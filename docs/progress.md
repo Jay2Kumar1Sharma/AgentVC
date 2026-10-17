@@ -17,7 +17,7 @@ Updated at the end of every session by the agent doing the work. Newest handoff 
 
 | Milestone (plan §8) | Status |
 |---|---|
-| Discovery (week 1) | in progress: part 1 done (session 1, branch `discovery/session-1`); payload capture awaiting the user; part 2 next |
+| Discovery (week 1) | in progress: part 1 done (session 1, branch `discovery/session-1`), Claude Code payloads captured; part 2 next |
 | v0.1-alpha (private) | not started |
 | v0.1 (public) | not started |
 | v0.2 Know your effects | not started |
@@ -28,17 +28,17 @@ Updated at the end of every session by the agent doing the work. Newest handoff 
 ## Handoff log
 
 ### 2026-10-18: session 1, repo setup and Discovery part 1
-Work is on branch **`discovery/session-1`** (11 small signed commits, not merged, not pushed).
+Work is on branch **`discovery/session-1`** (15 small signed commits, not merged, not pushed).
 
 **Done**
 - **ADRs:** `docs/adr/0000-template.md`, ADR-0001 (name AgentVC), ADR-0002 (Apache-2.0).
 - **Skeleton:** `pyproject.toml` (Python 3.11+, no runtime deps, `license = "Apache-2.0"`, dev extras), `agentvc/` with `python -m agentvc` printing the version, `tests/`, `eval/`, `results/`, `docs/design/`, `docs/prior-art/`, `docs/testing/`, `CHANGELOG.md`.
 - **Task runners:** `Makefile` and `make.ps1` (Windows) with `fast` (ruff check + format check, mypy strict, pytest `-m "not slow"`); `test`/`arch`/`fuzz`/`chaos` are placeholders that **exit 2 with a message**, so they can't pass silently. A test keeps both runners' targets in sync.
 - **CI:** `.github/workflows/fast.yml`, Linux/macOS/Windows × Python 3.11/3.13. **CI status: not yet run** (nothing pushed). Validated locally: a test parses every workflow and checks the matrix; `make fast` (MSYS2 make) and `make.ps1 fast` (PowerShell 5.1) both pass on Windows with **Python 3.12.7 only**. 3.11 and 3.13 aren't installed here, so they're untested until CI runs.
-- **Testing drafts (§16.1):** `docs/testing/fmea.md` (37 rows), `hazards.md` (42 hazards across G1–G8), `unknowns.md` (16 unknowns with experiments), `tests/traceability.yml` (8 guarantees + 42 hazards + 37 FMEA + 76 attacks from §15.3). `tests/test_traceability.py` fails if a row names a missing test (seen failing on two planted bad references), if the docs' IDs and the YAML disagree, or if a guarantee is missing; `TODO` rows show as a `TraceabilityGap` warning with per-section counts. Only FM-DEV-01 / HZ-G6-05 (dev tooling privacy) have tests so far.
+- **Testing drafts (§16.1):** `docs/testing/fmea.md` (38 rows), `hazards.md` (43 hazards across G1–G8), `unknowns.md` (17 unknowns with experiments), `tests/traceability.yml` (8 guarantees + 43 hazards + 38 FMEA + 76 attacks from §15.3). `tests/test_traceability.py` fails if a row names a missing test (seen failing on two planted bad references), if the docs' IDs and the YAML disagree, or if a guarantee is missing; `TODO` rows show as a `TraceabilityGap` warning with per-section counts. Only FM-DEV-01 / HZ-G6-05 (dev tooling privacy) have tests so far.
 - **Usage study:** `scripts/usage_study.py` (aggregate counts only; privacy tests plant canary strings in prompts, commands, paths, output, folder and session names). Result in `results/usage-study/2026-10-18/`: 35 sessions; **26.5% of file changes went through the shell**, 17/31 tool-using sessions changed files via shell, 10/31 ran a destructive command (63 in all); external effects were rare (3 pushes, 0 deploys, 6 DB commands, 7 HTTP writes, MCP calls in 1 session).
 - **Pivot check (recommendation, plan unchanged):** shell file changes are common and side effects rare in this sample, so keep v0.1 (file + shell undo) first. Final call after the outside conversations (one-person sample; heuristic classifier not checked against labelled commands; includes this session).
-- **Payload capture:** `scripts/capture_payloads.py` (`setup`, `hook`, `summary`); hook prints nothing, always exits 0, scrubs tokens/assigned secrets/keys/emails/home/user name. Tests were checked against three deliberate breaks (they were written first but first run with the code). A throwaway project was created at `%TEMP%\agentvc-capture-2026-10-18` (all 31 events; Claude Code 2.1.72). **No payloads captured yet:** running Claude Code, even in a throwaway folder, writes to `~/.claude.json` and `~/.claude/projects/`, so the session is left to the user (steps below).
+- **Payload capture:** `scripts/capture_payloads.py` (`setup`, `hook`, `summary`); hook prints nothing, always exits 0, scrubs tokens/assigned secrets/keys/emails/home/user name. Tests were checked against three deliberate breaks (they were written first but first run with the code). **Captured at the user's request:** 63 payloads from Claude Code 2.1.72 in `tests/fixtures/hosts/claude-code/2.1.72/` (all files read before committing), via 7 resumed `claude -p` turns in a throwaway folder with `--setting-sources project` and the parent session's `CLAUDE*` environment variables removed. Covered: Bash, Edit, Read, Write, ToolSearch, a parallel Bash batch, an Explore subagent (SubagentStart/Stop), a failing command (PostToolUseFailure), SessionStart/End, Stop, UserPromptSubmit, InstructionsLoaded. **Not captured:** PowerShell (2.1.72 offered no PowerShell tool) and PostToolBatch (doesn't exist in 2.1.72).
 
 **Decisions made (small, reversible; tell me if you disagree)**
 - Feature branch per session instead of committing to `main` (plan §13.1 squash-merge workflow).
@@ -46,20 +46,23 @@ Work is on branch **`discovery/session-1`** (11 small signed commits, not merged
 - ruff is limited to Python files (newer ruff also reformats code blocks inside Markdown).
 - `scripts/` is a package (`scripts/__init__.py`) so tests can import the scripts; pytest uses `pythonpath = ["."]`.
 - Capture hooks exclude `WorktreeCreate`/`WorktreeRemove` (a hook there replaces Claude Code's worktree handling); `--events core` is a fallback if 2.1.72 rejects newer event names.
+- `capture_payloads.py setup` defaults to `--events auto`: a known per-version event list (2.1.72's), else all.
 
-**For the user: capture payloads (about 5 minutes)**
-1. Keep `D:\open_source\AgentFS\.venv` in place (the hooks call its Python by absolute path).
-2. In a new terminal: `cd %TEMP%\agentvc-capture-2026-10-18`, then `claude`. Accept the folder-trust prompt.
-3. Run `/hooks` and check the events are listed. If Claude Code reports a settings error or lists none, delete the folder and re-run `python scripts/capture_payloads.py setup %TEMP%\agentvc-capture-2026-10-18 --events core` from the repository.
-4. Send the 7 prompts in `CAPTURE.md` (Bash, PowerShell, Edit, Write, a parallel batch, a subagent, a failing command), then `/exit`.
-5. In the repository: `.venv\Scripts\python scripts/capture_payloads.py summary tests/fixtures/hosts/claude-code/2.1.72`, **read every captured file**, then commit them (`test(fixtures): Claude Code 2.1.72 hook payloads`). Delete the throwaway folder.
+**Findings from the capture** (details in `docs/testing/unknowns.md`)
+- **Claude Code 2.1.72 registers no hooks at all, silently, if the settings name an event it doesn't know** (found when the first capture recorded nothing; `--debug-file` showed "Found 0 hook matchers"). New FMEA row FM-INS-03 and hazard HZ-G2-09: AgentVC's installer must write only events the installed version supports, and `agentvc check` must prove a hook fires.
+- Failed commands fire `PostToolUseFailure` instead of `PostToolUse`; the adapter must pair it with the Pre event.
+- Hooks for parallel tool calls run concurrently (two Post hooks 4 ms apart, separate processes): the ledger needs locking.
+- Every `claude -p --resume` turn had a new `session_id`: run identity can't rely on `session_id` alone (U-17).
+- Edit/Read/Write payloads include whole file contents: scrub before storing; payload size grows with file size.
+
+**Side effects outside the repository (from the capture runs):** transcripts for the throwaway folders under `~/.claude/projects/C--Users-<user>-AppData-Local-Temp-agentvc-capture-*` and their entries in `~/.claude.json`. No settings file was changed. They're the user's to delete; until then a re-run of the usage study counts those ~10 test sessions.
 
 **Open questions**
-- Merge `discovery/session-1` into `main`: fast-forward (keeps the 11 commits) or squash (plan §13.1)? And push when you're ready; CI runs then.
+- Merge `discovery/session-1` into `main`: fast-forward (keeps the 15 commits) or squash (plan §13.1)? And push when you're ready; CI runs then.
 - Is PyYAML acceptable as a dev dependency?
 - Outside conversations (5+ people, `docs/user-conversations.md`) are still needed for the pivot check.
 
-**Next (session 2):** start with spike S1/D1 (hook latency on Windows), then D2–D7 ADRs, prior-art notes, architecture skeleton. If the payload capture has been done, use those fixtures to answer U-02–U-08 in `docs/testing/unknowns.md`.
+**Next (session 2):** start with spike S1/D1 (hook latency on Windows), then D2–D7 ADRs, prior-art notes, architecture skeleton. Still open from the capture: U-04 (hook timeout behaviour), U-07 (`/rewind`), U-14 (interactive vs `-p`), U-17 (session ids on interactive resume), PowerShell payloads.
 
 **Unrelated issues found:** none.
 
