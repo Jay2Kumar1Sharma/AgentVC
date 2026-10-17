@@ -1,0 +1,191 @@
+# Traceability matrix (plan §16.1, §16.3): every guarantee, hazard, FMEA row and attack
+# mapped to the tests that cover it. Checked by tests/test_traceability.py.
+#
+# tests: pytest node ids ("tests/test_x.py::test_name") or "TODO" while none exist yet.
+# TODO rows are reported as gaps; any other entry must name a test that exists.
+# Hazard and FMEA ids must match docs/testing/hazards.md and docs/testing/fmea.md exactly.
+# Attack ids follow the catalog in plan §15.3 (later: eval/adversarial/<component>/<attack>/).
+
+guarantees:
+  - {id: G1, title: "Never destroy user work", tests: [TODO]}
+  - {id: G2, title: "Nothing silent", tests: [TODO]}
+  - {id: G3, title: "Honest accounting", tests: [TODO]}
+  - {id: G4, title: "Never repeat the world", tests: [TODO]}
+  - {id: G5, title: "Nothing leaves early", tests: [TODO]}
+  - {id: G6, title: "Local and private", tests: [TODO]}
+  - {id: G7, title: "Cheap enough to leave on", tests: [TODO]}
+  - {id: G8, title: "Can't be silently switched off", tests: [TODO]}
+
+hazards:
+  - {id: HZ-G1-01, hazard: "Restore writes to a path the user changed after the run", fmea: [FM-RST-03], tests: [TODO]}
+  - {id: HZ-G1-02, hazard: "User edits a file *during* the run, and the edit is attributed to the agent", fmea: [FM-OUT-01], tests: [TODO]}
+  - {id: HZ-G1-03, hazard: "Restore follows a symlink, or writes through a symlinked directory, to outside the workspace", fmea: [FM-RST-04, FM-SNAP-03], tests: [TODO]}
+  - {id: HZ-G1-04, hazard: "Crash or kill between two file writes of one rollback", fmea: [FM-RST-01], tests: [TODO]}
+  - {id: HZ-G1-05, hazard: "The snapshot holds a torn file (written during the read), and restore writes it back", fmea: [FM-SNAP-01], tests: [TODO]}
+  - {id: HZ-G1-06, hazard: "Snapshot objects disappear (user's `git gc`, AgentVC's own `gc`, disk full)", fmea: [FM-OBJ-01, FM-OBJ-02, FM-GC-01], tests: [TODO]}
+  - {id: HZ-G1-07, hazard: "A forced rollback runs without saving the current state first", fmea: [FM-RST-05], tests: [TODO]}
+  - {id: HZ-G1-08, hazard: "Compare-and-swap compares metadata (inode, mtime) instead of content", fmea: [FM-RST-02], tests: [TODO]}
+  - {id: HZ-G1-09, hazard: "A path changes type (file ↔ directory ↔ symlink) between snapshot and restore", fmea: [FM-RST-06], tests: [TODO]}
+  - {id: HZ-G1-10, hazard: "Two names map to one file (case-insensitive file system, Unicode normalisation)", fmea: [], tests: [TODO]}
+  - {id: HZ-G1-11, hazard: "Rollback runs while the agent is still writing", fmea: [], tests: [TODO]}
+  - {id: HZ-G1-12, hazard: "An older AgentVC opens a newer ledger and misreads it", fmea: [FM-LED-04], tests: [TODO]}
+  - {id: HZ-G2-01, hazard: "A Pre event arrives with no Post event, and no GAP is recorded", fmea: [FM-HOOK-02], tests: [TODO]}
+  - {id: HZ-G2-02, hazard: "AgentVC's hook crashes or times out without recording a GAP", fmea: [FM-HOOK-01], tests: [TODO]}
+  - {id: HZ-G2-03, hazard: "A payload field is renamed or missing, and the event is dropped instead of logged as a blind spot", fmea: [FM-ADP-01], tests: [TODO]}
+  - {id: HZ-G2-04, hazard: "A tool or event is not subscribed in the wiring", fmea: [FM-ADP-03], tests: [TODO]}
+  - {id: HZ-G2-05, hazard: "Subagent or parallel-batch actions are missed or misattributed", fmea: [FM-ADP-02], tests: [TODO]}
+  - {id: HZ-G2-06, hazard: "Concurrent hooks lose a ledger write", fmea: [FM-LED-01], tests: [TODO]}
+  - {id: HZ-G2-07, hazard: "The agent changes directory or adds a root outside the project, and its actions there go unreported", fmea: [], tests: [TODO]}
+  - {id: HZ-G2-08, hazard: "An action bypasses hooks entirely (a script calls an API); must be documented as a limit", fmea: [], tests: [TODO]}
+  - {id: HZ-G3-01, hazard: "A report says \"restored\" for a file that was skipped, conflicted or locked", fmea: [FM-RST-07], tests: [TODO]}
+  - {id: HZ-G3-02, hazard: "A path over the budget, or unreadable, is reported as protected", fmea: [FM-SNAP-04, FM-SNAP-05], tests: [TODO]}
+  - {id: HZ-G3-03, hazard: "An irreversible or unknown effect is classed as restorable", fmea: [FM-CLS-01, FM-CLS-02], tests: [TODO]}
+  - {id: HZ-G3-04, hazard: "A corrupt ledger is silently \"repaired\" into a false history", fmea: [FM-LED-03], tests: [TODO]}
+  - {id: HZ-G4-01, hazard: "A replayed or forked step re-executes an effect the parent already performed", fmea: [FM-FEN-01], tests: [TODO]}
+  - {id: HZ-G4-02, hazard: "The same effect is reached through a reworded command or another tool", fmea: [FM-FEN-01], tests: [TODO]}
+  - {id: HZ-G5-01, hazard: "A staged effect is released before `commit`", fmea: [FM-OBX-02], tests: [TODO]}
+  - {id: HZ-G5-02, hazard: "A crash between release and record makes the next `commit` release again", fmea: [FM-OBX-01], tests: [TODO]}
+  - {id: HZ-G5-03, hazard: "`commit` runs twice at once (two terminals)", fmea: [FM-OBX-01], tests: [TODO]}
+  - {id: HZ-G6-01, hazard: "A secret in a command, output or environment is written to the ledger", fmea: [FM-SEC-01], tests: [TODO]}
+  - {id: HZ-G6-02, hazard: "An export includes `.env` or other secret-bearing files", fmea: [FM-SEC-01], tests: [TODO]}
+  - {id: HZ-G6-03, hazard: "AgentVC's own code makes a network call", fmea: [], tests: [TODO]}
+  - {id: HZ-G6-04, hazard: "The debug log or diagnostics bundle contains secrets, prompts or file contents", fmea: [FM-SEC-01], tests: [TODO]}
+  - {id: HZ-G6-05, hazard: "Development tooling (usage study, payload capture) writes transcript content, prompts or secrets into the repository", fmea: [FM-DEV-01], tests: [TODO]}
+  - {id: HZ-G7-01, hazard: "Cold-start hook latency exceeds 50 ms p95 (Windows in particular)", fmea: [FM-HOOK-03], tests: [TODO]}
+  - {id: HZ-G7-02, hazard: "Snapshotting a huge or pathological repository blows the budget or hangs", fmea: [FM-SNAP-04], tests: [TODO]}
+  - {id: HZ-G7-03, hazard: "Disk use grows without bound", fmea: [FM-GC-01], tests: [TODO]}
+  - {id: HZ-G8-01, hazard: "The agent removes or edits AgentVC's hooks in the agent's settings", fmea: [FM-CFG-02], tests: [TODO]}
+  - {id: HZ-G8-02, hazard: "The agent switches AgentVC to `observe` mode", fmea: [FM-CFG-01], tests: [TODO]}
+  - {id: HZ-G8-03, hazard: "The agent deletes or edits `.agentvc/` (history, config)", fmea: [FM-LED-02], tests: [TODO]}
+  - {id: HZ-G8-04, hazard: "The agent runs `agentvc purge`, `uninstall` or `rollback --force`, or kills AgentVC's processes", fmea: [], tests: [TODO]}
+  - {id: HZ-G8-05, hazard: "Hooks fail on every call (wrong interpreter) and nobody notices", fmea: [FM-INS-01], tests: [TODO]}
+
+fmea:
+  - {id: FM-SNAP-01, component: "Snapshotter", failure: "File modified while being read", tests: [TODO]}
+  - {id: FM-SNAP-02, component: "Snapshotter", failure: "Ignored `.env` deleted by the agent", tests: [TODO]}
+  - {id: FM-SNAP-03, component: "Snapshotter", failure: "Follows a symlink to outside the project", tests: [TODO]}
+  - {id: FM-SNAP-04, component: "Snapshotter", failure: "Size, count or time budget exceeded", tests: [TODO]}
+  - {id: FM-SNAP-05, component: "Snapshotter", failure: "Unreadable file (permission denied, locked by an editor)", tests: [TODO]}
+  - {id: FM-OBJ-01, component: "Object store", failure: "User's `git gc` prunes objects AgentVC borrowed via alternates", tests: [TODO]}
+  - {id: FM-OBJ-02, component: "Object store", failure: "Disk full during object write", tests: [TODO]}
+  - {id: FM-RST-01, component: "Restore", failure: "Crash after writing half the files", tests: [TODO]}
+  - {id: FM-RST-02, component: "Restore", failure: "Editor saves by rename (atomic save)", tests: [TODO]}
+  - {id: FM-RST-03, component: "Restore", failure: "User edited the file after the run", tests: [TODO]}
+  - {id: FM-RST-04, component: "Restore", failure: "Writes through a symlinked directory", tests: [TODO]}
+  - {id: FM-RST-05, component: "Restore", failure: "`--force` without a pre-rollback snapshot", tests: [TODO]}
+  - {id: FM-RST-06, component: "Restore", failure: "File ↔ directory ↔ symlink type change between snapshots", tests: [TODO]}
+  - {id: FM-RST-07, component: "Restore", failure: "File locked by an editor or antivirus (Windows)", tests: [TODO]}
+  - {id: FM-OUT-01, component: "Outside-change detection", failure: "User edits during the run are attributed to the agent", tests: [TODO]}
+  - {id: FM-LED-01, component: "Ledger", failure: "Two hooks write at once", tests: [TODO]}
+  - {id: FM-LED-02, component: "Ledger", failure: "Agent edits or deletes rows", tests: [TODO]}
+  - {id: FM-LED-03, component: "Ledger", failure: "Database corrupted (crash, disk)", tests: [TODO]}
+  - {id: FM-LED-04, component: "Ledger", failure: "Opened by an older AgentVC with a newer schema", tests: [TODO]}
+  - {id: FM-HOOK-01, component: "Hook", failure: "AgentVC's hook crashes or exceeds the timeout", tests: [TODO]}
+  - {id: FM-HOOK-02, component: "Hook", failure: "Pre event with no matching Post event", tests: [TODO]}
+  - {id: FM-HOOK-03, component: "Hook", failure: "Hook too slow (cold Python start on Windows)", tests: [TODO]}
+  - {id: FM-ADP-01, component: "Adapter", failure: "Agent update renames a payload field", tests: [TODO]}
+  - {id: FM-ADP-02, component: "Adapter", failure: "Subagent or parallel-batch tool calls not attributed", tests: [TODO]}
+  - {id: FM-ADP-03, component: "Adapter", failure: "Tool the wiring doesn't subscribe to (new tool name)", tests: [TODO]}
+  - {id: FM-CLS-01, component: "Classifier", failure: "New CLI with a destructive subcommand", tests: [TODO]}
+  - {id: FM-CLS-02, component: "Classifier", failure: "Obfuscated command (`sh -c`, `eval`, base64)", tests: [TODO]}
+  - {id: FM-FEN-01, component: "Fence", failure: "Same effect via a different tool", tests: [TODO]}
+  - {id: FM-OBX-01, component: "Outbox", failure: "Release succeeds but the result is lost in a crash", tests: [TODO]}
+  - {id: FM-OBX-02, component: "Outbox", failure: "Staged effect released before `commit`", tests: [TODO]}
+  - {id: FM-SEC-01, component: "Scrubber", failure: "Token format not recognised", tests: [TODO]}
+  - {id: FM-CFG-01, component: "Config", failure: "Agent switches mode to `observe`", tests: [TODO]}
+  - {id: FM-CFG-02, component: "Install", failure: "Agent removes AgentVC's hooks from `.claude/settings.json`", tests: [TODO]}
+  - {id: FM-INS-01, component: "Install", failure: "Hook calls the wrong Python (project venv)", tests: [TODO]}
+  - {id: FM-INS-02, component: "Install", failure: "Install overwrites the user's other hooks", tests: [TODO]}
+  - {id: FM-GC-01, component: "GC", failure: "Deletes a snapshot still referenced by a fork", tests: [TODO]}
+  - {id: FM-DEV-01, component: "Dev tooling", failure: "Usage study or payload capture writes transcript content, prompts or secrets into the repository", tests: [TODO]}
+
+attacks:
+  # Hook capture / adapters
+  - {id: ATK-CAP-01, attack: "malformed, truncated or huge payloads", tests: [TODO]}
+  - {id: ATK-CAP-02, attack: "missing or renamed fields", tests: [TODO]}
+  - {id: ATK-CAP-03, attack: "NUL and odd Unicode", tests: [TODO]}
+  - {id: ATK-CAP-04, attack: "duplicated or out-of-order events", tests: [TODO]}
+  - {id: ATK-CAP-05, attack: "a Pre with no Post", tests: [TODO]}
+  - {id: ATK-CAP-06, attack: "reused tool_use_id", tests: [TODO]}
+  - {id: ATK-CAP-07, attack: "events from another project directory", tests: [TODO]}
+  - {id: ATK-CAP-08, attack: "two sessions at once", tests: [TODO]}
+  # Snapshotter
+  - {id: ATK-SNAP-01, attack: "files changing during the snapshot", tests: [TODO]}
+  - {id: ATK-SNAP-02, attack: "symlinks to outside the project and symlink loops", tests: [TODO]}
+  - {id: ATK-SNAP-03, attack: "hardlinks", tests: [TODO]}
+  - {id: ATK-SNAP-04, attack: "FIFOs, sockets, device files", tests: [TODO]}
+  - {id: ATK-SNAP-05, attack: "unreadable files", tests: [TODO]}
+  - {id: ATK-SNAP-06, attack: "very large files", tests: [TODO]}
+  - {id: ATK-SNAP-07, attack: "a million tiny files", tests: [TODO]}
+  - {id: ATK-SNAP-08, attack: "names with newlines or ..", tests: [TODO]}
+  - {id: ATK-SNAP-09, attack: "case collisions", tests: [TODO]}
+  - {id: ATK-SNAP-10, attack: "nested repos, submodules, LFS pointers", tests: [TODO]}
+  - {id: ATK-SNAP-11, attack: "a tampered .git", tests: [TODO]}
+  - {id: ATK-SNAP-12, attack: "disk full", tests: [TODO]}
+  - {id: ATK-SNAP-13, attack: "read-only file system", tests: [TODO]}
+  # Restore / rollback
+  - {id: ATK-RST-01, attack: "user edits after the run", tests: [TODO]}
+  - {id: ATK-RST-02, attack: "file deleted then recreated", tests: [TODO]}
+  - {id: ATK-RST-03, attack: "file / directory / symlink type changes", tests: [TODO]}
+  - {id: ATK-RST-04, attack: "restoring through a symlinked directory", tests: [TODO]}
+  - {id: ATK-RST-05, attack: "rollback while the agent is still running", tests: [TODO]}
+  - {id: ATK-RST-06, attack: "rollback of a rollback", tests: [TODO]}
+  - {id: ATK-RST-07, attack: "crash halfway through", tests: [TODO]}
+  - {id: ATK-RST-08, attack: "files locked by an editor (Windows)", tests: [TODO]}
+  - {id: ATK-RST-09, attack: "permission denied", tests: [TODO]}
+  # Ledger and state
+  - {id: ATK-LED-01, attack: "editing or deleting rows", tests: [TODO]}
+  - {id: ATK-LED-02, attack: "truncating the newest entries", tests: [TODO]}
+  - {id: ATK-LED-03, attack: "corrupting the database", tests: [TODO]}
+  - {id: ATK-LED-04, attack: "writing into .agentvc/ through a shell script or Python", tests: [TODO]}
+  - {id: ATK-LED-05, attack: "two writers at once", tests: [TODO]}
+  - {id: ATK-LED-06, attack: "clock changes", tests: [TODO]}
+  # Self-protection
+  - {id: ATK-SELF-01, attack: "agent runs agentvc purge, uninstall or rollback --force", tests: [TODO]}
+  - {id: ATK-SELF-02, attack: "agent edits .claude/settings.json to drop the hooks", tests: [TODO]}
+  - {id: ATK-SELF-03, attack: "agent changes config.toml to observe mode", tests: [TODO]}
+  - {id: ATK-SELF-04, attack: "agent kills AgentVC processes", tests: [TODO]}
+  - {id: ATK-SELF-05, attack: "prompt injection in a repo file asks for any of the above", tests: [TODO]}
+  # Effect classifier
+  - {id: ATK-CLS-01, attack: "sh -c, eval, bash <<EOF", tests: [TODO]}
+  - {id: ATK-CLS-02, attack: "base64 -d | sh", tests: [TODO]}
+  - {id: ATK-CLS-03, attack: "variables, aliases, shell functions", tests: [TODO]}
+  - {id: ATK-CLS-04, attack: "python -c", tests: [TODO]}
+  - {id: ATK-CLS-05, attack: "npm run scripts that push", tests: [TODO]}
+  - {id: ATK-CLS-06, attack: "Makefile targets", tests: [TODO]}
+  - {id: ATK-CLS-07, attack: "git aliases", tests: [TODO]}
+  - {id: ATK-CLS-08, attack: "GIT_* environment tricks", tests: [TODO]}
+  - {id: ATK-CLS-09, attack: "scripts written to disk and then run", tests: [TODO]}
+  # Fence (replay / fork)
+  - {id: ATK-FEN-01, attack: "reworded command, different flags, same target", tests: [TODO]}
+  - {id: ATK-FEN-02, attack: "same effect through another tool (curl, requests, MCP)", tests: [TODO]}
+  - {id: ATK-FEN-03, attack: "changed whitespace or case", tests: [TODO]}
+  - {id: ATK-FEN-04, attack: "changed idempotency keys or timestamps", tests: [TODO]}
+  - {id: ATK-FEN-05, attack: "a genuinely different target is still allowed", tests: [TODO]}
+  # Outbox
+  - {id: ATK-OBX-01, attack: "crash between two releases", tests: [TODO]}
+  - {id: ATK-OBX-02, attack: "commit run twice or in two terminals", tests: [TODO]}
+  - {id: ATK-OBX-03, attack: "network failure during release", tests: [TODO]}
+  - {id: ATK-OBX-04, attack: "agent uses a placeholder ID in a later call", tests: [TODO]}
+  - {id: ATK-OBX-05, attack: "staged effects that depend on each other", tests: [TODO]}
+  - {id: ATK-OBX-06, attack: "abort after a partial commit", tests: [TODO]}
+  # MCP proxy
+  - {id: ATK-MCP-01, attack: "annotations that lie (readOnlyHint on a destructive tool)", tests: [TODO]}
+  - {id: ATK-MCP-02, attack: "poisoned tool descriptions", tests: [TODO]}
+  - {id: ATK-MCP-03, attack: "huge or slow responses", tests: [TODO]}
+  - {id: ATK-MCP-04, attack: "protocol violations", tests: [TODO]}
+  - {id: ATK-MCP-05, attack: "server changes its tools mid-session", tests: [TODO]}
+  # Secrets and privacy
+  - {id: ATK-SEC-01, attack: "tokens in commands, environment, output, file names and exports", tests: [TODO]}
+  - {id: ATK-SEC-02, attack: ".env files in snapshots being exported", tests: [TODO]}
+  # Performance
+  - {id: ATK-PERF-01, attack: "pathological repos built to blow every budget", tests: [TODO]}
+  # Architecture page and docs
+  - {id: ATK-ARCH-01, attack: "a broken graph.json", tests: [TODO]}
+  - {id: ATK-ARCH-02, attack: "a deleted module still on the map", tests: [TODO]}
+  - {id: ATK-ARCH-03, attack: "a script error in the page", tests: [TODO]}
+  # CLI
+  - {id: ATK-CLI-01, attack: "running from a subdirectory", tests: [TODO]}
+  - {id: ATK-CLI-02, attack: "two terminals at once", tests: [TODO]}
+  - {id: ATK-CLI-03, attack: "wrong arguments", tests: [TODO]}
+  - {id: ATK-CLI-04, attack: "Ctrl-C at every step", tests: [TODO]}
