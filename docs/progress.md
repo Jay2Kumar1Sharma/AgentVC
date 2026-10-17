@@ -27,6 +27,32 @@ Updated at the end of every session by the agent doing the work. Newest handoff 
 
 ## Handoff log
 
+### 2026-10-18: Claude Code 2.1.302 payloads (PowerShell, PostToolBatch)
+Branch **`discovery/capture-2.1.302`**, based on `discovery/session-1` (which is in PR #1, open and green, waiting for the maintainer's review and squash merge). 4 signed commits, **not pushed**.
+
+**Done**
+- The 2.1.72 install on PATH has no PowerShell tool and no `PostToolBatch`, so these were captured with the **2.1.302 binary bundled with the IDE extension** (`~\.antigravity-ide\extensions\anthropic.claude-code-2.1.302-win32-x64\resources\native-binary\claude.exe`), run by full path. Nothing was installed or updated.
+- `scripts/capture_payloads.py`: event list for 2.1.302 (33 events, read from the binary, matching the docs); `setup` turns on the PowerShell tool in the throwaway project's own settings; the capture prompts live in one list (now with a failing PowerShell command) that the guide renders. Three new tests, each seen failing first.
+- **90 fixtures** in `tests/fixtures/hosts/claude-code/2.1.302/` from 8 resumed `claude -p` turns; every file read before committing.
+- `docs/testing/unknowns.md`: U-05 answered (PowerShell payload = Bash fields; failure → `PostToolUseFailure`); U-08, U-13, U-17 extended. `CHANGELOG.md` now lists the fixtures and the per-version event lists (the gap noted at the end of session 1).
+
+**Findings**
+- `PostToolBatch` fires once per model response, even for one call; it lists every call with its result as plain text, also fires after a failed command, and carries `agent_id` inside a subagent.
+- 2.1.302 keeps the same `session_id` across `-p --resume` turns (2.1.72 didn't), except the first `InstructionsLoaded` of most resumes, which carries a one-off id.
+- 2.1.302 adds `MessageDisplay` events with the assistant's reply text, plus `prompt_id`, `effort`, `duration_ms` and cost estimates in other events. Model output reaching hooks falls under the same storage rule as prompts.
+
+**Full test suite (AGENTS.md step 8)**, Windows, Python 3.12.7, on this branch after the last code commit:
+- `make fast` (MSYS2 make): **pass**, exit 0; ruff, ruff format, mypy (11 files) clean; 94 passed.
+- `python -m pytest` with no marker filter (stand-in while `make test` is a placeholder): **94 passed, 0 failed, 0 skipped**, 0.73 s (1.1 s wall). The one warning is the intended `TraceabilityGap` report.
+
+**Side effects outside the repository:** the capture runs added transcripts under `~/.claude/projects/C--Users-<user>-AppData-Local-Temp-agentvc-capture-2-1-302` and an entry in `~/.claude.json`. No settings file was changed. The throwaway folder is deleted.
+
+**Open questions**
+- Merge order: PR #1 first, then this branch as its own PR (or add it to PR #1 before merging)?
+- Your terminal's `claude` is still 2.1.72 (file dated 2026-03-10), while the IDE extension is 2.1.302. Update it with `claude update` if you want them to match.
+
+**Unrelated issues found:** none.
+
 ### 2026-10-18: new rule: full test suite at the end of every session
 - **Rule added** (AGENTS.md step 8, plan §13.1 and §16.5, `docs/agent-prompts.md`): every session ends with the full local suite; results go in this log; related failures are fixed first, others recorded.
 - **Applied retroactively to session 1** on `discovery/session-1`, Python 3.12.7, Windows:
