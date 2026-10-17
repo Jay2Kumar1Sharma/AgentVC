@@ -1,0 +1,17 @@
+{
+  "capture": {
+    "seq": 3,
+    "received_at": "2026-10-17T20:25:07.382970+00:00",
+    "pid": 26792,
+    "unparseable": false,
+    "script_version": 1
+  },
+  "payload": {
+    "session_id": "f0fafd28-1644-43fa-85f5-efab134643e7",
+    "transcript_path": "~\\.claude\\projects\\C--Users-<user>-AppData-Local-Temp-agentvc-capture-2026-10-18\\f0fafd28-1644-43fa-85f5-efab134643e7.jsonl",
+    "cwd": "~\\AppData\\Local\\Temp\\agentvc-capture-2026-10-18",
+    "permission_mode": "default",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "Run `echo hello` with the Bash tool, then reply with just the output."
+  }
+}

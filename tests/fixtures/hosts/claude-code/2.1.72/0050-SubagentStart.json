@@ -1,0 +1,17 @@
+{
+  "capture": {
+    "seq": 50,
+    "received_at": "2026-10-17T20:25:53.920763+00:00",
+    "pid": 24616,
+    "unparseable": false,
+    "script_version": 1
+  },
+  "payload": {
+    "session_id": "f0fafd28-1644-43fa-85f5-efab134643e7",
+    "transcript_path": "~\\.claude\\projects\\C--Users-<user>-AppData-Local-Temp-agentvc-capture-2026-10-18\\f0fafd28-1644-43fa-85f5-efab134643e7.jsonl",
+    "cwd": "~\\AppData\\Local\\Temp\\agentvc-capture-2026-10-18",
+    "agent_id": "ab97283c42458b655",
+    "agent_type": "Explore",
+    "hook_event_name": "SubagentStart"
+  }
+}

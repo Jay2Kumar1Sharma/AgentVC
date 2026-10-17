@@ -1,0 +1,24 @@
+{
+  "capture": {
+    "seq": 61,
+    "received_at": "2026-10-17T20:26:04.887364+00:00",
+    "pid": 3760,
+    "unparseable": false,
+    "script_version": 1
+  },
+  "payload": {
+    "session_id": "f0fafd28-1644-43fa-85f5-efab134643e7",
+    "transcript_path": "~\\.claude\\projects\\C--Users-<user>-AppData-Local-Temp-agentvc-capture-2026-10-18\\f0fafd28-1644-43fa-85f5-efab134643e7.jsonl",
+    "cwd": "~\\AppData\\Local\\Temp\\agentvc-capture-2026-10-18",
+    "permission_mode": "default",
+    "hook_event_name": "PostToolUseFailure",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "exit 3; echo \"exit:$?\"",
+      "description": "Run exit 3 and capture exit code"
+    },
+    "tool_use_id": "toolu_01HLMKJj5u529iQMPH5BpTFQ",
+    "error": "Exit code 3",
+    "is_interrupt": false
+  }
+}

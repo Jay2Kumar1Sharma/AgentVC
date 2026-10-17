@@ -1,0 +1,21 @@
+{
+  "capture": {
+    "seq": 53,
+    "received_at": "2026-10-17T20:25:57.075799+00:00",
+    "pid": 25444,
+    "unparseable": false,
+    "script_version": 1
+  },
+  "payload": {
+    "session_id": "f0fafd28-1644-43fa-85f5-efab134643e7",
+    "transcript_path": "~\\.claude\\projects\\C--Users-<user>-AppData-Local-Temp-agentvc-capture-2026-10-18\\f0fafd28-1644-43fa-85f5-efab134643e7.jsonl",
+    "cwd": "~\\AppData\\Local\\Temp\\agentvc-capture-2026-10-18",
+    "permission_mode": "default",
+    "agent_id": "ab97283c42458b655",
+    "agent_type": "Explore",
+    "hook_event_name": "SubagentStop",
+    "stop_hook_active": false,
+    "agent_transcript_path": "~\\.claude\\projects\\C--Users-<user>-AppData-Local-Temp-agentvc-capture-2026-10-18\\f0fafd28-1644-43fa-85f5-efab134643e7\\subagents\\agent-ab97283c42458b655.jsonl",
+    "last_assistant_message": "Here are the files found in the directory:\n\n1. CAPTURE.md\n2. new.txt\n3. notes.txt\n4. settings.json"
+  }
+}

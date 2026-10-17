@@ -1,0 +1,22 @@
+{
+  "capture": {
+    "seq": 29,
+    "received_at": "2026-10-17T20:25:35.411822+00:00",
+    "pid": 16560,
+    "unparseable": false,
+    "script_version": 1
+  },
+  "payload": {
+    "session_id": "f0fafd28-1644-43fa-85f5-efab134643e7",
+    "transcript_path": "~\\.claude\\projects\\C--Users-<user>-AppData-Local-Temp-agentvc-capture-2026-10-18\\f0fafd28-1644-43fa-85f5-efab134643e7.jsonl",
+    "cwd": "~\\AppData\\Local\\Temp\\agentvc-capture-2026-10-18",
+    "permission_mode": "default",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "ToolSearch",
+    "tool_input": {
+      "query": "select:Write",
+      "max_results": 1
+    },
+    "tool_use_id": "toolu_013usmfTYEJdop9jci5eSXVW"
+  }
+}

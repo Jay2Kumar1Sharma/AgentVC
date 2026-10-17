@@ -1,0 +1,18 @@
+{
+  "capture": {
+    "seq": 10,
+    "received_at": "2026-10-17T20:25:15.158558+00:00",
+    "pid": 15568,
+    "unparseable": false,
+    "script_version": 1
+  },
+  "payload": {
+    "session_id": "794319ab-2d25-40b0-b9c9-3c63376385fe",
+    "transcript_path": "~\\.claude\\projects\\C--Users-<user>-AppData-Local-Temp-agentvc-capture-2026-10-18\\794319ab-2d25-40b0-b9c9-3c63376385fe.jsonl",
+    "cwd": "~\\AppData\\Local\\Temp\\agentvc-capture-2026-10-18",
+    "hook_event_name": "InstructionsLoaded",
+    "file_path": "~\\.claude\\CLAUDE.md",
+    "memory_type": "Project",
+    "load_reason": "session_start"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "capture": {
+    "seq": 52,
+    "received_at": "2026-10-17T20:25:56.019873+00:00",
+    "pid": 20008,
+    "unparseable": false,
+    "script_version": 1
+  },
+  "payload": {
+    "session_id": "f0fafd28-1644-43fa-85f5-efab134643e7",
+    "transcript_path": "~\\.claude\\projects\\C--Users-<user>-AppData-Local-Temp-agentvc-capture-2026-10-18\\f0fafd28-1644-43fa-85f5-efab134643e7.jsonl",
+    "cwd": "~\\AppData\\Local\\Temp\\agentvc-capture-2026-10-18",
+    "permission_mode": "default",
+    "agent_id": "ab97283c42458b655",
+    "agent_type": "Explore",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "find ~/AppData/Local/Temp/agentvc-capture-2026-10-18 -type f -printf '%f\\n' | sort"
+    },
+    "tool_response": {
+      "stdout": "CAPTURE.md\nnew.txt\nnotes.txt\nsettings.json",
+      "stderr": "",
+      "interrupted": false,
+      "isImage": false,
+      "noOutputExpected": false
+    },
+    "tool_use_id": "toolu_015jPxra4UDA7jgyMamvyt24"
+  }
+}
