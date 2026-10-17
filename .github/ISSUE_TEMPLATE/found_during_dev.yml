@@ -1,0 +1,71 @@
+name: Found during development
+description: An unrelated problem noticed while working on something else. Raise it here and keep working.
+labels: ["found-during-dev", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this when you find a problem **not related** to the task you're working on (it existed before your change, in code you didn't touch).
+        Don't stop your current work and don't fix it in your branch. Fill this in, link it under "Unrelated issues found" in your PR, and carry on.
+        If it looks like data loss, a repeated external effect or a leaked secret, also mention a maintainer right away.
+  - type: textarea
+    id: seen
+    attributes:
+      label: What was seen
+      description: The symptom, with output or error text.
+    validations:
+      required: true
+  - type: textarea
+    id: how
+    attributes:
+      label: Command or test that shows it
+      render: shell
+    validations:
+      required: true
+  - type: input
+    id: commit
+    attributes:
+      label: Commit and branch where it was found
+      placeholder: "abc1234 on feat/123-replay (also happens on main: yes/no/unknown)"
+    validations:
+      required: true
+  - type: input
+    id: working-on
+    attributes:
+      label: What you were working on
+      placeholder: "#123 replay command"
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Suspected severity
+      options:
+        - "S0: a guarantee is broken in a harmful way (data loss, repeated effect, early release, leaked secret)"
+        - "S1: a guarantee could break, or the core flow fails"
+        - "S2: wrong or confusing result, with a workaround"
+        - "S3: cosmetic or minor"
+        - "Not sure"
+    validations:
+      required: true
+  - type: checkboxes
+    id: guarantees
+    attributes:
+      label: Guarantees that may be affected
+      options:
+        - label: "G1 never destroy user work"
+        - label: "G2 nothing silent"
+        - label: "G3 honest accounting"
+        - label: "G4 never repeat the world"
+        - label: "G5 nothing leaves early"
+        - label: "G6 local and private"
+        - label: "G7 cheap enough to leave on"
+        - label: "G8 can't be silently switched off"
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      placeholder: "OS, Python, git, agent and version"
+  - type: textarea
+    id: repro
+    attributes:
+      label: Minimal reproduction (if you already have one)
+      description: Don't spend long on this; the weekly triage will add one if needed.

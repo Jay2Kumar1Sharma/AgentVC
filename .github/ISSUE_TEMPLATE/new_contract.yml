@@ -1,0 +1,46 @@
+name: New effect contract
+description: Teach AgentVC to recognise (and possibly undo) a command or API call
+labels: ["contract", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Code contributions aren't open yet. Describing a command or API that AgentVC should recognise is still very useful for planning.
+  - type: input
+    id: tool
+    attributes:
+      label: Tool, CLI or API
+      placeholder: "e.g. `gh pr merge`, `aws s3 rm`, Stripe refunds, a specific MCP server tool"
+    validations:
+      required: true
+  - type: textarea
+    id: examples
+    attributes:
+      label: Example commands or calls
+      render: shell
+    validations:
+      required: true
+  - type: dropdown
+    id: class
+    attributes:
+      label: What can be done about it?
+      options:
+        - "NONE-NEEDED: read-only"
+        - "RESTORABLE: AgentVC can restore the previous state"
+        - "COMPENSATABLE: an inverse action exists"
+        - "STAGEABLE: it can be held back until approved"
+        - "IRREVERSIBLE"
+        - "Not sure"
+    validations:
+      required: true
+  - type: textarea
+    id: inverse
+    attributes:
+      label: Undo or compensation, if any
+      description: The inverse action, what it leaves behind, whether it's idempotent, and how to check whether the original call actually happened.
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Contribution
+      options:
+        - label: I'd like to help write this contract once contributions open

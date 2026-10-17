@@ -1,0 +1,76 @@
+name: Bug report
+description: AgentVC did something wrong
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. If AgentVC lost or overwrote your work, say so in the first field. That gets top priority.
+        **Security vulnerabilities:** please report privately (see SECURITY.md), not here.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you see, and what did you expect instead?
+    validations:
+      required: true
+  - type: dropdown
+    id: impact
+    attributes:
+      label: Impact
+      options:
+        - "Lost or overwrote my work"
+        - "An external action was repeated or released without approval"
+        - "A secret ended up in a recording or export"
+        - "An agent action was not recorded / AgentVC stopped recording"
+        - "Wrong or confusing result, but no harm"
+        - "Cosmetic / minor"
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: The smallest set of steps that shows the problem. Include the exact commands.
+      placeholder: |
+        1. agentvc install --agent claude-code
+        2. Asked the agent to ...
+        3. Ran `agentvc rollback ...`
+    validations:
+      required: true
+  - type: textarea
+    id: bundle
+    attributes:
+      label: Diagnostics bundle
+      description: Run `agentvc doctor --bundle`, review the file, and attach it (it contains no file contents or prompts). If you can't, paste the output of `agentvc status --json`.
+  - type: input
+    id: agentvc-version
+    attributes:
+      label: AgentVC version
+      placeholder: "agentvc --version"
+    validations:
+      required: true
+  - type: input
+    id: agent
+    attributes:
+      label: Agent and version
+      placeholder: "e.g. Claude Code 2.x, Codex CLI 0.x"
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options: ["Windows", "macOS", "Linux", "WSL", "Other"]
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: Python and git versions, file system (if known)
+      placeholder: "Python 3.12, git 2.45, NTFS"
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else?
+      description: Repo size, synced folders (OneDrive/Dropbox), antivirus, editors, other hooks installed…

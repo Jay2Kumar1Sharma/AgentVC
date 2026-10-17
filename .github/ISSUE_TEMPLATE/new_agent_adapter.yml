@@ -1,0 +1,37 @@
+name: New agent adapter
+description: Support another coding agent (Gemini CLI, Cursor, Copilot, OpenHands, …)
+labels: ["adapter", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Code contributions aren't open yet. Information about an agent's hook system is still very useful for planning, so thank you for sharing it.
+  - type: input
+    id: agent
+    attributes:
+      label: Agent name and version
+    validations:
+      required: true
+  - type: input
+    id: docs
+    attributes:
+      label: Link to the agent's hook or extension documentation
+    validations:
+      required: true
+  - type: textarea
+    id: events
+    attributes:
+      label: Which events does it expose?
+      description: Before/after tool use, session start/end, prompt submitted, subagents… and whether a hook can block a tool call or add context.
+  - type: checkboxes
+    id: payloads
+    attributes:
+      label: Real payloads
+      options:
+        - label: I can capture real hook payloads with `scripts/capture_payloads.py` (required before an adapter is merged)
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Contribution
+      options:
+        - label: I'd like to help build this adapter once contributions open

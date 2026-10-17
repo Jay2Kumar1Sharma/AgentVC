@@ -1,0 +1,12 @@
+# Default owner for everything.
+*                       @Jay2Kumar1Sharma
+
+# Safety-critical code: changes always need a maintainer review.
+/agentvc/restore*       @Jay2Kumar1Sharma
+/agentvc/snapshot*      @Jay2Kumar1Sharma
+/agentvc/ledger*        @Jay2Kumar1Sharma
+/agentvc/fence*         @Jay2Kumar1Sharma
+/agentvc/outbox*        @Jay2Kumar1Sharma
+/agentvc/classifier*    @Jay2Kumar1Sharma
+/docs/adr/              @Jay2Kumar1Sharma
+/.github/               @Jay2Kumar1Sharma

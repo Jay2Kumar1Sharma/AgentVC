@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/Jay2Kumar1Sharma/AgentVC/security/advisories/new
+    about: Please report security problems privately, not as a public issue.
+  - name: Questions and ideas
+    url: https://github.com/Jay2Kumar1Sharma/AgentVC/discussions
+    about: Ask questions and discuss ideas in GitHub Discussions.
