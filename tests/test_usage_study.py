@@ -218,3 +218,9 @@ def test_assert_aggregate_only_rejects_foreign_strings() -> None:
         usage_study.assert_aggregate_only({"totals": {"rm -rf secret": 1}})
     with pytest.raises(ValueError, match="string value"):
         usage_study.assert_aggregate_only({"sessions": "prompt text"})
+
+
+def test_result_file_uses_lf_line_endings(transcripts: Path, tmp_path: Path) -> None:
+    out = tmp_path / "out"
+    usage_study.main(["--root", str(transcripts), "--out", str(out)])
+    assert b"\r\n" not in (out / usage_study.RESULT_FILE).read_bytes()

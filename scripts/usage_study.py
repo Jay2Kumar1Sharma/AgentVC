@@ -411,7 +411,7 @@ def main(argv: list[str] | None = None) -> int:
         assert set(meta) == set(META_KEYS)
         args.out.mkdir(parents=True, exist_ok=True)
         text = json.dumps({"meta": meta, **result}, indent=2) + "\n"
-        (args.out / RESULT_FILE).write_text(text, encoding="utf-8")
+        (args.out / RESULT_FILE).write_text(text, encoding="utf-8", newline="\n")
         print(f"\nWrote {RESULT_FILE}")
     return 0
 
