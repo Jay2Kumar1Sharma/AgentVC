@@ -1,0 +1,36 @@
+{
+  "capture": {
+    "seq": 26,
+    "received_at": "2026-10-17T21:51:07.000450+00:00",
+    "pid": 14596,
+    "unparseable": false,
+    "script_version": 1
+  },
+  "payload": {
+    "session_id": "5ba9407c-baf9-4fe1-bbc0-21fcef812cc4",
+    "transcript_path": "~\\.claude\\projects\\C--Users-<user>-AppData-Local-Temp-agentvc-capture-2-1-302\\5ba9407c-baf9-4fe1-bbc0-21fcef812cc4.jsonl",
+    "cwd": "~\\AppData\\Local\\Temp\\agentvc-capture-2.1.302",
+    "prompt_id": "1b2c92a1-eb3e-4457-bc1b-6ebef7c44562",
+    "permission_mode": "default",
+    "effort": {
+      "level": "medium"
+    },
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Read",
+    "tool_input": {
+      "file_path": "~\\AppData\\Local\\Temp\\agentvc-capture-2.1.302\\notes.txt"
+    },
+    "tool_response": {
+      "type": "text",
+      "file": {
+        "filePath": "~\\AppData\\Local\\Temp\\agentvc-capture-2.1.302\\notes.txt",
+        "content": "one\n",
+        "numLines": 2,
+        "startLine": 1,
+        "totalLines": 2
+      }
+    },
+    "tool_use_id": "toolu_018P1gsb7ntnsj9hAgDAz9wy",
+    "duration_ms": 5
+  }
+}

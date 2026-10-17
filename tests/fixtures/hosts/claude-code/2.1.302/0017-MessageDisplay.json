@@ -1,0 +1,21 @@
+{
+  "capture": {
+    "seq": 17,
+    "received_at": "2026-10-17T21:50:59.863764+00:00",
+    "pid": 19256,
+    "unparseable": false,
+    "script_version": 1
+  },
+  "payload": {
+    "session_id": "5ba9407c-baf9-4fe1-bbc0-21fcef812cc4",
+    "transcript_path": "~\\.claude\\projects\\C--Users-<user>-AppData-Local-Temp-agentvc-capture-2-1-302\\5ba9407c-baf9-4fe1-bbc0-21fcef812cc4.jsonl",
+    "cwd": "~\\AppData\\Local\\Temp\\agentvc-capture-2.1.302",
+    "prompt_id": "db3ff421-ab32-4b6f-80ac-c903618229dd",
+    "hook_event_name": "MessageDisplay",
+    "turn_id": "6b0c436d-ab48-4876-a108-56e2a1b79895",
+    "message_id": "f65cf95c-9d7b-43c2-94ab-2c95b9b5f879",
+    "index": 0,
+    "final": true,
+    "delta": "The directory `~\\AppData\\Local\\Temp\\agentvc-capture-2.1.302` contains:\n\n| Mode | LastWriteTime | Length | Name |\n|---|---|---|---|\n| d----- | 18-10-2026 03:20 | | .claude |\n| -a---- | 18-10-2026 03:20 | 1245 | CAPTURE.md |\n| -a---- | 18-10-2026 03:20 | 4 | notes.txt |"
+  }
+}

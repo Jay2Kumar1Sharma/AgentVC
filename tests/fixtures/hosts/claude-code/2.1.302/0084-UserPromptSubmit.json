@@ -1,0 +1,18 @@
+{
+  "capture": {
+    "seq": 84,
+    "received_at": "2026-10-17T21:52:20.590351+00:00",
+    "pid": 20904,
+    "unparseable": false,
+    "script_version": 1
+  },
+  "payload": {
+    "session_id": "5ba9407c-baf9-4fe1-bbc0-21fcef812cc4",
+    "transcript_path": "~\\.claude\\projects\\C--Users-<user>-AppData-Local-Temp-agentvc-capture-2-1-302\\5ba9407c-baf9-4fe1-bbc0-21fcef812cc4.jsonl",
+    "cwd": "~\\AppData\\Local\\Temp\\agentvc-capture-2.1.302",
+    "prompt_id": "eeca66c3-b089-41e3-b730-6a591e71a29a",
+    "permission_mode": "default",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "Run `exit 3` with the PowerShell tool and tell me the exit code. If you have no PowerShell tool, say so and do nothing else."
+  }
+}

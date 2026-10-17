@@ -1,0 +1,21 @@
+{
+  "capture": {
+    "seq": 88,
+    "received_at": "2026-10-17T21:52:26.712004+00:00",
+    "pid": 14028,
+    "unparseable": false,
+    "script_version": 1
+  },
+  "payload": {
+    "session_id": "5ba9407c-baf9-4fe1-bbc0-21fcef812cc4",
+    "transcript_path": "~\\.claude\\projects\\C--Users-<user>-AppData-Local-Temp-agentvc-capture-2-1-302\\5ba9407c-baf9-4fe1-bbc0-21fcef812cc4.jsonl",
+    "cwd": "~\\AppData\\Local\\Temp\\agentvc-capture-2.1.302",
+    "prompt_id": "eeca66c3-b089-41e3-b730-6a591e71a29a",
+    "hook_event_name": "MessageDisplay",
+    "turn_id": "8d01fd86-6dff-4cfa-8190-ccdefd737d8d",
+    "message_id": "73d4bfa7-90af-4503-8558-e32ca088c5ec",
+    "index": 0,
+    "final": true,
+    "delta": "The exit code was **3**."
+  }
+}

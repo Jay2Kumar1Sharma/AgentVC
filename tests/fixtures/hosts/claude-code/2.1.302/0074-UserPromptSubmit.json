@@ -1,0 +1,18 @@
+{
+  "capture": {
+    "seq": 74,
+    "received_at": "2026-10-17T21:52:09.186280+00:00",
+    "pid": 27428,
+    "unparseable": false,
+    "script_version": 1
+  },
+  "payload": {
+    "session_id": "5ba9407c-baf9-4fe1-bbc0-21fcef812cc4",
+    "transcript_path": "~\\.claude\\projects\\C--Users-<user>-AppData-Local-Temp-agentvc-capture-2-1-302\\5ba9407c-baf9-4fe1-bbc0-21fcef812cc4.jsonl",
+    "cwd": "~\\AppData\\Local\\Temp\\agentvc-capture-2.1.302",
+    "prompt_id": "7f3a4c4b-3e58-4edb-81dc-dec8f3450d3a",
+    "permission_mode": "default",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "Run `exit 3` with the Bash tool and tell me the exit code."
+  }
+}

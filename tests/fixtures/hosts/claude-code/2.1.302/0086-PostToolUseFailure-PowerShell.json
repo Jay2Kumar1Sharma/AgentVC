@@ -1,0 +1,29 @@
+{
+  "capture": {
+    "seq": 86,
+    "received_at": "2026-10-17T21:52:24.423841+00:00",
+    "pid": 26016,
+    "unparseable": false,
+    "script_version": 1
+  },
+  "payload": {
+    "session_id": "5ba9407c-baf9-4fe1-bbc0-21fcef812cc4",
+    "transcript_path": "~\\.claude\\projects\\C--Users-<user>-AppData-Local-Temp-agentvc-capture-2-1-302\\5ba9407c-baf9-4fe1-bbc0-21fcef812cc4.jsonl",
+    "cwd": "~\\AppData\\Local\\Temp\\agentvc-capture-2.1.302",
+    "prompt_id": "eeca66c3-b089-41e3-b730-6a591e71a29a",
+    "permission_mode": "default",
+    "effort": {
+      "level": "medium"
+    },
+    "hook_event_name": "PostToolUseFailure",
+    "tool_name": "PowerShell",
+    "tool_input": {
+      "command": "exit 3",
+      "description": "Exit with code 3"
+    },
+    "tool_use_id": "toolu_01KSneBXmveFzAVZ3ejp7Dhz",
+    "error": "Exit code 3",
+    "is_interrupt": false,
+    "duration_ms": 309
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "capture": {
+    "seq": 48,
+    "received_at": "2026-10-17T21:51:31.139467+00:00",
+    "pid": 12324,
+    "unparseable": false,
+    "script_version": 1
+  },
+  "payload": {
+    "session_id": "5ba9407c-baf9-4fe1-bbc0-21fcef812cc4",
+    "transcript_path": "~\\.claude\\projects\\C--Users-<user>-AppData-Local-Temp-agentvc-capture-2-1-302\\5ba9407c-baf9-4fe1-bbc0-21fcef812cc4.jsonl",
+    "cwd": "~\\AppData\\Local\\Temp\\agentvc-capture-2.1.302",
+    "prompt_id": "489640fe-c971-454c-9c43-5966a3176833",
+    "permission_mode": "default",
+    "effort": {
+      "level": "medium"
+    },
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "echo a",
+      "description": "Print a"
+    },
+    "tool_use_id": "toolu_018YmRRFEtTBDD9byu5xsKRj"
+  }
+}

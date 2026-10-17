@@ -1,0 +1,21 @@
+{
+  "capture": {
+    "seq": 31,
+    "received_at": "2026-10-17T21:51:14.788212+00:00",
+    "pid": 13508,
+    "unparseable": false,
+    "script_version": 1
+  },
+  "payload": {
+    "session_id": "5ba9407c-baf9-4fe1-bbc0-21fcef812cc4",
+    "transcript_path": "~\\.claude\\projects\\C--Users-<user>-AppData-Local-Temp-agentvc-capture-2-1-302\\5ba9407c-baf9-4fe1-bbc0-21fcef812cc4.jsonl",
+    "cwd": "~\\AppData\\Local\\Temp\\agentvc-capture-2.1.302",
+    "prompt_id": "1b2c92a1-eb3e-4457-bc1b-6ebef7c44562",
+    "hook_event_name": "MessageDisplay",
+    "turn_id": "470d1fe6-fcf7-47cb-adae-75ffa10aa3b6",
+    "message_id": "cad71749-487e-4b85-a9af-1e53cc7dd49b",
+    "index": 0,
+    "final": true,
+    "delta": "I changed \"one\" to \"two\" in `notes.txt`."
+  }
+}
