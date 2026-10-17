@@ -42,7 +42,31 @@ HOOK_TIMEOUT_SECONDS = 10
 # Events from the Claude Code hooks reference (code.claude.com/docs/en/hooks, read 2026-10-18).
 # WorktreeCreate/WorktreeRemove are left out: a hook there replaces Claude Code's own
 # worktree handling. "core" is the long-standing subset, for versions that reject newer names.
+# Per-version lists: Claude Code 2.1.72 silently registers NO hooks if the settings name an
+# event it doesn't know, so "auto" uses a version's own list when one is known here.
 EVENTS: dict[str, tuple[str, ...]] = {
+    # From the event-name list in the 2.1.72 binary, confirmed by a capture run (2026-10-18).
+    "2.1.72": (
+        "SessionStart",
+        "Setup",
+        "UserPromptSubmit",
+        "PreToolUse",
+        "PermissionRequest",
+        "PostToolUse",
+        "PostToolUseFailure",
+        "Notification",
+        "SubagentStart",
+        "SubagentStop",
+        "TaskCompleted",
+        "Stop",
+        "TeammateIdle",
+        "InstructionsLoaded",
+        "ConfigChange",
+        "PreCompact",
+        "Elicitation",
+        "ElicitationResult",
+        "SessionEnd",
+    ),
     "core": (
         "SessionStart",
         "SessionEnd",
@@ -282,6 +306,8 @@ def setup(target: Path, *, fixtures_root: Path, agent_version: str, events: str)
         f'hook --out "{out.as_posix()}"'
     )
     handler = {"type": "command", "command": command, "timeout": HOOK_TIMEOUT_SECONDS}
+    if events == "auto":
+        events = agent_version if agent_version in EVENTS else "all"
     settings = {"hooks": {event: [{"hooks": [handler]}] for event in EVENTS[events]}}
 
     settings_path.parent.mkdir(parents=True, exist_ok=True)
@@ -311,7 +337,12 @@ def main(argv: list[str] | None = None) -> int:
     p_setup = commands.add_parser("setup", help="create a throwaway capture project")
     p_setup.add_argument("folder", type=Path)
     p_setup.add_argument("--agent-version", help="default: from `claude --version`")
-    p_setup.add_argument("--events", choices=sorted(EVENTS), default="all")
+    p_setup.add_argument(
+        "--events",
+        choices=["auto", *sorted(EVENTS)],
+        default="auto",
+        help="event list: auto = the list known for this version, else all",
+    )
     p_summary = commands.add_parser("summary", help="count captured payloads")
     p_summary.add_argument("folder", type=Path)
     args = parser.parse_args(argv)

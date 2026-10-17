@@ -205,3 +205,21 @@ def test_setup_refuses_unsafe_version(tmp_path: Path) -> None:
 def test_scrub_replaces_git_bash_form_of_home() -> None:
     scrubbed = cp.scrub_text("cd /c/Users/alice/proj", home="C:\\Users\\alice", user=None)
     assert scrubbed == "cd ~/proj"
+
+
+def test_setup_auto_uses_the_event_list_known_for_that_version(tmp_path: Path) -> None:
+    # Claude Code 2.1.72 silently registers no hooks at all if settings name an event it
+    # doesn't know, so setup must only write events that version supports.
+    cp.setup(tmp_path / "t", fixtures_root=tmp_path / "f", agent_version="2.1.72", events="auto")
+    settings = json.loads((tmp_path / "t" / ".claude" / "settings.json").read_text("utf-8"))
+    assert set(settings["hooks"]) == set(cp.EVENTS["2.1.72"])
+    assert "PostToolBatch" not in settings["hooks"]
+    assert {"PreToolUse", "PostToolUseFailure", "SubagentStart", "ConfigChange"} <= set(
+        settings["hooks"]
+    )
+
+
+def test_setup_auto_falls_back_to_all_for_unknown_versions(tmp_path: Path) -> None:
+    cp.setup(tmp_path / "t", fixtures_root=tmp_path / "f", agent_version="9.9.9", events="auto")
+    settings = json.loads((tmp_path / "t" / ".claude" / "settings.json").read_text("utf-8"))
+    assert set(settings["hooks"]) == set(cp.EVENTS["all"])
