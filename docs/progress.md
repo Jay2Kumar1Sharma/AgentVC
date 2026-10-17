@@ -27,6 +27,14 @@ Updated at the end of every session by the agent doing the work. Newest handoff 
 
 ## Handoff log
 
+### 2026-10-18: new rule: full test suite at the end of every session
+- **Rule added** (AGENTS.md step 8, plan §13.1 and §16.5, `docs/agent-prompts.md`): every session ends with the full local suite; results go in this log; related failures are fixed first, others recorded.
+- **Applied retroactively to session 1** on `discovery/session-1`, Python 3.12.7, Windows:
+  - `./make.ps1 fast` (ruff, mypy strict, pytest `-m "not slow"`): **pass**, exit 0, 1.6 s.
+  - `python -m pytest` with no marker filter (stand-in for `make test`, still a placeholder): **91 passed, 0 failed, 0 skipped**, 0.72 s. The one warning is the intended `TraceabilityGap` report (TODO rows without tests).
+- Note: GNU `make` isn't on every shell's PATH on this machine; `./make.ps1` works everywhere on Windows.
+- **Next session (2) starts with task 0:** replace the `make test` placeholder with the real full suite.
+
 ### 2026-10-18: session 1, repo setup and Discovery part 1
 Work is on branch **`discovery/session-1`** (15 small signed commits, not merged, not pushed).
 
