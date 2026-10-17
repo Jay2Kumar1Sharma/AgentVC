@@ -37,6 +37,7 @@ hazards:
   - {id: HZ-G2-06, hazard: "Concurrent hooks lose a ledger write", fmea: [FM-LED-01], tests: [TODO]}
   - {id: HZ-G2-07, hazard: "The agent changes directory or adds a root outside the project, and its actions there go unreported", fmea: [], tests: [TODO]}
   - {id: HZ-G2-08, hazard: "An action bypasses hooks entirely (a script calls an API); must be documented as a limit", fmea: [], tests: [TODO]}
+  - {id: HZ-G2-09, hazard: "An install writes a hook event the agent version doesn't know, and the agent silently drops all hooks", fmea: [FM-INS-03], tests: [TODO]}
   - {id: HZ-G3-01, hazard: "A report says \"restored\" for a file that was skipped, conflicted or locked", fmea: [FM-RST-07], tests: [TODO]}
   - {id: HZ-G3-02, hazard: "A path over the budget, or unreadable, is reported as protected", fmea: [FM-SNAP-04, FM-SNAP-05], tests: [TODO]}
   - {id: HZ-G3-03, hazard: "An irreversible or unknown effect is classed as restorable", fmea: [FM-CLS-01, FM-CLS-02], tests: [TODO]}
@@ -96,6 +97,7 @@ fmea:
   - {id: FM-CFG-02, component: "Install", failure: "Agent removes AgentVC's hooks from `.claude/settings.json`", tests: [TODO]}
   - {id: FM-INS-01, component: "Install", failure: "Hook calls the wrong Python (project venv)", tests: [TODO]}
   - {id: FM-INS-02, component: "Install", failure: "Install overwrites the user's other hooks", tests: [TODO]}
+  - {id: FM-INS-03, component: "Install", failure: "Hook config names an event the installed agent version doesn't know", tests: [TODO]}
   - {id: FM-GC-01, component: "GC", failure: "Deletes a snapshot still referenced by a fork", tests: [TODO]}
   - {id: FM-DEV-01, component: "Dev tooling", failure: "Usage study or payload capture writes transcript content, prompts or secrets into the repository", tests: [tests/test_usage_study.py::test_written_result_contains_no_transcript_data, tests/test_usage_study.py::test_result_holds_only_whitelisted_strings_and_numbers, tests/test_usage_study.py::test_assert_aggregate_only_rejects_foreign_strings, tests/test_capture_payloads.py::test_scrub_removes_known_token_formats, tests/test_capture_payloads.py::test_scrub_anonymises_home_user_and_email, tests/test_capture_payloads.py::test_hook_writes_scrubbed_payload]}
 

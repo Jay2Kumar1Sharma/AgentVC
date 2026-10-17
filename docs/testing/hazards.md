@@ -33,6 +33,7 @@ For each guarantee (plan §2), the conditions under which it could be violated. 
 | HZ-G2-06 | Concurrent hooks lose a ledger write | FM-LED-01 |
 | HZ-G2-07 | The agent changes directory or adds a root outside the project, and its actions there go unreported | — |
 | HZ-G2-08 | An action bypasses hooks entirely (a script calls an API); must be documented as a limit | — |
+| HZ-G2-09 | An install writes a hook event the agent version doesn't know, and the agent silently drops all hooks | FM-INS-03 |
 
 ## G3: Honest accounting
 
