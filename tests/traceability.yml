@@ -50,7 +50,7 @@ hazards:
   - {id: HZ-G6-02, hazard: "An export includes `.env` or other secret-bearing files", fmea: [FM-SEC-01], tests: [TODO]}
   - {id: HZ-G6-03, hazard: "AgentVC's own code makes a network call", fmea: [], tests: [TODO]}
   - {id: HZ-G6-04, hazard: "The debug log or diagnostics bundle contains secrets, prompts or file contents", fmea: [FM-SEC-01], tests: [TODO]}
-  - {id: HZ-G6-05, hazard: "Development tooling (usage study, payload capture) writes transcript content, prompts or secrets into the repository", fmea: [FM-DEV-01], tests: [tests/test_usage_study.py::test_written_result_contains_no_transcript_data, tests/test_usage_study.py::test_result_holds_only_whitelisted_strings_and_numbers, tests/test_usage_study.py::test_assert_aggregate_only_rejects_foreign_strings]}
+  - {id: HZ-G6-05, hazard: "Development tooling (usage study, payload capture) writes transcript content, prompts or secrets into the repository", fmea: [FM-DEV-01], tests: [tests/test_usage_study.py::test_written_result_contains_no_transcript_data, tests/test_usage_study.py::test_result_holds_only_whitelisted_strings_and_numbers, tests/test_usage_study.py::test_assert_aggregate_only_rejects_foreign_strings, tests/test_capture_payloads.py::test_scrub_removes_known_token_formats, tests/test_capture_payloads.py::test_scrub_anonymises_home_user_and_email, tests/test_capture_payloads.py::test_hook_writes_scrubbed_payload]}
   - {id: HZ-G7-01, hazard: "Cold-start hook latency exceeds 50 ms p95 (Windows in particular)", fmea: [FM-HOOK-03], tests: [TODO]}
   - {id: HZ-G7-02, hazard: "Snapshotting a huge or pathological repository blows the budget or hangs", fmea: [FM-SNAP-04], tests: [TODO]}
   - {id: HZ-G7-03, hazard: "Disk use grows without bound", fmea: [FM-GC-01], tests: [TODO]}
@@ -97,7 +97,7 @@ fmea:
   - {id: FM-INS-01, component: "Install", failure: "Hook calls the wrong Python (project venv)", tests: [TODO]}
   - {id: FM-INS-02, component: "Install", failure: "Install overwrites the user's other hooks", tests: [TODO]}
   - {id: FM-GC-01, component: "GC", failure: "Deletes a snapshot still referenced by a fork", tests: [TODO]}
-  - {id: FM-DEV-01, component: "Dev tooling", failure: "Usage study or payload capture writes transcript content, prompts or secrets into the repository", tests: [tests/test_usage_study.py::test_written_result_contains_no_transcript_data, tests/test_usage_study.py::test_result_holds_only_whitelisted_strings_and_numbers, tests/test_usage_study.py::test_assert_aggregate_only_rejects_foreign_strings]}
+  - {id: FM-DEV-01, component: "Dev tooling", failure: "Usage study or payload capture writes transcript content, prompts or secrets into the repository", tests: [tests/test_usage_study.py::test_written_result_contains_no_transcript_data, tests/test_usage_study.py::test_result_holds_only_whitelisted_strings_and_numbers, tests/test_usage_study.py::test_assert_aggregate_only_rejects_foreign_strings, tests/test_capture_payloads.py::test_scrub_removes_known_token_formats, tests/test_capture_payloads.py::test_scrub_anonymises_home_user_and_email, tests/test_capture_payloads.py::test_hook_writes_scrubbed_payload]}
 
 attacks:
   # Hook capture / adapters
