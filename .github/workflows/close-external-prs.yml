@@ -1,0 +1,31 @@
+# While AgentVC is not accepting outside contributions, close pull requests from
+# anyone who isn't the owner, a member or a collaborator, with a polite message.
+# Remove this file when contributions open (see MAINTAINING.md "Contribution phases").
+#
+# Security: uses pull_request_target so it can comment on PRs from forks, but it
+# never checks out or runs the PR's code. It only calls the GitHub API.
+name: Close external pull requests
+
+on:
+  pull_request_target:
+    types: [opened, reopened]
+
+permissions:
+  pull-requests: write   # close the PR
+  issues: write          # PR comments use the issues API
+
+jobs:
+  close:
+    if: >-
+      github.event.pull_request.author_association != 'OWNER' &&
+      github.event.pull_request.author_association != 'MEMBER' &&
+      github.event.pull_request.author_association != 'COLLABORATOR' &&
+      github.event.pull_request.user.login != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Comment and close
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: |
+          gh pr close "$PR_URL" --comment "Thank you for your interest in AgentVC! The project isn't accepting outside contributions yet while the core is being built, so this pull request has been closed automatically. Contributions will open after the first milestones are released (announced in the README and Discussions). Feedback on the plan is very welcome in Discussions in the meantime."
