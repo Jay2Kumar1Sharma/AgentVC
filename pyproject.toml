@@ -45,6 +45,7 @@ include = ["agentvc*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]
 addopts = "-ra --strict-markers"
 xfail_strict = true
 markers = [
@@ -62,6 +63,6 @@ select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
 
 [tool.mypy]
 python_version = "3.11"
-files = ["agentvc", "tests"]
+files = ["agentvc", "scripts", "tests"]
 strict = true
 warn_unreachable = true
