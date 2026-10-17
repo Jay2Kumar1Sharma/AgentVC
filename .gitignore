@@ -1,0 +1,32 @@
+# Personal agent/editor settings (never publish)
+.claude/settings.local.json
+.vscode/
+.idea/
+
+# AgentVC's own state when dogfooding on this repo
+.agentvc/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+.coverage
+htmlcov/
+mutants/
+
+# Local scratch and OS files
+scratch/
+*.tmp
+.DS_Store
+Thumbs.db
+
+# Private planning notes (not published)
+docs/private/
