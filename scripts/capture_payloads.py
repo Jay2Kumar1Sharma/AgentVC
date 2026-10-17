@@ -113,6 +113,9 @@ EVENTS: dict[str, tuple[str, ...]] = {
     ),
 }
 
+# The 2.1.302 binary lists exactly the documented events (read 2026-10-18).
+EVENTS["2.1.302"] = EVENTS["all"]
+
 # --- Scrubbing --------------------------------------------------------------------------------
 
 _TOKEN_PATTERNS = [
@@ -252,6 +255,20 @@ def hook(
 
 # --- Setup mode -------------------------------------------------------------------------------
 
+CAPTURE_PROMPTS = (
+    "Run `echo hello` with the Bash tool, then reply with just the output.",
+    "Run `Get-ChildItem` with the PowerShell tool. If you have no PowerShell tool, say so and do"
+    " nothing else.",
+    'Use the Edit tool to change "one" to "two" in notes.txt.',
+    'Use the Write tool to create new.txt containing "hi".',
+    "In a single message, run `echo a` and `echo b` as two parallel Bash tool calls.",
+    "Use a subagent (the Task or Agent tool) to list the files in this folder, then report what"
+    " it found.",
+    "Run `exit 3` with the Bash tool and tell me the exit code.",
+    "Run `exit 3` with the PowerShell tool and tell me the exit code. If you have no PowerShell"
+    " tool, say so and do nothing else.",
+)
+
 _CAPTURE_GUIDE = """\
 # Payload capture session
 
@@ -261,16 +278,12 @@ scrubbed payloads to:
 
     {out}
 
+It also turns on the PowerShell tool for this folder only (`CLAUDE_CODE_USE_POWERSHELL_TOOL`).
+
 Start Claude Code here (`claude`), run `/hooks` to confirm the hooks are registered, then
 send these prompts one at a time:
 
-1. Run `echo hello` with the Bash tool.
-2. Run `Get-ChildItem` with the PowerShell tool. (If there is no PowerShell tool, skip this.)
-3. Use the Edit tool to change "one" to "two" in notes.txt.
-4. Use the Write tool to create new.txt containing "hi".
-5. In a single message, run `echo a` and `echo b` as two parallel Bash tool calls.
-6. Use a subagent to list the files in this folder.
-7. Run `exit 3` with the Bash tool.
+{prompts}
 
 Then type `/exit`. Delete this folder afterwards.
 """
@@ -308,13 +321,21 @@ def setup(target: Path, *, fixtures_root: Path, agent_version: str, events: str)
     handler = {"type": "command", "command": command, "timeout": HOOK_TIMEOUT_SECONDS}
     if events == "auto":
         events = agent_version if agent_version in EVENTS else "all"
-    settings = {"hooks": {event: [{"hooks": [handler]}] for event in EVENTS[events]}}
+    settings = {
+        # Project-local only: turns the PowerShell tool on in this throwaway folder.
+        "env": {"CLAUDE_CODE_USE_POWERSHELL_TOOL": "1"},
+        "hooks": {event: [{"hooks": [handler]}] for event in EVENTS[events]},
+    }
 
     settings_path.parent.mkdir(parents=True, exist_ok=True)
     settings_path.write_text(json.dumps(settings, indent=2) + "\n", encoding="utf-8", newline="\n")
     (target / "notes.txt").write_text("one\n", encoding="utf-8", newline="\n")
     (target / "CAPTURE.md").write_text(
-        _CAPTURE_GUIDE.format(out=out), encoding="utf-8", newline="\n"
+        _CAPTURE_GUIDE.format(
+            out=out, prompts="\n".join(f"{n}. {p}" for n, p in enumerate(CAPTURE_PROMPTS, 1))
+        ),
+        encoding="utf-8",
+        newline="\n",
     )
     return out
 

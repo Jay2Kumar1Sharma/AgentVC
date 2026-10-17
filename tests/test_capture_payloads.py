@@ -223,3 +223,33 @@ def test_setup_auto_falls_back_to_all_for_unknown_versions(tmp_path: Path) -> No
     cp.setup(tmp_path / "t", fixtures_root=tmp_path / "f", agent_version="9.9.9", events="auto")
     settings = json.loads((tmp_path / "t" / ".claude" / "settings.json").read_text("utf-8"))
     assert set(settings["hooks"]) == set(cp.EVENTS["all"])
+
+
+def test_event_list_for_2_1_302_matches_its_binary() -> None:
+    # From the 2.1.302 binary's event list, minus WorktreeCreate/WorktreeRemove.
+    expected = {
+        "PreToolUse", "PostToolUse", "PostToolUseFailure", "PostToolBatch", "Notification",
+        "UserPromptSubmit", "UserPromptExpansion", "SessionStart", "SessionEnd", "Stop",
+        "StopFailure", "SubagentStart", "SubagentStop", "PreCompact", "PostCompact",
+        "PreModelSwitch", "PostModelSwitch", "PermissionRequest", "PermissionDenied", "Setup",
+        "TeammateIdle", "TaskCreated", "TaskCompleted", "Elicitation", "ElicitationResult",
+        "ConfigChange", "InstructionsLoaded", "CwdChanged", "FileChanged", "DirectoryAdded",
+        "MessageDisplay",
+    }  # fmt: skip
+    assert set(cp.EVENTS["2.1.302"]) == expected
+    assert len(cp.EVENTS["2.1.302"]) == len(expected)
+
+
+def test_setup_enables_the_powershell_tool_in_the_throwaway_project_only(tmp_path: Path) -> None:
+    cp.setup(tmp_path / "t", fixtures_root=tmp_path / "f", agent_version="2.1.302", events="auto")
+    settings = json.loads((tmp_path / "t" / ".claude" / "settings.json").read_text("utf-8"))
+    assert settings["env"] == {"CLAUDE_CODE_USE_POWERSHELL_TOOL": "1"}
+    assert set(settings["hooks"]) == set(cp.EVENTS["2.1.302"])
+
+
+def test_capture_guide_lists_every_prompt(tmp_path: Path) -> None:
+    cp.setup(tmp_path / "t", fixtures_root=tmp_path / "f", agent_version="1.0.0", events="core")
+    guide = (tmp_path / "t" / "CAPTURE.md").read_text(encoding="utf-8")
+    assert any("PowerShell" in p and "exit 3" in p for p in cp.CAPTURE_PROMPTS)
+    for prompt in cp.CAPTURE_PROMPTS:
+        assert prompt in guide
