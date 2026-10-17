@@ -36,13 +36,13 @@ Updated at the end of every session by the agent doing the work. Newest handoff 
 - **Next session (2) starts with task 0:** replace the `make test` placeholder with the real full suite.
 
 ### 2026-10-18: session 1, repo setup and Discovery part 1
-Work is on branch **`discovery/session-1`** (15 small signed commits, not merged, not pushed).
+Work is on branch **`discovery/session-1`** (signed commits, not merged). **Pushed on 2026-10-18 at the user's request**, together with `main` (pushed first so it stays the default branch).
 
 **Done**
 - **ADRs:** `docs/adr/0000-template.md`, ADR-0001 (name AgentVC), ADR-0002 (Apache-2.0).
 - **Skeleton:** `pyproject.toml` (Python 3.11+, no runtime deps, `license = "Apache-2.0"`, dev extras), `agentvc/` with `python -m agentvc` printing the version, `tests/`, `eval/`, `results/`, `docs/design/`, `docs/prior-art/`, `docs/testing/`, `CHANGELOG.md`.
 - **Task runners:** `Makefile` and `make.ps1` (Windows) with `fast` (ruff check + format check, mypy strict, pytest `-m "not slow"`); `test`/`arch`/`fuzz`/`chaos` are placeholders that **exit 2 with a message**, so they can't pass silently. A test keeps both runners' targets in sync.
-- **CI:** `.github/workflows/fast.yml`, Linux/macOS/Windows × Python 3.11/3.13. **CI status: not yet run** (nothing pushed). Validated locally: a test parses every workflow and checks the matrix; `make fast` (MSYS2 make) and `make.ps1 fast` (PowerShell 5.1) both pass on Windows. **Re-verified from a fresh clone of the branch with fresh environments:** `make fast` passes on Python 3.11.12, 3.12.7 and 3.13.3 (91 tests each; 3.11 and 3.13 via uv-managed interpreters), and `make.ps1 fast` passes on 3.12.7. **Linux and macOS are unverified** until CI runs (Docker Desktop was not running, so no local Linux run).
+- **CI:** `.github/workflows/fast.yml`, Linux/macOS/Windows × Python 3.11/3.13. **CI status: passing**: run 39068785382 on commit `d82e4b7`, all 6 jobs green (Linux, macOS, Windows × Python 3.11, 3.13), 91 tests each; `main` has no workflow yet, so CI runs only on the branch. Validated locally: a test parses every workflow and checks the matrix; `make fast` (MSYS2 make) and `make.ps1 fast` (PowerShell 5.1) both pass on Windows. **Re-verified from a fresh clone of the branch with fresh environments:** `make fast` passes on Python 3.11.12, 3.12.7 and 3.13.3 (91 tests each; 3.11 and 3.13 via uv-managed interpreters), and `make.ps1 fast` passes on 3.12.7. Linux and macOS verified by CI (above).
 - **Testing drafts (§16.1):** `docs/testing/fmea.md` (38 rows), `hazards.md` (43 hazards across G1–G8), `unknowns.md` (17 unknowns with experiments), `tests/traceability.yml` (8 guarantees + 43 hazards + 38 FMEA + 76 attacks from §15.3). `tests/test_traceability.py` fails if a row names a missing test (seen failing on two planted bad references), if the docs' IDs and the YAML disagree, or if a guarantee is missing; `TODO` rows show as a `TraceabilityGap` warning with per-section counts. Only FM-DEV-01 / HZ-G6-05 (dev tooling privacy) have tests so far.
 - **Usage study:** `scripts/usage_study.py` (aggregate counts only; privacy tests plant canary strings in prompts, commands, paths, output, folder and session names). Result in `results/usage-study/2026-10-18/`: 35 sessions; **26.5% of file changes went through the shell**, 17/31 tool-using sessions changed files via shell, 10/31 ran a destructive command (63 in all); external effects were rare (3 pushes, 0 deploys, 6 DB commands, 7 HTTP writes, MCP calls in 1 session).
 - **Pivot check (recommendation, plan unchanged):** shell file changes are common and side effects rare in this sample, so keep v0.1 (file + shell undo) first. Final call after the outside conversations (one-person sample; heuristic classifier not checked against labelled commands; includes this session).
@@ -66,7 +66,7 @@ Work is on branch **`discovery/session-1`** (15 small signed commits, not merged
 **Side effects outside the repository (from the capture runs):** transcripts for the throwaway folders under `~/.claude/projects/C--Users-<user>-AppData-Local-Temp-agentvc-capture-*` and their entries in `~/.claude.json`. No settings file was changed. They're the user's to delete; until then a re-run of the usage study counts those ~10 test sessions.
 
 **Open questions**
-- Merge `discovery/session-1` into `main`: fast-forward (keeps the 15 commits) or squash (plan §13.1)? And push when you're ready; CI runs then.
+- Merge `discovery/session-1` into `main`: fast-forward (keeps the commits) or squash via a pull request (plan §13.1)? Once `fast.yml` is on `main`, it can become a required check (MAINTAINING.md "Repository settings").
 - Is PyYAML acceptable as a dev dependency?
 - Outside conversations (5+ people, `docs/user-conversations.md`) are still needed for the pivot check.
 
