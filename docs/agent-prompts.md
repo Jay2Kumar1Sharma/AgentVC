@@ -6,6 +6,7 @@ How to use this file:
 - After each session: read its summary and `docs/progress.md`, review the diff, and answer its open questions before starting the next session.
 - Use a **separate session** for reviews and red-team runs, ideally a different model or agent from the one that wrote the code.
 - Every session must **commit gradually** (AGENTS.md, plan §13.1): small, single-purpose, working commits as it goes, not one big commit at the end. When reviewing a session, check `git log`. If you see one huge commit, ask the agent to follow the rule next time.
+- Every session must **end by running the full test suite** (AGENTS.md step 8) and report the result: command, pass/fail/skip counts, duration. Related failures are fixed before the session ends; anything that can't be fixed is recorded as a known issue, and the session isn't counted as done. If a session summary has no full-suite result, ask the agent to run it before you start the next session. This applies to every prompt below, even where it isn't repeated.
 
 ---
 
@@ -59,6 +60,7 @@ Rules: follow AGENTS.md (tests seen to fail first, unrelated issues → GitHub i
 Read AGENTS.md and docs/progress.md, then docs/master-plan.md §7.1, §5, §8 Discovery and §17 week 1.
 
 Task for this session:
+0. First, replace the `make test` placeholder (Makefile and make.ps1) with the real full local suite: everything `make fast` runs, plus all pytest tests with no marker filter (slow tests included), plus each later check as it appears (architecture checks, eval scenario and adversarial runners). Keep the test that holds the two runners' targets in sync. Show `make test` failing on a deliberately broken test, then passing. From now on, every session ends with `make test`.
 1. Spikes for the design decisions in plan §7.1, each with a short measurement script in scripts/spikes/, raw results in results/spikes/<date>/, and an ADR (ADR-0003 onward):
    - S1/D1 hook latency: measure cold-start latency of a minimal Python hook handler, and of a handler that snapshots a 1k / 10k / 100k-file test repo, on this machine (Windows). Write a CI job that runs the same spike on Linux and macOS and uploads the numbers; it will only run once I push the repository, so say clearly that those results are still pending and don't push to get them. Recommend per-call process vs background process from the Windows numbers, and say what the Linux/macOS numbers would need to show to change the recommendation.
    - D2 hook failure policy: write the ADR (fail open with a visible gap; fail closed in strict mode; hook timeout below the agent's).
