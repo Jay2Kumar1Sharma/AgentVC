@@ -22,7 +22,17 @@ Every tool call fires at least two hooks (PreToolUse, PostToolUse). The budget i
 
 From the Claude Code hooks reference (read 2026-10-18): a command hook with `args` runs in **exec form**, with no shell; an **`http` hook** POSTs the payload to a URL, so no process is started per call; a failed `http` hook is a non-blocking error unless it sets `onFailure: "block"` (Claude Code 2.1.295+).
 
-**Linux and macOS: pending.** The CI job runs the same spike there, but only once the branch is pushed or the job is started by hand. No numbers yet.
+**Linux, macOS and Windows on GitHub's runners** (same spike, 30 runs each, [Actions run 39114705668](https://github.com/Jay2Kumar1Sharma/AgentVC/actions/runs/39114705668); raw data in `results/spikes/2026-10-18/ci-runners/`), p95:
+
+| What one hook call costs | Linux | macOS | Windows (CI) |
+|---|---:|---:|---:|
+| Minimal handler, `-I -S`, no shell | 31 ms | 32 ms | 43 ms |
+| Minimal handler through the shell | 35 ms | 47 ms | **92 ms** |
+| Snapshot, 10k files, one changed | 62 ms | 87 ms | **216 ms** (over the 150 ms budget) |
+| Snapshot, 100k files, one changed | 290 ms | 283 ms | 436 ms |
+| **First** snapshot, 10k / 100k files | 1.3 s / 9 s | 4 s / 44 s | **82 s / 15 min** |
+
+Shared runners are small (2–5 CPUs) and noisy; read them as orders of magnitude.
 
 ## Options considered
 
@@ -42,7 +52,7 @@ From the Claude Code hooks reference (read 2026-10-18): a command hook with `arg
 
 ## What would change this decision
 
-- **Linux and macOS numbers (CI job, pending):** they can't rescue Windows, which already fails option 1 and has no headroom in option 2. They would change the recommendation **for those platforms only** if exec-form per-call p95 there stays below about 35 ms *including* a real ledger write. Even then, one process model on every OS is simpler to test, so the per-call path would stay the fallback rather than become a second default.
+- **Linux and macOS numbers (measured, see above):** exec-form per-call is 31–32 ms p95 for a handler that does *nothing*, so it reaches the ~35 ms bar set here only before any real work (a ledger write, module imports). That doesn't change the recommendation: per-call stays the fallback on every OS. Windows on CI is worse than on the maintainer's machine (92 ms through the shell, 216 ms for a 10k-file snapshot), which strengthens the case for the daemon and for keeping the index warm in it.
 - **The `http` round trip measuring above ~25 ms p95 on Windows** would remove the daemon's advantage; then option 2 with aggressive import trimming becomes the default, and the 50 ms budget needs an ADR.
 
 ## Consequences
