@@ -17,7 +17,7 @@ Updated at the end of every session by the agent doing the work. Newest handoff 
 
 | Milestone (plan §8) | Status |
 |---|---|
-| Discovery (week 1) | in progress: part 1 done (session 1, branch `discovery/session-1`), Claude Code payloads captured; part 2 next |
+| Discovery (week 1) | parts 1 and 2 done (branches `discovery/session-1`, PR #1, and `discovery/session-2`); ADRs 0003–0009 proposed, awaiting review; outside conversations and Linux/macOS latency numbers still open |
 | v0.1-alpha (private) | not started |
 | v0.1 (public) | not started |
 | v0.2 Know your effects | not started |
@@ -26,6 +26,55 @@ Updated at the end of every session by the agent doing the work. Newest handoff 
 | v0.5 Beyond the workspace | not started |
 
 ## Handoff log
+
+### 2026-10-18: session 2, Discovery part 2
+Branch **`discovery/session-2`**, built on `discovery/session-1` (PR #1, still open and unmerged at your request). 32 signed commits, **not pushed**. Review and merge PR #1 first, then this branch (or both together; the history is linear).
+
+**Done**
+- **Task 0, `make test`:** now the full local suite (ruff, format, mypy, `arch_check`, pytest with no marker filter), in both `Makefile` and `make.ps1`. Shown failing on a deliberately broken `slow` test (which `make fast` skipped) and passing once it was removed.
+- **Task 1, spikes and ADRs** (scripts in `scripts/spikes/`, raw results in `results/spikes/2026-10-18/`; every ADR is **proposed**, waiting for your decision):
+
+  | Decision | Finding | ADR |
+  |---|---|---|
+  | D1 hook process model | Windows: per-call Python through Git Bash **p95 77 ms** (budget 50); direct `-I -S` 48 ms; warm snapshots in budget; **first snapshot 21 s (10k files) / 243 s (100k)** | 0003: background `agentvcd` reached through `http` hooks on 127.0.0.1, per-call exec form as fallback, baseline built in the background |
+  | D2 hook failure | Claude Code 2.1.302 **fails open by itself**: a timed-out or crashing PreToolUse hook lets the tool run, then PostToolUse arrives; exit 2 blocks | 0004: fail open visibly with GAPs (incl. Post-without-Pre), fail closed in strict mode (`onFailure: block` + exit 2), own deadline under the agent's |
+  | D3 object ownership | A store borrowing via alternates **can't restore** after the user resets and prunes; owning every object survives. A CRLF alternates file is silently ignored | 0005: own every object |
+  | D4 ignored files | **Weak evidence**: 48 repos found, only 8 with tracked files; ignored data almost all dependency folders; no `.env` | 0006: keep the plan's default (minus heavy folders, `.env` always, ≤ 1 MB/file, ≤ 50 MB/snapshot, never exported) |
+  | D5 schema version | — | 0007: `schema_version` + `migrations` tables, forward-only, backup before migrating, refuse newer |
+  | D6 interpreter | In a project with its own venv and a planted `agentvc/` folder, **even the absolute interpreter path ran the planted package**; only `-I` ran the real one | 0008: absolute path **and** `-I` |
+  | D7 workspace root | Worktrees and nested repos have their own top level; **a snapshot of the outer repo records nested repos and inner worktrees as gitlinks, without their files** | 0009: workspace = git top level of the start folder; worktrees are separate workspaces; nested repos snapshotted separately (unprotected until built) |
+
+- **Linux and macOS latency: pending.** `.github/workflows/spike-latency.yml` runs the spike there once the branch is pushed (or from the Actions tab). Not pushed, so no numbers.
+- **Task 2, prior art:** seven notes in `docs/prior-art/` plus a comparison index. Sources were shallow-cloned and read (commits recorded); nothing was installed or run; inferences are marked. Main finding: **file and shell undo exists (turnback, Cline, OpenCode), but each misses a G1 property** (overwrites user edits, can't undo the restore, borrows objects via alternates, or writes into the user's `.git`), and none reports external effects.
+- **Task 3, architecture skeleton:** `architecture/graph.json` (21 nodes, all planned), an offline Overview page, `architecture/README.md` with the update rule, `scripts/arch_check.py` (tested in both directions), and a Playwright render check, **seen failing** on a stray script character and on an external stylesheet, then passing. `make arch` runs both.
+- **Task 4, pivot check:** `docs/discovery/pivot-check-2026-10-18.md`. Recommendation: **keep v0.1 first**; measure "already solved" by running the v0.1 scenarios against turnback during v0.1-alpha; lead with the guarantees others miss. The plan is unchanged.
+- Testing docs: 5 new failure modes, 3 hazards, unknowns U-01/U-04/U-10 answered, U-11 partly; U-18 (`http` hook latency) and U-19 (OpenCode under prune) added.
+
+**Mistakes made and fixed this session (all in my own new code)**
+- Committed `test_arch_check.py` without running the linter, which broke the fast lane at `0643a64`; fixed in `a3ac574`.
+- Staged files before a failing fast lane, so an ADR commit swallowed the D7 spike; that unpushed commit was undone (`reset --soft`) and redone as two clean commits.
+- From then on, the fast lane runs before staging.
+
+**Full test suite (AGENTS.md step 8)**, Windows, Python 3.12.7, on `discovery/session-2` at `66c21f3`:
+- `make test` (MSYS2 make): **pass**, exit 0; ruff, format and mypy (27 files) clean; `arch_check` OK (21 nodes); **127 passed, 0 failed, 0 skipped**, 8.3 s (9.3 s wall).
+- `./make.ps1 test`: **pass**, exit 0; same results, 7.2 s (8.4 s wall).
+- The one warning is the intended `TraceabilityGap` report.
+
+**Needs your decision**
+1. **ADRs 0003–0009:** accept, change or reject each. ADR-0003 (a background process) adds real scope to session 3, and rests on U-18, which isn't measured yet.
+2. **The pivot recommendation**, including whether a turnback differential run joins v0.1-alpha's "Done when".
+3. **Dev dependencies:** PyYAML (still open from session 1) and now **Playwright** (render check).
+4. **Push** `discovery/session-2` so CI runs, including the Linux/macOS latency spike.
+
+**Side effects outside the repository:**
+- **Playwright's Chromium:** about 118 MB in `%LOCALAPPDATA%\ms-playwright`. Remove with `python -m playwright uninstall`.
+- **Prior-art clones:** in `%TEMP%\agentvc-prior-art`; safe to delete.
+- **Latency spike repos:** in `%TEMP%\agentvc-spike-latency`, about 100k files; safe to delete.
+- **Claude Code runs:** three `claude -p` runs (hook-failure spike) left transcripts under `~/.claude/projects/`. No settings were changed.
+
+**Next (session 3, Alpha A):** before building hooks on ADR-0003, measure U-18 (the `http` hook round trip). If the ADRs change, adjust the session 3 prompt accordingly.
+
+**Unrelated issues found:** none.
 
 ### 2026-10-18: Claude Code 2.1.302 payloads (PowerShell, PostToolBatch)
 Branch **`discovery/capture-2.1.302`**, based on `discovery/session-1` (which is in PR #1, open and green, waiting for the maintainer's review and squash merge). 4 signed commits, **not pushed**.
