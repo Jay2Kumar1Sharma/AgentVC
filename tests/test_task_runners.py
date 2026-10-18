@@ -57,3 +57,16 @@ def test_make_test_runs_the_full_suite() -> None:
 
 def test_make_ps1_test_runs_the_full_suite() -> None:
     assert_full_suite(ps1_branch("test"))
+
+
+def test_make_arch_runs_structure_and_render_checks() -> None:
+    for recipe in (makefile_recipe("arch"), ps1_branch("arch")):
+        flat = recipe.replace("'", "").replace(",", "")
+        assert "arch_check.py" in flat
+        assert "test_arch_render.py" in flat
+        assert "not implemented" not in recipe.lower()
+
+
+def test_make_test_includes_the_architecture_check() -> None:
+    for recipe in (makefile_recipe("test"), ps1_branch("test")):
+        assert "arch_check.py" in recipe

@@ -9,7 +9,7 @@ Thanks for helping. AgentVC records what coding agents do and lets people undo i
 >
 > **When it opens:** after the first milestones are released. The README badge and this banner will change, and it will be announced in Discussions. The rest of this guide describes how contributing will work then; the maintainer already follows it.
 
-`pip install -e ".[dev]"`, `make fast` and `make test` work now; `make arch`, `make fuzz`, `make chaos` and the `eval` runners arrive with the milestones that build them and fail with a "not implemented yet" message until then.
+`pip install -e ".[dev]"`, `make fast`, `make test` and `make arch` work now; `make fuzz`, `make chaos` and the `eval` runners arrive with the milestones that build them and fail with a "not implemented yet" message until then.
 
 **Windows:** `make.ps1` offers the same targets as the Makefile, e.g. `powershell -ExecutionPolicy Bypass -File make.ps1 fast`.
 
