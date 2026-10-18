@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AgentVC architecture</title>
+<!-- Offline renderer for graph.json (plan §5.2). No external resources: keep it that way. -->
+<style>
+  :root {
+    --bg: #fbfbfa; --panel: #ffffff; --text: #1d1f23; --muted: #5c6370; --line: #d7dae0;
+    --edge: #9aa3b2; --accent: #2f6fdd; --planned: #8a6d1f; --planned-bg: #fbf3dc;
+    --shipped: #1f7a45; --shipped-bg: #e2f4e8; --progress: #6b3fb3; --progress-bg: #efe7fb;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #15171b; --panel: #1d2026; --text: #e6e8eb; --muted: #9aa3b2; --line: #343944;
+      --edge: #59616f; --accent: #6ea2ff; --planned: #e3c46b; --planned-bg: #3a3220;
+      --shipped: #6fd39b; --shipped-bg: #1d3628; --progress: #c3a6f5; --progress-bg: #2e2540;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  header { padding: 20px 16px 8px; max-width: 1200px; margin: 0 auto; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .meta { color: var(--muted); font-size: 13px; }
+  nav { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  nav button { font: inherit; padding: 4px 12px; border-radius: 6px; border: 1px solid var(--line);
+               background: var(--panel); color: var(--text); cursor: pointer; }
+  nav button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+  nav button:disabled { opacity: .5; cursor: default; }
+  main { max-width: 1200px; margin: 0 auto; padding: 8px 16px 32px; display: grid;
+         grid-template-columns: minmax(0, 1fr) 320px; gap: 16px; }
+  #canvas { position: relative; }
+  #edges { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  #edges line { stroke: var(--edge); stroke-width: 1.2; }
+  #edges line.hot { stroke: var(--accent); stroke-width: 2; }
+  .layer { position: relative; margin-bottom: 18px; }
+  .layer h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted);
+              margin: 0 0 6px; }
+  .nodes { display: flex; flex-wrap: wrap; gap: 10px; }
+  .node { position: relative; z-index: 1; min-width: 150px; max-width: 230px; flex: 1 1 150px;
+          text-align: left; font: inherit; color: inherit; background: var(--panel);
+          border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; cursor: pointer; }
+  .node:hover, .node:focus-visible { border-color: var(--accent); outline: none; }
+  .node[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+  .node .label { font-weight: 600; display: block; }
+  .node .sub { color: var(--muted); font-size: 12px; display: block; overflow-wrap: anywhere; }
+  .badge { display: inline-block; font-size: 11px; border-radius: 4px; padding: 0 6px; margin-top: 4px; }
+  .badge.planned { color: var(--planned); background: var(--planned-bg); }
+  .badge.shipped { color: var(--shipped); background: var(--shipped-bg); }
+  .badge.in-progress { color: var(--progress); background: var(--progress-bg); }
+  aside { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px;
+          align-self: start; position: sticky; top: 12px; overflow-wrap: anywhere; }
+  aside h3 { margin: 0 0 4px; font-size: 16px; }
+  aside dt { color: var(--muted); font-size: 12px; margin-top: 10px; }
+  aside dd { margin: 0; }
+  #error { color: #c0392b; padding: 16px; display: none; }
+  @media (max-width: 760px) {
+    main { grid-template-columns: minmax(0, 1fr); }
+    aside { position: static; }
+    #edges { display: none; }
+    .node { max-width: none; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>AgentVC architecture</h1>
+  <div class="meta" id="meta">Loading graph.json…</div>
+  <nav aria-label="Views">
+    <button type="button" aria-pressed="true">Overview</button>
+    <button type="button" disabled title="Arrives with v0.1">Data flow</button>
+    <button type="button" disabled title="Arrives with v0.1">Lifecycle</button>
+  </nav>
+</header>
+<div id="error" role="alert"></div>
+<main>
+  <section id="canvas" aria-label="Overview">
+    <svg id="edges" aria-hidden="true"></svg>
+    <div id="layers"></div>
+  </section>
+  <aside id="details" aria-live="polite">
+    <h3>Select a component</h3>
+    <p class="meta">Click a box to see what it does, where it lives and which decisions shaped it.</p>
+  </aside>
+</main>
+<script>
+"use strict";
+const STATUS_CLASS = { "planned": "planned", "shipped": "shipped", "in progress": "in-progress" };
+let graph = null;
+let selected = null;
+
+function el(tag, attrs, ...children) {
+  const node = document.createElement(tag);
+  for (const [key, value] of Object.entries(attrs || {})) {
+    if (key === "class") node.className = value; else node.setAttribute(key, value);
+  }
+  for (const child of children) node.append(child);
+  return node;
+}
+
+function render() {
+  const meta = graph.meta;
+  document.getElementById("meta").textContent =
+    `${graph.nodes.length} components · version ${meta.version} · updated ${meta.updated}`;
+  const layers = document.getElementById("layers");
+  layers.replaceChildren();
+  for (const layer of graph.layers) {
+    const box = el("div", { class: "nodes" });
+    for (const node of graph.nodes.filter(n => n.layer === layer.id)) {
+      const button = el("button", { class: "node", type: "button", "data-node-id": node.id,
+                                    "aria-pressed": "false" },
+        el("span", { class: "label" }, node.label),
+        el("span", { class: "sub" }, node.sub || ""),
+        el("span", { class: "badge " + (STATUS_CLASS[node.status] || "") }, node.status));
+      button.addEventListener("click", () => select(node.id));
+      box.append(button);
+    }
+    layers.append(el("div", { class: "layer", "data-layer-id": layer.id },
+                     el("h2", {}, layer.label), box));
+  }
+  drawEdges();
+}
+
+function drawEdges() {
+  const svg = document.getElementById("edges");
+  svg.replaceChildren();
+  const canvas = document.getElementById("canvas").getBoundingClientRect();
+  const centre = id => {
+    const box = document.querySelector(`[data-node-id="${CSS.escape(id)}"]`);
+    if (!box) return null;
+    const r = box.getBoundingClientRect();
+    return [r.left + r.width / 2 - canvas.left, r.top + r.height / 2 - canvas.top];
+  };
+  for (const edge of graph.edges) {
+    const a = centre(edge.from), b = centre(edge.to);
+    if (!a || !b) continue;
+    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    line.setAttribute("x1", a[0]); line.setAttribute("y1", a[1]);
+    line.setAttribute("x2", b[0]); line.setAttribute("y2", b[1]);
+    if (selected && (edge.from === selected || edge.to === selected)) line.classList.add("hot");
+    svg.append(line);
+  }
+}
+
+function select(id) {
+  selected = id;
+  const node = graph.nodes.find(n => n.id === id);
+  for (const b of document.querySelectorAll(".node")) {
+    b.setAttribute("aria-pressed", String(b.dataset.nodeId === id));
+  }
+  const name = other => (graph.nodes.find(n => n.id === other) || { label: other }).label;
+  const out = graph.edges.filter(e => e.from === id).map(e => `${e.kind} → ${name(e.to)}`);
+  const into = graph.edges.filter(e => e.to === id).map(e => `${name(e.from)} → ${e.kind}`);
+  const list = items => items.length ? items.join("; ") : "none";
+  const details = document.getElementById("details");
+  details.replaceChildren(
+    el("h3", {}, node.label),
+    el("span", { class: "badge " + (STATUS_CLASS[node.status] || "") }, node.status),
+    el("dl", {},
+      el("dt", {}, "What it does"), el("dd", {}, node.desc || ""),
+      el("dt", {}, "Source"), el("dd", {}, node.path || "not written yet"),
+      el("dt", {}, "Decisions (ADRs)"),
+      el("dd", {}, (node.adr || []).length ? node.adr.map(a => "ADR-" + a).join(", ") : "none"),
+      el("dt", {}, "Sends to"), el("dd", {}, list(out)),
+      el("dt", {}, "Receives from"), el("dd", {}, list(into))));
+  drawEdges();
+}
+
+async function load() {
+  try {
+    const response = await fetch("graph.json", { cache: "no-store" });
+    if (!response.ok) throw new Error(`graph.json: HTTP ${response.status}`);
+    graph = await response.json();
+    render();
+    window.addEventListener("resize", drawEdges);
+    document.body.dataset.rendered = "true";
+  } catch (error) {
+    const box = document.getElementById("error");
+    box.style.display = "block";
+    box.textContent = location.protocol === "file:"
+      ? "Browsers block reading graph.json from a page opened from disk. Serve this folder instead: " +
+        "python -m http.server --directory architecture 8000"
+      : `Could not load graph.json (${error.message}).`;
+    document.body.dataset.rendered = "error";
+  }
+}
+load();
+</script>
+</body>
+</html>
