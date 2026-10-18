@@ -29,6 +29,7 @@ hazards:
   - {id: HZ-G1-10, hazard: "Two names map to one file (case-insensitive file system, Unicode normalisation)", fmea: [], tests: [TODO]}
   - {id: HZ-G1-11, hazard: "Rollback runs while the agent is still writing", fmea: [], tests: [TODO]}
   - {id: HZ-G1-12, hazard: "An older AgentVC opens a newer ledger and misreads it", fmea: [FM-LED-04], tests: [TODO]}
+  - {id: HZ-G1-13, hazard: "The agent deletes a nested repository or a worktree inside the workspace, whose files the snapshot doesn't hold", fmea: [FM-SNAP-06], tests: [TODO]}
   - {id: HZ-G2-01, hazard: "A Pre event arrives with no Post event, and no GAP is recorded", fmea: [FM-HOOK-02], tests: [TODO]}
   - {id: HZ-G2-02, hazard: "AgentVC's hook crashes or times out without recording a GAP", fmea: [FM-HOOK-01], tests: [TODO]}
   - {id: HZ-G2-03, hazard: "A payload field is renamed or missing, and the event is dropped instead of logged as a blind spot", fmea: [FM-ADP-01], tests: [TODO]}
@@ -38,6 +39,7 @@ hazards:
   - {id: HZ-G2-07, hazard: "The agent changes directory or adds a root outside the project, and its actions there go unreported", fmea: [], tests: [TODO]}
   - {id: HZ-G2-08, hazard: "An action bypasses hooks entirely (a script calls an API); must be documented as a limit", fmea: [], tests: [TODO]}
   - {id: HZ-G2-09, hazard: "An install writes a hook event the agent version doesn't know, and the agent silently drops all hooks", fmea: [FM-INS-03], tests: [TODO]}
+  - {id: HZ-G2-10, hazard: "AgentVC's background process is down, so every hook fails silently as a non-blocking error", fmea: [FM-HOOK-04], tests: [TODO]}
   - {id: HZ-G3-01, hazard: "A report says \"restored\" for a file that was skipped, conflicted or locked", fmea: [FM-RST-07], tests: [TODO]}
   - {id: HZ-G3-02, hazard: "A path over the budget, or unreadable, is reported as protected", fmea: [FM-SNAP-04, FM-SNAP-05], tests: [TODO]}
   - {id: HZ-G3-03, hazard: "An irreversible or unknown effect is classed as restorable", fmea: [FM-CLS-01, FM-CLS-02], tests: [TODO]}
@@ -60,6 +62,7 @@ hazards:
   - {id: HZ-G8-03, hazard: "The agent deletes or edits `.agentvc/` (history, config)", fmea: [FM-LED-02], tests: [TODO]}
   - {id: HZ-G8-04, hazard: "The agent runs `agentvc purge`, `uninstall` or `rollback --force`, or kills AgentVC's processes", fmea: [], tests: [TODO]}
   - {id: HZ-G8-05, hazard: "Hooks fail on every call (wrong interpreter) and nobody notices", fmea: [FM-INS-01], tests: [TODO]}
+  - {id: HZ-G8-06, hazard: "Repository content runs in place of AgentVC's hook (module shadowing)", fmea: [FM-INS-04], tests: [TODO]}
 
 fmea:
   - {id: FM-SNAP-01, component: "Snapshotter", failure: "File modified while being read", tests: [TODO]}
@@ -67,8 +70,11 @@ fmea:
   - {id: FM-SNAP-03, component: "Snapshotter", failure: "Follows a symlink to outside the project", tests: [TODO]}
   - {id: FM-SNAP-04, component: "Snapshotter", failure: "Size, count or time budget exceeded", tests: [TODO]}
   - {id: FM-SNAP-05, component: "Snapshotter", failure: "Unreadable file (permission denied, locked by an editor)", tests: [TODO]}
+  - {id: FM-SNAP-06, component: "Snapshotter", failure: "Nested repository or worktree inside the workspace is recorded as a gitlink", tests: [TODO]}
+  - {id: FM-SNAP-07, component: "Snapshotter", failure: "First snapshot of a large repository runs inside a hook", tests: [TODO]}
   - {id: FM-OBJ-01, component: "Object store", failure: "User's `git gc` prunes objects AgentVC borrowed via alternates", tests: [TODO]}
   - {id: FM-OBJ-02, component: "Object store", failure: "Disk full during object write", tests: [TODO]}
+  - {id: FM-OBJ-03, component: "Object store", failure: "An alternates file is malformed (e.g. CRLF)", tests: [TODO]}
   - {id: FM-RST-01, component: "Restore", failure: "Crash after writing half the files", tests: [TODO]}
   - {id: FM-RST-02, component: "Restore", failure: "Editor saves by rename (atomic save)", tests: [TODO]}
   - {id: FM-RST-03, component: "Restore", failure: "User edited the file after the run", tests: [TODO]}
@@ -84,6 +90,7 @@ fmea:
   - {id: FM-HOOK-01, component: "Hook", failure: "AgentVC's hook crashes or exceeds the timeout", tests: [TODO]}
   - {id: FM-HOOK-02, component: "Hook", failure: "Pre event with no matching Post event", tests: [TODO]}
   - {id: FM-HOOK-03, component: "Hook", failure: "Hook too slow (cold Python start on Windows)", tests: [TODO]}
+  - {id: FM-HOOK-04, component: "Hook", failure: "The background process (agentvcd) is down while hooks are http hooks", tests: [TODO]}
   - {id: FM-ADP-01, component: "Adapter", failure: "Agent update renames a payload field", tests: [TODO]}
   - {id: FM-ADP-02, component: "Adapter", failure: "Subagent or parallel-batch tool calls not attributed", tests: [TODO]}
   - {id: FM-ADP-03, component: "Adapter", failure: "Tool the wiring doesn't subscribe to (new tool name)", tests: [TODO]}
@@ -98,6 +105,7 @@ fmea:
   - {id: FM-INS-01, component: "Install", failure: "Hook calls the wrong Python (project venv)", tests: [TODO]}
   - {id: FM-INS-02, component: "Install", failure: "Install overwrites the user's other hooks", tests: [TODO]}
   - {id: FM-INS-03, component: "Install", failure: "Hook config names an event the installed agent version doesn't know", tests: [TODO]}
+  - {id: FM-INS-04, component: "Install", failure: "Repo content shadows AgentVC's modules", tests: [TODO]}
   - {id: FM-GC-01, component: "GC", failure: "Deletes a snapshot still referenced by a fork", tests: [TODO]}
   - {id: FM-DEV-01, component: "Dev tooling", failure: "Usage study or payload capture writes transcript content, prompts or secrets into the repository", tests: [tests/test_usage_study.py::test_written_result_contains_no_transcript_data, tests/test_usage_study.py::test_result_holds_only_whitelisted_strings_and_numbers, tests/test_usage_study.py::test_assert_aggregate_only_rejects_foreign_strings, tests/test_capture_payloads.py::test_scrub_removes_known_token_formats, tests/test_capture_payloads.py::test_scrub_anonymises_home_user_and_email, tests/test_capture_payloads.py::test_hook_writes_scrubbed_payload]}
 
