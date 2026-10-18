@@ -1,0 +1,38 @@
+# Spike S1/D1 (plan §7.1): run the hook latency spike on Linux, macOS and Windows and upload the
+# raw numbers. Runs on demand, and when the spike script changes. Results are evidence for
+# ADR-0003; commit them under results/spikes/<date>/ by hand after downloading the artifacts.
+name: Spike - hook latency
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - scripts/spikes/hook_latency.py
+      - .github/workflows/spike-latency.yml
+
+permissions:
+  contents: read
+
+jobs:
+  latency:
+    name: hook latency (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run the spike
+        run: python scripts/spikes/hook_latency.py --sizes 1000 10000 100000 --runs 30 --out spike-results
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hook-latency-${{ matrix.os }}
+          path: spike-results/
