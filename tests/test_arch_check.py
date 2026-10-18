@@ -40,7 +40,7 @@ def minimal_graph() -> dict[str, Any]:
                 "desc": "d",
                 "adr": [],
             },
-        ],  # fmt: skip
+        ],
         "edges": [{"from": "a", "to": "b", "kind": "calls"}],
         "views": {
             "dataflow": [{"from": "a", "to": "b", "label": "step"}],
@@ -59,7 +59,7 @@ def minimal_graph() -> dict[str, Any]:
                 "first_contribution": "f",
                 "links": ["docs/master-plan.md"],
             },
-        ],  # fmt: skip
+        ],
     }
 
 
