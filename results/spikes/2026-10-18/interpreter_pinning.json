@@ -1,0 +1,37 @@
+{
+  "environment": {
+    "os": "Windows",
+    "agentvc_python": "3.12.7",
+    "foreign_python": "Python 3.10.11"
+  },
+  "cases": [
+    {
+      "name": "bare_python",
+      "outcome": "impostor",
+      "exit_code": 0,
+      "interpreter_is_project_venv": true
+    },
+    {
+      "name": "pinned",
+      "outcome": "impostor",
+      "exit_code": 0,
+      "interpreter_is_project_venv": false
+    },
+    {
+      "name": "pinned_isolated",
+      "outcome": "real",
+      "exit_code": 0,
+      "interpreter_is_project_venv": false
+    },
+    {
+      "name": "pinned_isolated_no_site",
+      "outcome": "not_found",
+      "exit_code": 1,
+      "interpreter_is_project_venv": false
+    }
+  ],
+  "meta": {
+    "script": "scripts/spikes/interpreter_pinning.py",
+    "date": "2026-10-18"
+  }
+}
