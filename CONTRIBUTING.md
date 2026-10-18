@@ -9,7 +9,7 @@ Thanks for helping. AgentVC records what coding agents do and lets people undo i
 >
 > **When it opens:** after the first milestones are released. The README badge and this banner will change, and it will be announced in Discussions. The rest of this guide describes how contributing will work then; the maintainer already follows it.
 
-`pip install -e ".[dev]"` and `make fast` work now; `make test`, `make arch`, `make fuzz`, `make chaos` and the `eval` runners arrive with the milestones that build them and fail with a "not implemented yet" message until then.
+`pip install -e ".[dev]"`, `make fast` and `make test` work now; `make arch`, `make fuzz`, `make chaos` and the `eval` runners arrive with the milestones that build them and fail with a "not implemented yet" message until then.
 
 **Windows:** `make.ps1` offers the same targets as the Makefile, e.g. `powershell -ExecutionPolicy Bypass -File make.ps1 fast`.
 
@@ -72,7 +72,7 @@ Useful commands:
 | Command | What it runs |
 |---|---|
 | `make fast` | Unit, golden, adapter-contract, small property and fast adversarial tests (< 2 min). Run before every push |
-| `make test` | Everything that runs on a pull request (< 15 min) |
+| `make test` | The full local suite: everything in `make fast` plus slow tests, and later checks as they arrive (< 15 min). Run at the end of every work session |
 | `make arch` | Regenerates the code map and README diagrams, then validates and renders the architecture page |
 | `make fuzz` / `make chaos` | Fuzzers / kill-at-random-point tests (longer) |
 | `python -m eval.run --all` | Scenario suite (the numbers in the README come from here) |
