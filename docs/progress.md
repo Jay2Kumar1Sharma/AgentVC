@@ -28,7 +28,7 @@ Updated at the end of every session by the agent doing the work. Newest handoff 
 ## Handoff log
 
 ### 2026-10-18: session 2, Discovery part 2
-Branch **`discovery/session-2`**, built on `discovery/session-1` (PR #1, still open and unmerged at your request). 32 signed commits, **not pushed**. Review and merge PR #1 first, then this branch (or both together; the history is linear).
+Branch **`discovery/session-2`**, built on `discovery/session-1` (PR #1, still open and unmerged at your request). Signed commits, **pushed on 2026-10-18 at the user's request to run CI** (no pull request opened). Review and merge PR #1 first, then this branch (or both together; the history is linear).
 
 **Done**
 - **Task 0, `make test`:** now the full local suite (ruff, format, mypy, `arch_check`, pytest with no marker filter), in both `Makefile` and `make.ps1`. Shown failing on a deliberately broken `slow` test (which `make fast` skipped) and passing once it was removed.
@@ -44,7 +44,8 @@ Branch **`discovery/session-2`**, built on `discovery/session-1` (PR #1, still o
   | D6 interpreter | In a project with its own venv and a planted `agentvc/` folder, **even the absolute interpreter path ran the planted package**; only `-I` ran the real one | 0008: absolute path **and** `-I` |
   | D7 workspace root | Worktrees and nested repos have their own top level; **a snapshot of the outer repo records nested repos and inner worktrees as gitlinks, without their files** | 0009: workspace = git top level of the start folder; worktrees are separate workspaces; nested repos snapshotted separately (unprotected until built) |
 
-- **Linux and macOS latency: pending.** `.github/workflows/spike-latency.yml` runs the spike there once the branch is pushed (or from the Actions tab). Not pushed, so no numbers.
+- **Linux and macOS latency: measured on GitHub runners** ([run 39114705668](https://github.com/Jay2Kumar1Sharma/AgentVC/actions/runs/39114705668), `results/spikes/2026-10-18/ci-runners/`): no-shell `-I -S` p95 31 ms (Linux), 32 ms (macOS), 43 ms (Windows CI); through the shell 35 / 47 / 92 ms; first 100k-file snapshot 9 s / 44 s / 15 min. ADR-0003 updated; its recommendation stands.
+- **CI:** fast lane [run 39114705655](https://github.com/Jay2Kumar1Sharma/AgentVC/actions/runs/39114705655) green on all 6 jobs (Linux, macOS, Windows × Python 3.11, 3.13), 120 passed and 7 slow tests deselected in each; the slow tests (render check, spike smoke tests) run only in local `make test`.
 - **Task 2, prior art:** seven notes in `docs/prior-art/` plus a comparison index. Sources were shallow-cloned and read (commits recorded); nothing was installed or run; inferences are marked. Main finding: **file and shell undo exists (turnback, Cline, OpenCode), but each misses a G1 property** (overwrites user edits, can't undo the restore, borrows objects via alternates, or writes into the user's `.git`), and none reports external effects.
 - **Task 3, architecture skeleton:** `architecture/graph.json` (21 nodes, all planned), an offline Overview page, `architecture/README.md` with the update rule, `scripts/arch_check.py` (tested in both directions), and a Playwright render check, **seen failing** on a stray script character and on an external stylesheet, then passing. `make arch` runs both.
 - **Task 4, pivot check:** `docs/discovery/pivot-check-2026-10-18.md`. Recommendation: **keep v0.1 first**; measure "already solved" by running the v0.1 scenarios against turnback during v0.1-alpha; lead with the guarantees others miss. The plan is unchanged.
@@ -64,7 +65,7 @@ Branch **`discovery/session-2`**, built on `discovery/session-1` (PR #1, still o
 1. **ADRs 0003–0009:** accept, change or reject each. ADR-0003 (a background process) adds real scope to session 3, and rests on U-18, which isn't measured yet.
 2. **The pivot recommendation**, including whether a turnback differential run joins v0.1-alpha's "Done when".
 3. **Dev dependencies:** PyYAML (still open from session 1) and now **Playwright** (render check).
-4. **Push** `discovery/session-2` so CI runs, including the Linux/macOS latency spike.
+4. Whether CI should also run the slow tests (render check needs Playwright's browser on the runner), for example in a pull-request workflow.
 
 **Side effects outside the repository:**
 - **Playwright's Chromium:** about 118 MB in `%LOCALAPPDATA%\ms-playwright`. Remove with `python -m playwright uninstall`.
