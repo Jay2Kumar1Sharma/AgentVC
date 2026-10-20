@@ -1,0 +1,31 @@
+{
+  "capture": {
+    "seq": 16,
+    "received_at": "2026-10-17T21:50:55.372962+00:00",
+    "pid": 16248,
+    "unparseable": false,
+    "script_version": 1
+  },
+  "payload": {
+    "session_id": "5ba9407c-baf9-4fe1-bbc0-21fcef812cc4",
+    "transcript_path": "~\\.claude\\projects\\C--Users-<user>-AppData-Local-Temp-agentvc-capture-2-1-302\\5ba9407c-baf9-4fe1-bbc0-21fcef812cc4.jsonl",
+    "cwd": "~\\AppData\\Local\\Temp\\agentvc-capture-2.1.302",
+    "prompt_id": "db3ff421-ab32-4b6f-80ac-c903618229dd",
+    "permission_mode": "default",
+    "effort": {
+      "level": "medium"
+    },
+    "hook_event_name": "PostToolBatch",
+    "tool_calls": [
+      {
+        "tool_name": "PowerShell",
+        "tool_input": {
+          "command": "Get-ChildItem",
+          "description": "List files in current directory"
+        },
+        "tool_use_id": "toolu_019EUZi51kwCTtYbXUMnrLJz",
+        "tool_response": "    Directory: ~\\AppData\\Local\\Temp\\agentvc-capture-2.1.302\r\n\r\n\r\nMode                 LastWriteTime         Length Name                                                                 \r\n----                 -------------         ------ ----                                                                 \r\nd-----        18-10-2026     03:20                .claude                                                              \r\n-a----        18-10-2026     03:20           1245 CAPTURE.md                                                           \r\n-a----        18-10-2026     03:20              4 notes.txt"
+      }
+    ]
+  }
+}

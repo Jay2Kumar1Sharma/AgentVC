@@ -1,0 +1,29 @@
+{
+  "capture": {
+    "seq": 76,
+    "received_at": "2026-10-17T21:52:14.642008+00:00",
+    "pid": 20292,
+    "unparseable": false,
+    "script_version": 1
+  },
+  "payload": {
+    "session_id": "5ba9407c-baf9-4fe1-bbc0-21fcef812cc4",
+    "transcript_path": "~\\.claude\\projects\\C--Users-<user>-AppData-Local-Temp-agentvc-capture-2-1-302\\5ba9407c-baf9-4fe1-bbc0-21fcef812cc4.jsonl",
+    "cwd": "~\\AppData\\Local\\Temp\\agentvc-capture-2.1.302",
+    "prompt_id": "7f3a4c4b-3e58-4edb-81dc-dec8f3450d3a",
+    "permission_mode": "default",
+    "effort": {
+      "level": "medium"
+    },
+    "hook_event_name": "PostToolUseFailure",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "exit 3",
+      "description": "Exit with code 3"
+    },
+    "tool_use_id": "toolu_01CSihVjGix1Xq39ToYvcGB1",
+    "error": "Exit code 3",
+    "is_interrupt": false,
+    "duration_ms": 742
+  }
+}

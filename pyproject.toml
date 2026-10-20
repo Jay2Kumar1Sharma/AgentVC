@@ -1,0 +1,68 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agentvc"
+description = "Version control for what AI coding agents do: record, diff, roll back, replay and approve agent actions."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+authors = [{ name = "The AgentVC Authors" }]
+classifiers = [
+    "Development Status :: 1 - Planning",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Software Development :: Version Control",
+]
+# Standard library only at runtime (AGENTS.md). A runtime dependency needs an ADR.
+dependencies = []
+dynamic = ["version"]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "hypothesis>=6",
+    "mypy>=1.10",
+    "ruff>=0.6",
+    "pyyaml>=6",
+    "types-PyYAML",
+]
+
+[project.urls]
+Homepage = "https://github.com/Jay2Kumar1Sharma/AgentVC"
+Issues = "https://github.com/Jay2Kumar1Sharma/AgentVC/issues"
+
+[tool.setuptools.dynamic]
+version = { attr = "agentvc.__version__" }
+
+[tool.setuptools.packages.find]
+include = ["agentvc*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-ra --strict-markers"
+xfail_strict = true
+markers = [
+    "slow: longer tests, excluded from the fast lane (make fast)",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+include = ["*.py", "*.pyi", "**/pyproject.toml"]
+extend-exclude = ["docs/private"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
+
+[tool.mypy]
+python_version = "3.11"
+files = ["agentvc", "scripts", "tests"]
+strict = true
+warn_unreachable = true

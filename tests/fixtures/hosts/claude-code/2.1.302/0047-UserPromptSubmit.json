@@ -1,0 +1,18 @@
+{
+  "capture": {
+    "seq": 47,
+    "received_at": "2026-10-17T21:51:27.315046+00:00",
+    "pid": 27340,
+    "unparseable": false,
+    "script_version": 1
+  },
+  "payload": {
+    "session_id": "5ba9407c-baf9-4fe1-bbc0-21fcef812cc4",
+    "transcript_path": "~\\.claude\\projects\\C--Users-<user>-AppData-Local-Temp-agentvc-capture-2-1-302\\5ba9407c-baf9-4fe1-bbc0-21fcef812cc4.jsonl",
+    "cwd": "~\\AppData\\Local\\Temp\\agentvc-capture-2.1.302",
+    "prompt_id": "489640fe-c971-454c-9c43-5966a3176833",
+    "permission_mode": "default",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "In a single message, run `echo a` and `echo b` as two parallel Bash tool calls."
+  }
+}

@@ -609,7 +609,7 @@ Each gets a short spike (timeboxed experiment) and an ADR before v0.1 code depen
 
 ### 13.1 Building a feature, and when it's done
 
-**Workflow:** one feature per branch → design note (≤ 1 page: what, why, what it borrows, how it can fail, which guarantees it touches) → tests first, each seen to fail → implementation in small commits → self-review against the checklist below → CI green → merge → architecture/docs updates in the same PR.
+**Workflow:** one feature per branch → design note (≤ 1 page: what, why, what it borrows, how it can fail, which guarantees it touches) → tests first, each seen to fail → implementation in small commits → self-review against the checklist below → **full local test suite (`make test`) at the end of every work session** → CI green → merge → architecture/docs updates in the same PR.
 
 **Commit gradually, never one big drop of work:**
 - **One logical change per commit**: e.g. "add ledger schema + migration test", then "record pending steps", then "turn missing post-events into gaps". Not "add ledger" as one commit.
@@ -1082,6 +1082,7 @@ These design rules make the tests above possible, so they're part of v0.1:
 | Tier | Contents | Time budget |
 |---|---|---|
 | **Every push** | unit, golden, adapter contracts, small property/model runs, fast adversarial, static analysis, names/encodings, security | < 2 min |
+| **End of every work session** (human or AI agent) | The **full local suite** (`make test`): everything in the PR tier that can run locally, including slow tests. Result recorded in `docs/progress.md`; failures fixed or recorded before the session ends (AGENTS.md step 8) | < 15 min |
 | **Every PR** | above + diff coverage, install/uninstall, docs, HTML report, perf (small) | < 15 min |
 | **Nightly** | long property/model runs, crash points, fault injection, simulation, fuzzing, concurrency stress, full perf | hours |
 | **Weekly** | mutation testing, real-agent end-to-end, drift canary, hostile environments, full transcript replay, soak, differential vs other tools | hours |

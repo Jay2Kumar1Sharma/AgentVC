@@ -34,7 +34,12 @@ G1 never destroy user work · G2 nothing silent · G3 honest accounting · G4 ne
 5. Run the relevant test tier (`make fast`, then `make test` once it exists) and report the real results, including failures.
 6. If you changed the architecture (new module, adapter, hook event, ledger table, recovery class, CLI flow), update `architecture/graph.json` and run `make arch` (plan §5.3).
 7. Update docs, `CHANGELOG.md` ("Unreleased"), and `tests/traceability.yml` / `docs/testing/fmea.md` where relevant.
-8. **End of session:** update `docs/progress.md` (what was done, what's next, decisions made, open questions, unrelated issues raised), then give the user a short summary.
+8. **End of session: run the full test suite.** After the last commit of the session, run the full local suite on the session's branch:
+   - `make test` (Windows PowerShell: `./make.ps1 test`).
+   - While `make test` is still a placeholder, run `make fast` **and then** `python -m pytest` with no marker filter (this includes slow tests).
+   - Record the exact command, pass/fail/skip counts, duration and Python version in `docs/progress.md`.
+   - **If anything fails:** a failure related to this session's work is fixed before the session ends (following §13.3), then the full suite is run again. If it can't be fixed in this session, it gets a strict `xfail` probe and an entry in `docs/known-issues.md` (or a GitHub issue), and the handoff says plainly that the session's work isn't done. An unrelated failure is raised as an issue (see below) and reported. **Never end a session with a failing or unreported test.**
+9. **Then** update `docs/progress.md` (what was done, the full-suite result, what's next, decisions made, open questions, unrelated issues raised), and give the user a short summary that includes the full-suite result.
 
 ## When you find an issue (plan §13.3)
 
@@ -71,4 +76,4 @@ G1 never destroy user work · G2 nothing silent · G3 honest accounting · G4 ne
 
 ## Definition of done for a task
 
-Tests seen to fail then pass · adversarial tests where required · relevant tier green · docs/changelog/traceability updated · architecture updated if needed · `docs/progress.md` updated · honest summary given to the user.
+Tests seen to fail then pass · adversarial tests where required · **full test suite run at the end of the session and green** (or every failure recorded as above) · docs/changelog/traceability updated · architecture updated if needed · `docs/progress.md` updated · honest summary given to the user.

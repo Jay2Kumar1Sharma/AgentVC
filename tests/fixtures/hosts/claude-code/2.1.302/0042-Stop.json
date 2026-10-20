@@ -1,0 +1,24 @@
+{
+  "capture": {
+    "seq": 42,
+    "received_at": "2026-10-17T21:51:24.831238+00:00",
+    "pid": 28148,
+    "unparseable": false,
+    "script_version": 1
+  },
+  "payload": {
+    "session_id": "5ba9407c-baf9-4fe1-bbc0-21fcef812cc4",
+    "transcript_path": "~\\.claude\\projects\\C--Users-<user>-AppData-Local-Temp-agentvc-capture-2-1-302\\5ba9407c-baf9-4fe1-bbc0-21fcef812cc4.jsonl",
+    "cwd": "~\\AppData\\Local\\Temp\\agentvc-capture-2.1.302",
+    "prompt_id": "b9fdce3b-2d00-47d0-8eaa-d4a350d41a85",
+    "permission_mode": "default",
+    "effort": {
+      "level": "medium"
+    },
+    "hook_event_name": "Stop",
+    "stop_hook_active": false,
+    "last_assistant_message": "I created `new.txt` with the content \"hi\".",
+    "background_tasks": [],
+    "session_crons": []
+  }
+}

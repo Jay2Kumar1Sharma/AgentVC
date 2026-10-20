@@ -1,0 +1,31 @@
+{
+  "capture": {
+    "seq": 40,
+    "received_at": "2026-10-17T21:51:22.730493+00:00",
+    "pid": 25596,
+    "unparseable": false,
+    "script_version": 1
+  },
+  "payload": {
+    "session_id": "5ba9407c-baf9-4fe1-bbc0-21fcef812cc4",
+    "transcript_path": "~\\.claude\\projects\\C--Users-<user>-AppData-Local-Temp-agentvc-capture-2-1-302\\5ba9407c-baf9-4fe1-bbc0-21fcef812cc4.jsonl",
+    "cwd": "~\\AppData\\Local\\Temp\\agentvc-capture-2.1.302",
+    "prompt_id": "b9fdce3b-2d00-47d0-8eaa-d4a350d41a85",
+    "permission_mode": "default",
+    "effort": {
+      "level": "medium"
+    },
+    "hook_event_name": "PostToolBatch",
+    "tool_calls": [
+      {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "~\\AppData\\Local\\Temp\\agentvc-capture-2.1.302\\new.txt",
+          "content": "hi"
+        },
+        "tool_use_id": "toolu_01R1TgxCTZcojHMk3xirYi4R",
+        "tool_response": "File created successfully at: ~\\AppData\\Local\\Temp\\agentvc-capture-2.1.302\\new.txt (file state is current in your context â€” no need to Read it back)"
+      }
+    ]
+  }
+}

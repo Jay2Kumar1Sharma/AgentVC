@@ -1,0 +1,18 @@
+{
+  "capture": {
+    "seq": 13,
+    "received_at": "2026-10-17T20:25:18.661240+00:00",
+    "pid": 19300,
+    "unparseable": false,
+    "script_version": 1
+  },
+  "payload": {
+    "session_id": "f0fafd28-1644-43fa-85f5-efab134643e7",
+    "transcript_path": "~\\.claude\\projects\\C--Users-<user>-AppData-Local-Temp-agentvc-capture-2026-10-18\\f0fafd28-1644-43fa-85f5-efab134643e7.jsonl",
+    "cwd": "~\\AppData\\Local\\Temp\\agentvc-capture-2026-10-18",
+    "permission_mode": "default",
+    "hook_event_name": "Stop",
+    "stop_hook_active": false,
+    "last_assistant_message": "I don't have a PowerShell tool available. My tools include Bash, file read/write/edit, search, and others â€” but no dedicated PowerShell tool."
+  }
+}

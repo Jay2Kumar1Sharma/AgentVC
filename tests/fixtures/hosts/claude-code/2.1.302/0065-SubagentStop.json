@@ -1,0 +1,27 @@
+{
+  "capture": {
+    "seq": 65,
+    "received_at": "2026-10-17T21:51:59.789762+00:00",
+    "pid": 29124,
+    "unparseable": false,
+    "script_version": 1
+  },
+  "payload": {
+    "session_id": "5ba9407c-baf9-4fe1-bbc0-21fcef812cc4",
+    "transcript_path": "~\\.claude\\projects\\C--Users-<user>-AppData-Local-Temp-agentvc-capture-2-1-302\\5ba9407c-baf9-4fe1-bbc0-21fcef812cc4.jsonl",
+    "cwd": "~\\AppData\\Local\\Temp\\agentvc-capture-2.1.302",
+    "prompt_id": "9cb6533b-80b5-4507-8d0e-456926abf587",
+    "permission_mode": "default",
+    "agent_id": "a2cea66fba6489aec",
+    "agent_type": "Explore",
+    "effort": {
+      "level": "medium"
+    },
+    "hook_event_name": "SubagentStop",
+    "stop_hook_active": false,
+    "agent_transcript_path": "~\\.claude\\projects\\C--Users-<user>-AppData-Local-Temp-agentvc-capture-2-1-302\\5ba9407c-baf9-4fe1-bbc0-21fcef812cc4\\subagents\\agent-a2cea66fba6489aec.jsonl",
+    "last_assistant_message": "The directory `~\\AppData\\Local\\Temp\\agentvc-capture-2.1.302` holds 1 hidden subdirectory and 4 files. I only read the listing and changed nothing.\n\n| Name | Type | Size (bytes) | Modified |\n|---|---|---|---|\n| `.claude` | dir | n/a | Oct 18 03:20 |\n| `.claude\\settings.json` | file | 11,476 | Oct 18 03:20 |\n| `CAPTURE.md` | file | 1,245 | Oct 18 03:20 |\n| `new.txt` | file | 2 | Oct 18 03:21 |\n| `notes.txt` | file | 4 | Oct 18 03:21 |\n\nFull paths:\n- ~\\AppData\\Local\\Temp\\agentvc-capture-2.1.302\\.claude\\settings.json\n- ~\\AppData\\Local\\Temp\\agentvc-capture-2.1.302\\CAPTURE.md\n- ~\\AppData\\Local\\Temp\\agentvc-capture-2.1.302\\new.txt\n- ~\\AppData\\Local\\Temp\\agentvc-capture-2.1.302\\notes.txt",
+    "background_tasks": [],
+    "session_crons": []
+  }
+}

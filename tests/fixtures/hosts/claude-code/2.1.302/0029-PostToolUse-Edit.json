@@ -1,0 +1,49 @@
+{
+  "capture": {
+    "seq": 29,
+    "received_at": "2026-10-17T21:51:10.632148+00:00",
+    "pid": 20640,
+    "unparseable": false,
+    "script_version": 1
+  },
+  "payload": {
+    "session_id": "5ba9407c-baf9-4fe1-bbc0-21fcef812cc4",
+    "transcript_path": "~\\.claude\\projects\\C--Users-<user>-AppData-Local-Temp-agentvc-capture-2-1-302\\5ba9407c-baf9-4fe1-bbc0-21fcef812cc4.jsonl",
+    "cwd": "~\\AppData\\Local\\Temp\\agentvc-capture-2.1.302",
+    "prompt_id": "1b2c92a1-eb3e-4457-bc1b-6ebef7c44562",
+    "permission_mode": "default",
+    "effort": {
+      "level": "medium"
+    },
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Edit",
+    "tool_input": {
+      "file_path": "~\\AppData\\Local\\Temp\\agentvc-capture-2.1.302\\notes.txt",
+      "old_string": "one",
+      "new_string": "two",
+      "replace_all": false
+    },
+    "tool_response": {
+      "filePath": "~\\AppData\\Local\\Temp\\agentvc-capture-2.1.302\\notes.txt",
+      "oldString": "one",
+      "newString": "two",
+      "originalFile": "one\n",
+      "structuredPatch": [
+        {
+          "oldStart": 1,
+          "oldLines": 1,
+          "newStart": 1,
+          "newLines": 1,
+          "lines": [
+            "-one",
+            "+two"
+          ]
+        }
+      ],
+      "userModified": false,
+      "replaceAll": false
+    },
+    "tool_use_id": "toolu_012cqyQspqjhVR61kze3YvMw",
+    "duration_ms": 8
+  }
+}

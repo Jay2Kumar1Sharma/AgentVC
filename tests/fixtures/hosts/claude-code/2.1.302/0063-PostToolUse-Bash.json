@@ -1,0 +1,36 @@
+{
+  "capture": {
+    "seq": 63,
+    "received_at": "2026-10-17T21:51:54.359627+00:00",
+    "pid": 20800,
+    "unparseable": false,
+    "script_version": 1
+  },
+  "payload": {
+    "session_id": "5ba9407c-baf9-4fe1-bbc0-21fcef812cc4",
+    "transcript_path": "~\\.claude\\projects\\C--Users-<user>-AppData-Local-Temp-agentvc-capture-2-1-302\\5ba9407c-baf9-4fe1-bbc0-21fcef812cc4.jsonl",
+    "cwd": "~\\AppData\\Local\\Temp\\agentvc-capture-2.1.302",
+    "prompt_id": "9cb6533b-80b5-4507-8d0e-456926abf587",
+    "permission_mode": "default",
+    "agent_id": "a2cea66fba6489aec",
+    "agent_type": "Explore",
+    "effort": {
+      "level": "medium"
+    },
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "find \"~/AppData/Local/Temp/agentvc-capture-2.1.302\" -exec ls -ld {} \\;",
+      "description": "List all files and directories recursively with details"
+    },
+    "tool_response": {
+      "stdout": "drwxr-xr-x 1 <user> 197609 0 Oct 18 03:21 ~/AppData/Local/Temp/agentvc-capture-2.1.302\ndrwxr-xr-x 1 <user> 197609 0 Oct 18 03:20 ~/AppData/Local/Temp/agentvc-capture-2.1.302/.claude\n-rw-r--r-- 1 <user> 197609 11476 Oct 18 03:20 ~/AppData/Local/Temp/agentvc-capture-2.1.302/.claude/settings.json\n-rw-r--r-- 1 <user> 197609 1245 Oct 18 03:20 ~/AppData/Local/Temp/agentvc-capture-2.1.302/CAPTURE.md\n-rw-r--r-- 1 <user> 197609 2 Oct 18 03:21 ~/AppData/Local/Temp/agentvc-capture-2.1.302/new.txt\n-rw-r--r-- 1 <user> 197609 4 Oct 18 03:21 ~/AppData/Local/Temp/agentvc-capture-2.1.302/notes.txt",
+      "stderr": "",
+      "interrupted": false,
+      "isImage": false,
+      "noOutputExpected": false
+    },
+    "tool_use_id": "toolu_0136NT85TMponAmkn6kAJ4Ri",
+    "duration_ms": 953
+  }
+}
