@@ -1,0 +1,1931 @@
+{
+  "meta": {
+    "script": "scripts/spikes/ignored_files.py",
+    "date": "2026-10-18",
+    "os": "Windows",
+    "repos_found": 48,
+    "policy_default": "dotenv files + other ignored files of at most 1 MB each"
+  },
+  "repos": [
+    {
+      "repo": "repo-1",
+      "tracked_files": 5266,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-2",
+      "tracked_files": 783,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-3",
+      "tracked_files": 0,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-4",
+      "tracked_files": 0,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-5",
+      "tracked_files": 0,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-6",
+      "tracked_files": 0,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-7",
+      "tracked_files": 0,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-8",
+      "tracked_files": 0,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-9",
+      "tracked_files": 0,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-10",
+      "tracked_files": 0,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-11",
+      "tracked_files": 0,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-12",
+      "tracked_files": 0,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-13",
+      "tracked_files": 0,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-14",
+      "tracked_files": 0,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-15",
+      "tracked_files": 0,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-16",
+      "tracked_files": 0,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-17",
+      "tracked_files": 0,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-18",
+      "tracked_files": 0,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-19",
+      "tracked_files": 0,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-20",
+      "tracked_files": 0,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-21",
+      "tracked_files": 0,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-22",
+      "tracked_files": 0,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-23",
+      "tracked_files": 0,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-24",
+      "tracked_files": 0,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-25",
+      "tracked_files": 0,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-26",
+      "tracked_files": 0,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-27",
+      "tracked_files": 0,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-28",
+      "tracked_files": 0,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-29",
+      "tracked_files": 0,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-30",
+      "tracked_files": 0,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-31",
+      "tracked_files": 0,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-32",
+      "tracked_files": 0,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-33",
+      "tracked_files": 0,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-34",
+      "tracked_files": 0,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-35",
+      "tracked_files": 0,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-36",
+      "tracked_files": 0,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-37",
+      "tracked_files": 0,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-38",
+      "tracked_files": 0,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-39",
+      "tracked_files": 0,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-40",
+      "tracked_files": 0,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-41",
+      "tracked_files": 0,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-42",
+      "tracked_files": 0,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-43",
+      "tracked_files": 1,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-44",
+      "tracked_files": 2,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-45",
+      "tracked_files": 3,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-46",
+      "tracked_files": 1,
+      "heavy": {
+        "files": 0,
+        "bytes": 0
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-47",
+      "tracked_files": 18,
+      "heavy": {
+        "files": 38497,
+        "bytes": 306654319
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 0,
+        "bytes": 0
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    },
+    {
+      "repo": "repo-48",
+      "tracked_files": 232,
+      "heavy": {
+        "files": 4289,
+        "bytes": 111397845
+      },
+      "dotenv": {
+        "files": 0,
+        "bytes": 0
+      },
+      "other": {
+        "files": 10,
+        "bytes": 58076
+      },
+      "other_by_size": {
+        "le_64k": {
+          "files": 10,
+          "bytes": 58076
+        },
+        "gt_64k_le_1m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_1m_le_10m": {
+          "files": 0,
+          "bytes": 0
+        },
+        "gt_10m": {
+          "files": 0,
+          "bytes": 0
+        }
+      },
+      "policy_default": {
+        "files": 10,
+        "bytes": 58076
+      },
+      "symlinks_skipped": 0,
+      "unreadable": 0
+    }
+  ]
+}
