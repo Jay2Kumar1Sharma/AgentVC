@@ -104,6 +104,17 @@ class IO:
         self.faults.check("mkdir", str(path))
         path.mkdir(parents=True, exist_ok=True)
 
+    def size(self, path: Path) -> int:
+        """Size in bytes; 0 for a missing file."""
+        try:
+            return path.stat().st_size
+        except FileNotFoundError:
+            return 0
+
+    def replace(self, source: Path, target: Path) -> None:
+        self.faults.check("replace", str(target))
+        os.replace(source, target)
+
     def remove(self, path: Path) -> None:
         self.faults.check("remove", str(path))
         path.unlink(missing_ok=True)
