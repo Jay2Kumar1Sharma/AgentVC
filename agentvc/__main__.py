@@ -1,12 +1,6 @@
-"""Entry point for ``python -m agentvc``. Prints the version until the CLI exists."""
+"""Entry point for ``python -m agentvc``."""
 
-from agentvc import __version__
-
-
-def main() -> int:
-    print(f"agentvc {__version__}")
-    return 0
-
+from agentvc.cli import main
 
 if __name__ == "__main__":
     raise SystemExit(main())
