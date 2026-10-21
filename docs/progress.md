@@ -11,13 +11,14 @@ Updated at the end of every session by the agent doing the work. Newest handoff 
 | GitHub owner/repo | **github.com/Jay2Kumar1Sharma/AgentVC** | 2026-10-17 |
 | Outside contributions | **Closed for now**; outside PRs auto-closed; opens after the first milestones (MAINTAINING.md "Contribution phases") | 2026-10-17 |
 | Public / private docs | Private notes in `docs/private/` (git-ignored); everything else public | 2026-10-17 |
-| Git repository initialised | yes (remote `origin` exists; nothing pushed by agents) | 2026-10-17 |
+| Git repository initialised | yes (remote `origin`; agents push only when the maintainer asks) | 2026-10-17 |
+| How pull requests land on `main` | Reviewed by the maintainer, merged with a merge commit (PR #1); agents never merge | 2026-10-20 |
 
 ## Milestone tracker
 
 | Milestone (plan §8) | Status |
 |---|---|
-| Discovery (week 1) | parts 1 and 2 done (branches `discovery/session-1`, PR #1, and `discovery/session-2`); ADRs 0003–0009 proposed, awaiting review; outside conversations and Linux/macOS latency numbers still open |
+| Discovery (week 1) | parts 1 and 2 done. Part 1 merged (PR #1, 2026-10-20); part 2 in review (PR #2, `discovery/session-2`). ADRs 0003–0009 proposed, awaiting review; outside conversations still open |
 | v0.1-alpha (private) | not started |
 | v0.1 (public) | not started |
 | v0.2 Know your effects | not started |
@@ -27,8 +28,14 @@ Updated at the end of every session by the agent doing the work. Newest handoff 
 
 ## Handoff log
 
+### 2026-10-21: PR #1 merged; PR #2 opened for session 2
+- **PR #1** (`discovery/session-1`: session 1 plus the Claude Code 2.1.302 capture) was merged by the maintainer on 2026-10-20 as merge commit `fd44c41`. `main`'s files are identical to the PR's last commit `12b4eed`; GitHub reports the merge commit as verified; the fast lane passed on `main` after the merge.
+- **Resolved open questions** from the session 1 and capture handoffs: the merge method (a merge commit, keeping every commit), and the merge order (the 2.1.302 commits went in as part of PR #1).
+- **PR #2** opened for `discovery/session-2` (Discovery part 2) into `main`, for the maintainer's review. Its CI ran green on push: [fast lane](https://github.com/Jay2Kumar1Sharma/AgentVC/actions/runs/39116374614) and [latency spike](https://github.com/Jay2Kumar1Sharma/AgentVC/actions/runs/39114705668).
+- **Still open:** ADRs 0003–0009, the pivot recommendation, PyYAML and Playwright as dev dependencies, whether CI should run the slow tests, and the outside conversations.
+
 ### 2026-10-18: session 2, Discovery part 2
-Branch **`discovery/session-2`**, built on `discovery/session-1` (PR #1, still open and unmerged at your request). Signed commits, **pushed on 2026-10-18 at the user's request to run CI** (no pull request opened). Review and merge PR #1 first, then this branch (or both together; the history is linear).
+Branch **`discovery/session-2`**, built on `discovery/session-1` (PR #1, since merged on 2026-10-20). Signed commits, **pushed on 2026-10-18 at the user's request to run CI** (no pull request opened). Opened for review as PR #2 on 2026-10-21.
 
 **Done**
 - **Task 0, `make test`:** now the full local suite (ruff, format, mypy, `arch_check`, pytest with no marker filter), in both `Makefile` and `make.ps1`. Shown failing on a deliberately broken `slow` test (which `make fast` skipped) and passing once it was removed.
