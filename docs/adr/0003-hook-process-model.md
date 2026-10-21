@@ -75,3 +75,11 @@ Shared runners are small (2–5 CPUs) and noisy; read them as orders of magnitud
 - G7 is reachable on Windows only through the daemon; the per-call fallback is documented as over budget there.
 - New moving parts: process lifecycle, port selection, token handling, and crash recovery for `agentvcd`. Each needs tests and FMEA rows (session 3 design note).
 - Payload handling and scrubbing move into a long-lived process, so a memory leak or a stuck request becomes possible; per-request timeouts below the hook timeout apply (ADR-0004).
+
+## Amendment (2026-10-21, proposed, awaiting the maintainer)
+
+**How the token reaches the `http` hook.** The decision above says the token is "sent as a header through `allowedEnvVars`". Reading the Claude Code 2.1.302 binary (session 3) shows that when a header names an environment variable, Claude Code **blanks it** if its own heuristics consider the variable a credential, and logs only a debug-level warning ("is a credential and is not interpolated into an HTTP hook header"). A blanked token would make every hook a rejected request: a silent gap (G2).
+
+- **Proposed change:** the generated hook config carries the token as a **literal header value** (`"X-AgentVC-Token": "<token>"`), with no interpolation. The token guards against other local processes and web pages (a browser can't add the custom header without a CORS preflight, which `agentvcd` never answers); it was never a secret from the agent, which can read the project anyway.
+- **Where that config lives** is the installer's choice (session 6): a project-local, git-ignored settings file such as `.claude/settings.local.json`, never the user's global settings.
+- **Still detected either way:** `agentvcd` counts rejected requests, and the next `SessionStart`/`UserPromptSubmit` command hook reports them (design note `docs/design/hook-path.md`).
