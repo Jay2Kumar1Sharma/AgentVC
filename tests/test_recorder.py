@@ -326,3 +326,16 @@ def test_failures_can_be_recorded_as_gaps(tmp_path: Path) -> None:
     assert (a["gap_reason"], a["tool"], a["tool_use_id"]) == ("hook-error", "Bash", PRE.tool_use_id)
     assert (b["gap_reason"], b["tool"]) == ("daemon-down", None)
     assert lg.verify().status == "ok"
+
+
+def test_a_denied_action_is_recorded_as_denied_not_as_a_gap(tmp_path: Path) -> None:
+    rec, lg = make(tmp_path)
+    rec.apply(PROMPT, timeout=5)
+    rec.deny(PRE, "writes into .agentvc/", timeout=5)
+    rec.apply(STOP, timeout=5)
+    [step] = steps(lg)
+    assert (step["status"], step["error"], step["tool"]) == (
+        "DENIED",
+        "writes into .agentvc/",
+        "Bash",
+    )

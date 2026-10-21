@@ -69,6 +69,19 @@ class Recorder:
                 run = self._start_run(tx, event)
             return self._apply(tx, run, event)
 
+    def deny(self, event: Event, reason: str, *, timeout: float) -> Outcome:
+        """An action AgentVC blocked: still a step (G2), with status DENIED and the reason."""
+        with self._ledger.transaction(timeout=timeout) as tx:
+            run = self._find_run(tx, event)
+            if run is None:
+                if not self._inside(event.cwd):
+                    return Outcome("foreign", blindspot="foreign-project")
+                run = self._start_run(tx, event)
+            step = self._new_step(
+                tx, run, event, status="DENIED", error=reason[:1000], ended_at=self._now()
+            )
+            return Outcome("denied", run_id=run, step_id=step)
+
     def record_gap(
         self,
         session_id: str,
