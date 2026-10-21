@@ -1,9 +1,9 @@
 # ADR-0003: Hook process model (S1 / D1)
 
-- **Status:** proposed
+- **Status:** accepted (2026-10-21)
 - **Date:** 2026-10-18
-- **Decided by:** pending the maintainer's review (drafted in Discovery part 2)
-- **Related:** plan §7.1 S1/D1, §10 budgets, G7; spike `scripts/spikes/hook_latency.py`, results `results/spikes/2026-10-18/hook_latency-windows.json`; CI job `.github/workflows/spike-latency.yml`; ADR-0004 (D2)
+- **Decided by:** the maintainer, 2026-10-21 (drafted in Discovery part 2)
+- **Related:** plan §7.1 S1/D1, §10 budgets, G7; spike `scripts/spikes/hook_latency.py`, results `results/spikes/2026-10-18/hook_latency-windows.json` and (U-18) `results/spikes/2026-10-21/hook_latency_http-windows.json`; CI job `.github/workflows/spike-latency.yml`; ADR-0004 (D2)
 
 ## Context
 
@@ -34,26 +34,41 @@ From the Claude Code hooks reference (read 2026-10-18): a command hook with `arg
 
 Shared runners are small (2–5 CPUs) and noisy; read them as orders of magnitude.
 
+**The `http` hook round trip (unknown U-18), measured on Windows 11** (same machine, Python 3.12.7, Node 22.18.0, 200 calls each, 2026-10-21; `hook_latency.py --http-only`). The server is a stand-in for `agentvcd`: stdlib `ThreadingHTTPServer` on 127.0.0.1, random port, checks a token header, parses the JSON payload, answers `{}`. The client runs in an already-running process, as the agent's does:
+
+| Client, per hook call | p50 | p95 |
+|---|---:|---:|
+| Node's built-in `fetch` (the closest stand-in for the agent's JavaScript client) | 1.5 ms | **2.7 ms** (3.4 ms on a re-run) |
+| Python, one kept-alive connection | 0.5 ms | 1.1 ms |
+| Python, a new connection per call | 3.7 ms | 27 ms |
+| Python, new connection, a Write payload carrying a 256 KB file | 4.4 ms | 28 ms |
+| Python, new connection to the **name `localhost`** | **2,054 ms** | **2,066 ms** |
+
+- The Python new-connection p95 is a client artifact: with a socket timeout set, Python's `connect` sometimes waits one Windows timer tick (~15 ms); split into phases, connect + send + response take about 2 ms. The agent's client isn't Python.
+- **`localhost` costs about 2 seconds per call on Windows**: the name resolves to `::1` first, nothing listens there, and Windows waits before trying 127.0.0.1. Hook URLs must use the literal `127.0.0.1`.
+- Not measured: Claude Code's own client (its binary bundles its own JavaScript runtime). `agentvc check` measures the real round trip on each install.
+
 ## Options considered
 
 1. **Per-call process, shell form** (what a plain `"command"` hook does): 77 ms p95 on Windows. **Over budget** before doing any work.
 2. **Per-call process, exec form + `-I -S`**: 48 ms p95 for a handler that does nothing. It fits only with no headroom: importing AgentVC's modules and writing one ledger row will push it over on Windows.
-3. **Background process (`agentvcd`), hooks as `http` hooks to `127.0.0.1`**: no process start per call. The per-call cost is one local HTTP round trip plus the work itself. **Not measured yet.**
+3. **Background process (`agentvcd`), hooks as `http` hooks to `127.0.0.1`**: no process start per call. The per-call cost is one local HTTP round trip (**2.7 ms p95** with Node's `fetch`, U-18) plus the work itself.
 4. **Background process, hooks as tiny command clients**: still pays a process start per call (option 2's cost at best). No advantage over option 3 for agents that support `http` hooks.
 
-## Decision (proposed)
+## Decision
 
 - **Default: a background process, `agentvcd`, started on demand, receiving hook events as `http` hooks bound to `127.0.0.1` only.** It holds the ledger connection and the snapshot index warm, so per-call work is only the work itself.
 - **Fallback: per-call exec-form process** (`args`, absolute interpreter, `-I -S`) for agents or versions without `http` hooks, and whenever `agentvcd` can't be started. Over budget on Windows; reported as such by `agentvc ready` rather than hidden.
 - **Liveness is checked per prompt, not per tool call:** a command hook on `SessionStart` and `UserPromptSubmit` (≈ 77 ms, once per prompt) starts `agentvcd` if needed and tells the user if it can't. Otherwise a dead daemon would make every `http` hook fail as a *non-blocking* error, which is a silent gap (G2, G8).
+- **Hook URLs name `127.0.0.1` literally, never `localhost`** (about 2 s per call on Windows, U-18).
 - **The local endpoint is authenticated:** each session gets a random token, stored in `.agentvc/` and sent as a header through `allowedEnvVars`, so other local processes can't write into the ledger. Nothing listens beyond `127.0.0.1` (G6).
 - **First snapshots never run inside a hook:** building the index for a large repo takes seconds to minutes, so it runs in `agentvcd` at install or session start, in the background. Until it finishes, steps are recorded with a visible "baseline snapshot pending" notice.
-- **To confirm before v0.1-alpha code depends on this:** measure the `http` hook round trip to a local server on Windows, Linux and macOS (an extension of this spike).
+- **Confirmed on Windows (U-18, 2026-10-21):** the round trip is well under the budget (above). Linux and macOS numbers come from the CI spike job, which now runs the same measurement.
 
 ## What would change this decision
 
 - **Linux and macOS numbers (measured, see above):** exec-form per-call is 31–32 ms p95 for a handler that does *nothing*, so it reaches the ~35 ms bar set here only before any real work (a ledger write, module imports). That doesn't change the recommendation: per-call stays the fallback on every OS. Windows on CI is worse than on the maintainer's machine (92 ms through the shell, 216 ms for a 10k-file snapshot), which strengthens the case for the daemon and for keeping the index warm in it.
-- **The `http` round trip measuring above ~25 ms p95 on Windows** would remove the daemon's advantage; then option 2 with aggressive import trimming becomes the default, and the 50 ms budget needs an ADR.
+- **The `http` round trip measuring above ~25 ms p95 on Windows** with the agent's own client would remove the daemon's advantage; then option 2 with aggressive import trimming becomes the default, and the 50 ms budget needs an ADR. Measured (U-18): 2.7 ms with Node's `fetch`. Only the Python client with a new connection per call came near the line (27 ms, the timer artifact above); AgentVC's own Python clients (`agentvc check`, the per-call fallback's forwarder) therefore keep their connection open or connect without a socket timeout.
 
 ## Consequences
 

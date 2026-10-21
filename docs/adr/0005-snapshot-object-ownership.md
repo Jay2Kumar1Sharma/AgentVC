@@ -1,8 +1,8 @@
 # ADR-0005: AgentVC owns every object its snapshots reference (D3)
 
-- **Status:** proposed
+- **Status:** accepted (2026-10-21)
 - **Date:** 2026-10-18
-- **Decided by:** pending the maintainer's review (drafted in Discovery part 2)
+- **Decided by:** the maintainer, 2026-10-21 (drafted in Discovery part 2)
 - **Related:** plan §7.1 D3, G1; FMEA FM-OBJ-01; hazard HZ-G1-06; spike `scripts/spikes/object_ownership.py`, results `results/spikes/2026-10-18/object_ownership.json`
 
 ## Context
@@ -25,7 +25,7 @@ A second finding came from a bug in the spike itself: an alternates file with a 
 2. **Own every object:** every snapshot writes its blobs into AgentVC's store. Costs disk and the time to hash new content (measured in ADR-0003's spike: 10k files, one changed, p95 132 ms).
 3. **Borrow while snapshotting, then make the store self-contained** (repack, drop alternates): survives, but repacking on every step is too slow for a hook; feasible only as background maintenance.
 
-## Decision (proposed)
+## Decision
 
 - **AgentVC owns every object any snapshot references.** The snapshot store has **no alternates file in normal operation**; `git add` into its private index writes every new blob into `.agentvc/objects`.
 - Alternates may be used only as a **read-only speed-up** for the very first (baseline) snapshot of a large repository, and only if, before the step is marked recorded, the store is made self-contained (`repack -a -d`, alternates file removed) and a check confirms every referenced object is readable without alternates. Until then the snapshot is marked *pending*, never *protected*.

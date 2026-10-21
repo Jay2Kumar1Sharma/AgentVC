@@ -1,8 +1,8 @@
 # ADR-0004: When AgentVC's own hook fails or times out (D2)
 
-- **Status:** proposed
+- **Status:** accepted (2026-10-21)
 - **Date:** 2026-10-18
-- **Decided by:** pending the maintainer's review (drafted in Discovery part 2)
+- **Decided by:** the maintainer, 2026-10-21 (drafted in Discovery part 2)
 - **Related:** plan §7.1 D2, G2, G7, G8; unknown U-04; spike `scripts/spikes/hook_failure.py`, results `results/spikes/2026-10-18/hook_failure.json`; FMEA FM-HOOK-01, FM-HOOK-02; ADR-0003
 
 ## Context
@@ -25,7 +25,7 @@ So Claude Code itself **fails open**, and the agent carries on without noticing.
 2. **Always fail open, silently:** never in the way, but actions go unrecorded with nobody told (breaks G2).
 3. **Fail open visibly by default; fail closed in `strict` mode.**
 
-## Decision (proposed)
+## Decision
 
 - **Default (`observe`, `protect` modes): fail open, visibly.**
   - Every AgentVC hook runs under its **own deadline, shorter than the agent's hook timeout**: 5 s against a configured hook timeout of 10 s. When the deadline is near, it stops work, records what it has, and exits 0, so the agent's timeout never has to kill it mid-write.
