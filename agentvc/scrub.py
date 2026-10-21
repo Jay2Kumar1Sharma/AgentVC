@@ -24,6 +24,10 @@ _TOKEN_PATTERNS = [
         r"\bnpm_[A-Za-z0-9]{36}",
         r"\bpypi-[A-Za-z0-9_-]{30,}",
         r"\beyJ[\w-]{8,}\.eyJ[\w-]{8,}\.[\w-]{8,}",
+        r"\b[rs]k_(?:live|test)_[A-Za-z0-9]{16,}",
+        r"\bya29\.[\w-]{20,}",
+        r"https://hooks\.slack\.com/services/[A-Za-z0-9/]+",
+        r"\bhf_[A-Za-z0-9]{30,}",
     )
 ]
 _PRIVATE_KEY = re.compile(
@@ -31,10 +35,12 @@ _PRIVATE_KEY = re.compile(
 )
 _BEARER = re.compile(r"(?i)\b(Bearer|Basic)\s+[A-Za-z0-9._~+/=-]{6,}")
 _SECRET_NAME = (
-    r"[\w.-]*(?:api[_-]?key|token|secret|password|passwd|credential|access[_-]?key)[\w.-]*"
+    r"[\w.-]*(?:api[_-]?key|token|secret|password|passwd|credential|access[_-]?key"
+    r"|account[_-]?key|sharedaccesssignature)[\w.-]*"
 )
 _ASSIGNED = re.compile(rf"(?i)\b({_SECRET_NAME})(\s*[:=]\s*)(['\"]?)([^\s'\"]{{6,}})\3")
 _SECRET_KEY = re.compile(rf"(?i)^{_SECRET_NAME}$")
+_URL_CREDENTIALS = re.compile(r"(?i)\b([a-z][a-z0-9+.-]*://)([^/\s:@]+):([^/\s@]+)@")
 _EMAIL = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
 
 
@@ -45,6 +51,7 @@ def scrub_text(text: str, *, home: str | None, user: str | None) -> str:
         text = pattern.sub("[REDACTED]", text)
     text = _BEARER.sub(r"\1 [REDACTED]", text)
     text = _ASSIGNED.sub(r"\1\2\3[REDACTED]\3", text)
+    text = _URL_CREDENTIALS.sub(r"\1\2:[REDACTED]@", text)
     text = _EMAIL.sub("<email>", text)
     if home and len(home) > 3:
         variants = {home, home.replace("\\", "/"), home.replace("\\", "\\\\")}
