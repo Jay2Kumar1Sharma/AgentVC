@@ -172,9 +172,13 @@ class IO:
 
     # --- SQLite -----------------------------------------------------------------------------
 
-    def connect_sqlite(self, path: Path, *, timeout: float) -> sqlite3.Connection:
+    def connect_sqlite(
+        self, path: Path, *, timeout: float, check_same_thread: bool = True
+    ) -> sqlite3.Connection:
         self.faults.check("sqlite", str(path))
-        return sqlite3.connect(path, timeout=timeout, isolation_level=None)
+        return sqlite3.connect(
+            path, timeout=timeout, isolation_level=None, check_same_thread=check_same_thread
+        )
 
     # --- processes --------------------------------------------------------------------------
 
