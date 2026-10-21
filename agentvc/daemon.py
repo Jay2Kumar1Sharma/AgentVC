@@ -327,7 +327,11 @@ class Server:
         lines = []
         try:
             gaps = self.ctx.ledger().rows(
-                "steps", "where status = 'GAP' and id > ?", (seen.get("gap_step", 0),)
+                "steps",
+                # `agentvc check` makes a gap on purpose; its runs are flagged `check`.
+                "where status = 'GAP' and id > ? and run_id not in "
+                "(select id from runs where flags like '%\"check\"%')",
+                (seen.get("gap_step", 0),),
             )
         except Exception:
             gaps = []

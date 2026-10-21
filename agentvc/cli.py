@@ -318,6 +318,23 @@ def cmd_inspect(args: argparse.Namespace, environ: Mapping[str, str]) -> int:
     return 0 if verdict.ok else 1
 
 
+def cmd_check(args: argparse.Namespace, environ: Mapping[str, str]) -> int:
+    from agentvc.check import render, run_check, to_json
+
+    io = IO()
+    workspace = find_workspace(io, Path.cwd())
+    report = run_check(
+        workspace,
+        io=io,
+        clock=SystemClock(),
+        rand=SystemRandom(),
+        environ=environ,
+        python=sys.executable,
+    )
+    print(json.dumps(to_json(report), indent=1) if args.json else render(report))
+    return 0 if report.ok else 1
+
+
 def cmd_hooks_config(args: argparse.Namespace, environ: Mapping[str, str]) -> int:
     from agentvc.daemon import ensure_state
 
@@ -358,6 +375,10 @@ def build_parser() -> argparse.ArgumentParser:
     inspect.add_argument("run", help="run number, or `latest`")
     inspect.add_argument("--json", action="store_true", help="machine-readable output")
     inspect.set_defaults(func=cmd_inspect)
+
+    check = sub.add_parser("check", help="prove recording works here, through the real hook path")
+    check.add_argument("--json", action="store_true", help="machine-readable output")
+    check.set_defaults(func=cmd_check)
 
     config = sub.add_parser("hooks-config", help="print the Claude Code hook settings to install")
     config.add_argument("--agent-version", required=True, help="Claude Code version, e.g. 2.1.302")
