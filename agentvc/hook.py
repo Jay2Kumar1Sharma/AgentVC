@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import os
+import threading
 from contextlib import suppress
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -47,6 +48,7 @@ class HookContext:
     debug: DebugLog = field(init=False)
     _ledger: Ledger | None = field(default=None, init=False)
     _recorder: Recorder | None = field(default=None, init=False)
+    _open_lock: threading.Lock = field(default_factory=threading.Lock, init=False)
 
     def __post_init__(self) -> None:
         self.store = Store(self.workspace)
@@ -55,21 +57,24 @@ class HookContext:
         )
 
     def ledger(self) -> Ledger:
-        if self._ledger is None:
-            self.store.ensure(self.io)  # the store's .gitignore comes first
-            self._ledger = Ledger.open(
-                self.io,
-                self.store.ledger,
-                workspace=self.workspace,
-                anchor_dir=self.anchor_dir,
-                clock=self.clock,
-            )
-        return self._ledger
+        with self._open_lock:  # agentvcd's request threads share one context
+            if self._ledger is None:
+                self.store.ensure(self.io)  # the store's .gitignore comes first
+                self._ledger = Ledger.open(
+                    self.io,
+                    self.store.ledger,
+                    workspace=self.workspace,
+                    anchor_dir=self.anchor_dir,
+                    clock=self.clock,
+                )
+            return self._ledger
 
     def recorder(self) -> Recorder:
-        if self._recorder is None:
-            self._recorder = Recorder(self.ledger(), self.workspace, self.clock)
-        return self._recorder
+        ledger = self.ledger()
+        with self._open_lock:
+            if self._recorder is None:
+                self._recorder = Recorder(ledger, self.workspace, self.clock)
+            return self._recorder
 
     def close(self) -> None:
         if self._ledger is not None:
@@ -118,6 +123,11 @@ def _log_blindspot(ctx: HookContext, entry: dict[str, Any]) -> None:
 
 
 def handle(body: bytes, ctx: HookContext) -> HookReply:
+    return handle_event(body, ctx)[0]
+
+
+def handle_event(body: bytes, ctx: HookContext) -> tuple[HookReply, Event | None]:
+    """Like `handle`, also returning the event it handled (None for a blind spot)."""
     deadline = Deadline(ctx.clock, ctx.deadline_s)
     start = ctx.clock.monotonic()
     parsed = claude_code.parse_bytes(body, record_prompts=ctx.config.record_prompts)
@@ -125,7 +135,7 @@ def handle(body: bytes, ctx: HookContext) -> HookReply:
     if isinstance(parsed, BlindSpot):
         _log_blindspot(ctx, parsed.to_json())
         ctx.debug.record("hook", event=parsed.event_name, action="blind-spot", reason=parsed.reason)
-        return HookReply(event_name=parsed.event_name)
+        return HookReply(event_name=parsed.event_name), None
 
     event = parsed
     action = "failed"
@@ -144,7 +154,7 @@ def handle(body: bytes, ctx: HookContext) -> HookReply:
         record_ms=round(total_ms - parse_ms, 2),
         total_ms=round(total_ms, 2),
     )
-    return reply
+    return reply, event
 
 
 def _record(event: Event, ctx: HookContext, deadline: Deadline) -> tuple[HookReply, str]:
