@@ -18,6 +18,8 @@ from agentvc.clock import Clock
 from agentvc.events import Event, Kind
 from agentvc.ledger import Ledger, Row, Transaction
 
+CHECK_SESSION_PREFIX = "agentvc-check-"
+
 
 @dataclass(frozen=True)
 class Outcome:
@@ -119,6 +121,8 @@ class Recorder:
             flags.add("start-missing")  # its SessionStart was lost
         if event.source == "resume":
             flags.add("resumed")  # a resume whose session id AgentVC hasn't seen (U-17)
+        if event.session_id.startswith(CHECK_SESSION_PREFIX):
+            flags.add("check")  # made by `agentvc check`; hidden from history and notices
         run = tx.insert(
             "runs",
             "run.start",
