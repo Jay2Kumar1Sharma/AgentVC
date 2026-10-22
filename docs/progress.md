@@ -28,6 +28,16 @@ Updated at the end of every session by the agent doing the work. Newest handoff 
 
 ## Handoff log
 
+### 2026-10-22: ADR-0003 amendment accepted; the three U-20 defects fixed
+Same branch, `alpha/session-3`, not pushed.
+- **ADR-0003 amendment accepted by you:** the token is a literal header value in the generated hook settings. The decision text now says so, and also says the token is per workspace (the old text said per session).
+- **Fixed** (each with a test seen to fail first, then searched for the same mistake elsewhere):
+  1. `SystemClock.monotonic()` now uses `perf_counter`: hook timings had been quantised to Windows' 15.6 ms tick. The other `time.monotonic()` uses only time out coarse waits and stay.
+  2. `agentvcd` ignores clients dropping their connection (no more tracebacks in `daemon.log`); other errors are still reported.
+  3. The CLI no longer crashes when piped output can't encode a recorded command or path (worse than the garbled `·` first seen). Text uses ASCII separators (`|`, `...`), unencodable characters become `?`, and `--json` is pure ASCII. The golden `inspect` output changed accordingly. New FMEA row FM-CLI-03.
+- **Full suite:** `make test` (MSYS2) at `3689e73`, Python 3.12.7: **pass, 801 passed, 0 failed, 1 skipped** (the Windows symlink case), 92.4 s (93.4 s wall).
+- **Still open for you:** pushing this branch and the PR plan once PR #2 is merged; the earlier open items (pivot recommendation, PyYAML and Playwright, CI for slow tests).
+
 ### 2026-10-22: U-20, real Claude Code against agentvcd (your go-ahead)
 Same branch, `alpha/session-3`. Three resumed `claude -p` turns (Claude Code 2.1.302, the terminal binary) in a throwaway git repo in `%TEMP%`, with `--setting-sources project`, hooks from `agentvc hooks-config --agent-version 2.1.302`, a temporary `AGENTVC_HOME` and `AGENTVC_DEBUG=1`. Evidence: `results/spikes/2026-10-22/u20-real-claude-code/` (scrubbed).
 
