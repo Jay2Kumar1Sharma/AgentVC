@@ -31,13 +31,21 @@ _First draft, Discovery (2026-10-18). Seeded from the example rows in plan §16.
 | FM-LED-02 | Ledger | Agent edits or deletes rows | False history | S1 | G2, G8 | Hash chain + anchor outside the workspace; tamper attack test |
 | FM-LED-03 | Ledger | Database corrupted (crash, disk) | History unreadable, or "repaired" into a false history | S1 | G2, G3 | Integrity check on open; report, never silently repair; corruption test |
 | FM-LED-04 | Ledger | Opened by an older AgentVC with a newer schema | Misread or damaged ledger | S1 | G1, G2 | `schema_version` table; refuse newer schemas (D5); upgrade/downgrade test |
+| FM-LED-05 | Ledger | Crash between commit and anchor write | False tamper alarm, or entries forged later look legitimate after the next write | S2 | G3, G8 | The anchor records the pending head before each commit; crash-point test; forged-append test |
 | FM-HOOK-01 | Hook | AgentVC's hook crashes or exceeds the timeout | Agent blocked, or step unrecorded | S1 | G2, G7 | Fail open with a visible GAP; fail closed in strict mode (D2); fault-injection test |
 | FM-HOOK-02 | Hook | Pre event with no matching Post event | Step silently missing | S1 | G2 | Pending step becomes a visible GAP; adapter test |
 | FM-HOOK-03 | Hook | Hook too slow (cold Python start on Windows) | User turns AgentVC off | S2 | G7 | Spike S1 / D1; latency benchmark in CI |
 | FM-HOOK-04 | Hook | The background process (agentvcd) is down while hooks are `http` hooks | Every hook fails as a non-blocking error: actions silently unrecorded | S1 | G2, G8 | Liveness check on SessionStart/UserPromptSubmit that restarts it or tells the user (ADR-0003) |
+| FM-HOOK-05 | Hook | agentvcd's port is taken by another program | No daemon, so every http hook fails | S1 | G2 | Liveness hook detects it, records the event in-process and tells the user; test |
+| FM-HOOK-06 | Hook | Hook requests with a wrong or blanked token, or a foreign Host header | Hooks refused: the actions go unrecorded | S1 | G2 | Rejections counted and reported at the next prompt; tests |
+| FM-HOOK-07 | Hook | The hook URL says `localhost` | About 2 s per hook call on Windows (U-18) | S2 | G7 | The generator always writes 127.0.0.1; test |
+| FM-HOOK-08 | Hook | Another local socket binds agentvcd's port (SO_REUSEADDR on Windows), or the port is ephemeral and a client connects to itself | Hook traffic and the token intercepted; health checks answered by the client itself | S1 | G2, G6 | SO_EXCLUSIVEADDRUSE on Windows; ports 20000-32767; tests |
 | FM-ADP-01 | Adapter | Agent update renames a payload field | Steps silently stop recording | S1 | G2 | Blind-spot log + weekly payload-drift canary (§16.2) |
 | FM-ADP-02 | Adapter | Subagent or parallel-batch tool calls not attributed | Steps missing or attributed to the wrong agent | S1 | G2 | `SubagentStart`/`Stop` + `PostToolBatch` handling; fixture tests |
 | FM-ADP-03 | Adapter | Tool the wiring doesn't subscribe to (new tool name) | Its actions never recorded | S1 | G2 | Catch-all matcher; unknown tools logged to the blind-spot log; wiring test |
+| FM-ADP-04 | Adapter | A one-off session id (InstructionsLoaded on resume) starts a phantom run | History split across false runs | S2 | G3 | InstructionsLoaded isn't handled; whole captured sessions replay as one run |
+| FM-ADP-05 | Adapter | File contents, prompts or assistant text stored in the ledger | Private content kept in recordings | S1 | G6 | Contents reduced to their size; prompts only if enabled; canary test on every fixture |
+| FM-SELF-01 | Self-protection | The agent writes into `.agentvc/` through an edit tool or a plain shell command | Recording forged or deleted | S1 | G8 | PreToolUse deny with `..`, case and junction variants; the hash chain catches what slips past |
 | FM-CLS-01 | Classifier | New CLI with a destructive subcommand | Effect classed safe | S1 | G3 | Default `UNKNOWN`; fuzzing; incident gold set |
 | FM-CLS-02 | Classifier | Obfuscated command (`sh -c`, `eval`, base64) | Risky command classed safe | S1 | G3 | Obfuscation fuzzing; must classify `UNKNOWN` or worse |
 | FM-FEN-01 | Fence | Same effect via a different tool | Duplicate payment | S0 | G4 | Cross-tool equivalence tests |
@@ -50,5 +58,12 @@ _First draft, Discovery (2026-10-18). Seeded from the example rows in plan §16.
 | FM-INS-02 | Install | Install overwrites the user's other hooks | User's tooling broken | S2 | G1 | Merge, never replace; AgentVC-owned markers; install/uninstall tests |
 | FM-INS-03 | Install | Hook config names an event the installed agent version doesn't know | The agent silently registers **no** hooks; nothing is recorded (seen on Claude Code 2.1.72) | S1 | G2, G8 | Per-version event lists; `agentvc check` confirms a hook fires; install test per supported agent version |
 | FM-INS-04 | Install | Repo content shadows AgentVC's modules (a planted `agentvc/` in the project folder) | The project's code runs as AgentVC's hook: recording off or the ledger forged | S1 | G2, G8 | Absolute interpreter path **and** `-I` (ADR-0008); spike `interpreter_pinning.py` |
+| FM-WIR-01 | Wiring | The agent's hook timeout and AgentVC's own deadline drift apart | The agent kills the hook mid-write | S2 | G2 | Both derived from one constant; test |
+| FM-IO-01 | I/O layer | Crash between the temp write and the rename | Old file intact plus a stray temp file; never a torn file | S2 | G1, G2 | Atomic replace; crash-point tests in-process and in a killed process |
+| FM-IO-02 | I/O layer | A lock holder is killed | Every later hook waits | S2 | G7 | The OS releases file locks on exit; locks time out; test kills a holder |
+| FM-IO-03 | I/O layer | A child process outlives its timeout (a grandchild keeps the pipes open) | Hook hangs; orphan processes | S1 | G7 | Job object on Windows, process group elsewhere; grandchild tests |
+| FM-IO-04 | I/O layer | Unbounded child output | Memory blow-up in a hook | S2 | G7 | Output caps; test |
+| FM-CLI-01 | CLI | Output hides gaps or a tampered ledger | The user trusts a broken record | S1 | G2, G3 | Verdict and gap reasons always printed, exit 1 when not clean; golden tests |
+| FM-CLI-02 | CLI | `agentvc check` passes without exercising the real hook path | "Installed but not recording" goes unnoticed | S1 | G2, G8 | check runs the real command hook and http hooks; test with recording broken |
 | FM-GC-01 | GC | Deletes a snapshot still referenced by a fork | Rollback of the fork fails | S0 | G1 | Reference-counting test; model-based test with forks + gc |
 | FM-DEV-01 | Dev tooling | Usage study or payload capture writes transcript content, prompts or secrets into the repository | Private data published with the repository | S0 | G6 | Aggregate-only output schema; scrubbing; tests that plant canary strings and check they never reach the output |
