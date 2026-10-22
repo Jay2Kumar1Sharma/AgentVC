@@ -24,6 +24,8 @@ Nothing is ever "repaired" into a different history (FM-LED-03, HZ-G3-04). `insp
 
 **Versions** (ADR-0007): a newer `schema_version` → `LedgerTooNew`, nothing written; a missing or unreadable version row → `LedgerCorrupt`. Forward-only migrations with a `.bak-v<old>` copy first (none exist yet; the mechanism and its tests do).
 
+**Schema 2 (session 4), the first real migration.** Adds two tables, `snapshots` and `rollbacks` (snapshot and restore notes), and nothing else: existing tables keep their columns, so every old row still equals its entry and `verify()` stays clean across the upgrade. Migration 2 runs inside one transaction after the `.bak-v1` copy; its crash point leaves the ledger at version 1, intact. Tested from a real schema-1 ledger written by session 3's code (`tests/fixtures/ledger/schema-1/`), and an AgentVC that knows only schema 1 refuses the upgraded ledger (the existing newer-schema rule).
+
 **Time** comes from the injected clock; ordering never depends on it (`seq` does), so clock changes (ATK-LED-06) can't reorder history.
 
 ## Guarantees touched
