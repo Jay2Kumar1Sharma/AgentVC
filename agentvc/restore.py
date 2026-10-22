@@ -185,7 +185,7 @@ class Restorer:
 
     def undo(self, *, force: bool = False) -> Report:
         """Roll back the newest turn that still has changes in place."""
-        run = self._run("latest")
+        run = self.run_row("latest")
         undone = {
             r["target"]
             for r in self.ledger.rows(
@@ -195,7 +195,7 @@ class Restorer:
                 (run["id"],),
             )
         }
-        steps = self._steps(run["id"])
+        steps = self.steps_of(run["id"])
         turns = {
             t["id"]: t["seq"] for t in self.ledger.rows("turns", "where run_id = ?", (run["id"],))
         }
@@ -206,7 +206,7 @@ class Restorer:
             target = f"{run['id']}:t{seq}"
             if target in undone:
                 continue
-            chains, _, _ = self._chains(run["id"], by_turn[seq])
+            chains, _, _ = self.chains(run["id"], by_turn[seq])
             if chains:
                 later = [s for n in by_turn if n >= seq for s in by_turn[n]]
                 return self._rollback("undo", run, later, target, force, label=target)
@@ -226,7 +226,7 @@ class Restorer:
 
     # --- what to roll back --------------------------------------------------------------------
 
-    def _run(self, text: str) -> Row:
+    def run_row(self, text: str) -> Row:
         runs = self.ledger.rows("runs")
         if text == "latest":
             visible = [r for r in runs if "check" not in json.loads(r["flags"] or "[]")]
@@ -238,15 +238,15 @@ class Restorer:
             raise RestoreError(f"no run {text}")
         return found[0]
 
-    def _steps(self, run_id: int) -> list[Row]:
+    def steps_of(self, run_id: int) -> list[Row]:
         return sorted(
             self.ledger.rows("steps", "where run_id = ?", (run_id,)), key=lambda s: s["seq"]
         )
 
     def _range(self, text: str) -> tuple[Row, list[Row], str]:
         run_text, _, rest = text.partition(":")
-        run = self._run(run_text)
-        steps = self._steps(run["id"])
+        run = self.run_row(run_text)
+        steps = self.steps_of(run["id"])
         if not rest:
             return run, steps, str(run["id"])
         try:
@@ -266,7 +266,7 @@ class Restorer:
             raise RestoreError(f"no step {n} in run {run['id']}")
         return run, [s for s in steps if s["seq"] >= n], text
 
-    def _chains(
+    def chains(
         self, run_id: int, steps: list[Row]
     ) -> tuple[dict[str, list[tuple[int, Any, Any]]], list[tuple[int, str]], list[str]]:
         """Per path, the agent's changes in step order; the steps that can't be undone."""
@@ -452,7 +452,7 @@ class Restorer:
             )
         with self.snap.locked(LOCK_WAIT_S):
             repaired = self._repair()
-            chains, uncaptured, unprotected = self._chains(run["id"], steps)
+            chains, uncaptured, unprotected = self.chains(run["id"], steps)
 
             def plan(view: View) -> list[Entry]:
                 return self._plan(chains, view, force)
