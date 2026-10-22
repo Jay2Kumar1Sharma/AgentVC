@@ -28,6 +28,15 @@ Updated at the end of every session by the agent doing the work. Newest handoff 
 
 ## Handoff log
 
+### 2026-10-22: real Claude Code re-run after the fixes (your request)
+Same set-up as the first U-20 run (throwaway git repo in `%TEMP%`, `--setting-sources project`, hooks from `hooks-config`, temporary `AGENTVC_HOME`), code at `f55a011`, Claude Code 2.1.302, 2 resumed `claude -p` turns. Evidence: `results/spikes/2026-10-22/u20-real-claude-code-rerun/`.
+- **Recorded correctly:** 1 run, 2 turns, 4 steps (Bash `echo 漢字 → done`, Write `notes.txt`, Bash `exit 3` as `error`, the Write into `.agentvc/` DENIED with the file not created), 0 gaps, ledger verified.
+- **Fix 1 (timings) confirmed:** the debug log now shows real durations. AgentVC's own server-side cost per event was 0.9–13 ms for tool events (21 ms for the first event, which creates the ledger).
+- **Fix 3 (CLI output) confirmed:** piped `inspect` printed `|` separators and `echo ?? ? done` with no crash; `inspect --json` was pure ASCII and decoded to exactly `echo 漢字 → done`.
+- **Fix 2 (quiet connection drops):** `daemon.log` stayed empty. That proves no traceback was written, not that a drop happened in this run; the unit test covers the drop itself.
+- Seen, not AgentVC: the agent's own reply showed the non-ASCII output garbled (`æ¼¢å­—`), from how Claude Code on Windows decodes shell output. AgentVC recorded the command correctly.
+- **Side effects:** 2 more short prompts on your account and one more transcript under `~/.claude/projects/`; no settings changed; throwaway folders deleted; no daemon left running; the real `~/.agentvc` untouched.
+
 ### 2026-10-22: ADR-0003 amendment accepted; the three U-20 defects fixed
 Same branch, `alpha/session-3`, not pushed.
 - **ADR-0003 amendment accepted by you:** the token is a literal header value in the generated hook settings. The decision text now says so, and also says the token is per workspace (the old text said per session).
