@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import ntpath
 import os
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -62,14 +63,24 @@ class Recorder:
 
     # --- entry points ----------------------------------------------------------------------
 
-    def apply(self, event: Event, *, timeout: float) -> Outcome:
+    def apply(
+        self,
+        event: Event,
+        *,
+        timeout: float,
+        on_step: Callable[[Transaction, Outcome], None] | None = None,
+    ) -> Outcome:
+        """Record ``event``; ``on_step`` adds rows for its step in the same transaction."""
         with self._ledger.transaction(timeout=timeout) as tx:
             run = self._find_run(tx, event)
             if run is None:
                 if not self._inside(event.cwd):
                     return Outcome("foreign", blindspot="foreign-project")
                 run = self._start_run(tx, event)
-            return self._apply(tx, run, event)
+            outcome = self._apply(tx, run, event)
+            if on_step is not None:
+                on_step(tx, outcome)
+            return outcome
 
     def deny(self, event: Event, reason: str, *, timeout: float) -> Outcome:
         """An action AgentVC blocked: still a step (G2), with status DENIED and the reason."""

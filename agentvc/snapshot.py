@@ -119,8 +119,15 @@ def row_values(result: SnapshotResult) -> dict[str, Any]:
 
 def changes(older: View, newer: View) -> list[str]:
     """Paths both snapshots know about whose content differs."""
+    if older.flat is newer.flat and older.scope == newer.scope:
+        return []
+    differing = {
+        path
+        for path in older.candidates() | newer.candidates()
+        if older.flat.get(path) != newer.flat.get(path)
+    }
     out = []
-    for path in sorted(older.candidates() | newer.candidates()):
+    for path in sorted(differing):
         a, b = older.state(path), newer.state(path)
         if a is not UNKNOWN and b is not UNKNOWN and a != b:
             out.append(path)
