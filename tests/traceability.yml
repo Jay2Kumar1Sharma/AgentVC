@@ -121,6 +121,7 @@ fmea:
   - {id: FM-IO-04, component: "I/O layer", failure: "Unbounded child output", tests: [tests/test_io_run.py::test_output_is_capped]}
   - {id: FM-CLI-01, component: "CLI", failure: "Output hides gaps or a tampered ledger", tests: [tests/test_cli.py::test_inspect_golden, tests/test_cli.py::test_tampering_is_shown_in_text_and_json]}
   - {id: FM-CLI-02, component: "CLI", failure: "`agentvc check` passes without exercising the real hook path", tests: [tests/test_check.py::test_check_fails_when_recording_is_broken]}
+  - {id: FM-CLI-03, component: "CLI", failure: "Piped output can't encode a recorded command or path", tests: [tests/test_cli.py::test_piped_output_never_crashes_on_unusual_characters]}
   - {id: FM-GC-01, component: "GC", failure: "Deletes a snapshot still referenced by a fork", tests: [TODO]}
   - {id: FM-DEV-01, component: "Dev tooling", failure: "Usage study or payload capture writes transcript content, prompts or secrets into the repository", tests: [tests/test_usage_study.py::test_written_result_contains_no_transcript_data, tests/test_usage_study.py::test_result_holds_only_whitelisted_strings_and_numbers, tests/test_usage_study.py::test_assert_aggregate_only_rejects_foreign_strings, tests/test_capture_payloads.py::test_scrub_removes_known_token_formats, tests/test_capture_payloads.py::test_scrub_anonymises_home_user_and_email, tests/test_capture_payloads.py::test_hook_writes_scrubbed_payload]}
 

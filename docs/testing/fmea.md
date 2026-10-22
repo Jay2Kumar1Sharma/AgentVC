@@ -65,5 +65,6 @@ _First draft, Discovery (2026-10-18). Seeded from the example rows in plan §16.
 | FM-IO-04 | I/O layer | Unbounded child output | Memory blow-up in a hook | S2 | G7 | Output caps; test |
 | FM-CLI-01 | CLI | Output hides gaps or a tampered ledger | The user trusts a broken record | S1 | G2, G3 | Verdict and gap reasons always printed, exit 1 when not clean; golden tests |
 | FM-CLI-02 | CLI | `agentvc check` passes without exercising the real hook path | "Installed but not recording" goes unnoticed | S1 | G2, G8 | check runs the real command hook and http hooks; test with recording broken |
+| FM-CLI-03 | CLI | Piped output can't encode a recorded command or path (console code page under `-I`) | `inspect` crashes instead of showing the run | S2 | G2, G3 | ASCII separators, unencodable characters replaced, ASCII JSON; subprocess test with non-cp1252 text |
 | FM-GC-01 | GC | Deletes a snapshot still referenced by a fork | Rollback of the fork fails | S0 | G1 | Reference-counting test; model-based test with forks + gc |
 | FM-DEV-01 | Dev tooling | Usage study or payload capture writes transcript content, prompts or secrets into the repository | Private data published with the repository | S0 | G6 | Aggregate-only output schema; scrubbing; tests that plant canary strings and check they never reach the output |
