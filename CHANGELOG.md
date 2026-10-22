@@ -28,6 +28,13 @@ All notable changes to AgentVC are listed here. The format follows [Keep a Chang
 - Self-protection: PreToolUse denies agent writes into `.agentvc/`, which ignores itself with a `.gitignore` of `*`.
 - CLI: `agentvc history`, `inspect <run>`, `check` (a realistic tool call through the real hook path), each with `--json`; `hooks-config`; internal `hook` and `daemon` commands.
 - Design notes for session 3 in `docs/design/`; attack reviews in `docs/adversarial/` (capture, ledger).
+- Snapshots (session 4): every file-changing step gets a before and an after snapshot in AgentVC's own git object store (`.agentvc/objects`, written by AgentVC in git's format, no alternates, every tree pinned, hashes checked on read). Edit tools capture only their target; shell, MCP and unknown tools capture the whole workspace. Links are never followed; nested repositories, heavy ignored folders, unreadable, oversized and torn files are listed as unprotected (G3). Ignored files follow ADR-0006; budgets follow ADR-0010 (proposed). A snapshot index (`.agentvc/snapindex.db`) makes unchanged files free; `agentvcd` builds the first snapshot in the background.
+- Outside-change detection: a step's before snapshot is compared with the run's last after snapshot; the differences are recorded and never rolled back.
+- Restore: `agentvc rollback <run | run:step | run:tTURN>`, `rollback --undo`, `undo`, `redo` and `repair`. Per-file compare-and-swap (plan diagram 4.4) over each file's chain of agent changes; the current state is saved before anything is written, including with `--force`; an intent record and named crash points make an interrupted rollback finishable (`repair`, also run first by every rollback). Paths through links, unsafe names and case collisions are refused.
+- `agentvc diff <run | run:step | run:tTURN>`: unified diffs from the snapshots, plus outside changes and steps that weren't captured.
+- `config.toml` gains `version` and a `[snapshot]` table (time budget, file size limits, heavy folders, include and exclude patterns); each bad setting is reported on its own.
+- Ledger schema 2: `snapshots` and `rollbacks` tables, the first real migration, tested from a schema-1 ledger written by session 3's code.
+- `scripts/broken_build.py` and `eval/broken_builds/`: runs tests against deliberately broken builds of the package (53 of 53 caught for snapshots, hook snapshots, restore and the CLI). Attack reviews `docs/adversarial/snapshot.md` and `restore.md`.
 
 ### Fixed
 - Found in the first real Claude Code run (U-20): hook timings were quantised to Windows' 15.6 ms clock tick; `agentvcd` wrote a traceback whenever a client dropped a kept-alive connection; `agentvc inspect` could crash on piped output containing characters outside the console code page (text output now uses ASCII separators, `--json` is pure ASCII).
@@ -35,3 +42,4 @@ All notable changes to AgentVC are listed here. The format follows [Keep a Chang
 ### Changed
 - ADRs 0003–0009 accepted by the maintainer (2026-10-21). ADR-0003 amended (accepted 2026-10-22, verified with Claude Code 2.1.302): the token travels as a literal header value, because Claude Code blanks environment variables it considers credentials in `http` hook headers.
 - `python -m agentvc` now runs the CLI (with no command it still prints the version).
+- `agentvc inspect` tags each file-changing step that isn't protected (`[not snapshotted: ...]`, `[outside changes: N]`), counts the protected ones, and lists the run's rollbacks; runs recorded before snapshots existed now say their steps aren't protected.
