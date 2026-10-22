@@ -270,3 +270,33 @@ def test_blind_spot_keeps_shape_not_content() -> None:
     assert "TOPSECRET" not in text
     assert result.event_name == "PreToolUseV2"
     assert result.shape["tool_input"]["content"] == "str(510)"
+
+
+@pytest.mark.parametrize(
+    ("rel", "key"),
+    [
+        ("2.1.302/0038-PreToolUse-Write.json", "file_path"),
+        ("2.1.302/0028-PreToolUse-Edit.json", "file_path"),
+        ("2.1.302/0039-PostToolUse-Write.json", "file_path"),
+    ],
+)
+def test_edit_targets_are_kept_for_snapshots_but_never_stored(rel: str, key: str) -> None:
+    data = payload(rel)
+    secret_path = "C:/work/ghp_" + "a" * 36 + "/notes.txt"  # a path that looks like a token
+    data["tool_input"][key] = secret_path
+    event = cc.parse(data, record_prompts=False)
+    assert isinstance(event, Event)
+    assert event.targets == (secret_path,)  # unscrubbed: it has to find the real file
+    assert "ghp_" + "a" * 36 not in json.dumps(event.to_json())
+
+
+def test_relative_targets_are_made_absolute_and_shell_tools_have_none() -> None:
+    data = payload("2.1.302/0038-PreToolUse-Write.json")
+    data["tool_input"]["file_path"] = "sub/new.txt"
+    data["cwd"] = "C:/proj" if __import__("sys").platform == "win32" else "/proj"
+    event = cc.parse(data, record_prompts=False)
+    assert isinstance(event, Event)
+    [target] = event.targets
+    assert Path(target).is_absolute() and target.replace("\\", "/").endswith("proj/sub/new.txt")
+    bash = cc.parse(payload("2.1.302/0004-PreToolUse-Bash.json"), record_prompts=False)
+    assert isinstance(bash, Event) and bash.targets == ()

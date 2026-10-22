@@ -50,6 +50,9 @@ class Event:
     source: str | None = None  # SessionStart: startup | resume | clear | compact
     duration_ms: int | None = None
     batch: tuple[BatchCall, ...] = ()
+    # An edit tool's target paths as the agent gave them, made absolute against its cwd.
+    # Used only to snapshot those files; never stored (`to_json` leaves them out).
+    targets: tuple[str, ...] = ()
 
     def to_json(self) -> dict[str, JSON]:
         data: dict[str, JSON] = {"kind": self.kind.value}
