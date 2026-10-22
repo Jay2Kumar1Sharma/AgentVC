@@ -71,7 +71,7 @@ def served(tmp_path: Path) -> Iterator[tuple[daemon.Server, daemon.DaemonState, 
     ws.mkdir()
     ctx = make_ctx(ws)
     ctx.store.ensure(ctx.io)
-    state = daemon.ensure_state(ctx.io, ctx.store, SeededRandom(1))
+    state = daemon.ensure_state(ctx.io, ctx.store, SystemRandom())
     server = daemon.Server(ctx, state)
     thread = threading.Thread(target=server.serve, daemon=True)
     thread.start()
@@ -182,11 +182,35 @@ def test_oversized_bodies_are_refused_and_logged(
     data = body(
         ctx.workspace,
         "0038-PreToolUse-Write.json",
-        tool_input={"file_path": "x", "content": "y" * 5000},
+        tool_input={"file_path": "x", "content": "y" * 2000},
     )
     assert request(state, "POST", "/hook", data, auth(state))[0] == 413
     lines = ctx.store.blindspots.read_text(encoding="utf-8").splitlines()
     assert json.loads(lines[-1])["reason"] == "too-large"
+
+
+def test_a_refused_body_still_gets_a_clean_answer_to_a_slow_reader(
+    served: Any, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # Closing with unread request data makes the OS reset the connection, and on Windows a
+    # reset discards the reply the client hasn't read yet (seen under load in the full suite).
+    _server, state, _ctx = served
+    monkeypatch.setattr(daemon, "MAX_BODY_BYTES", 1000)
+    payload = b"x" * 3000  # over the limit, within what the server drains
+    head = (
+        f"POST /hook HTTP/1.1\r\nHost: 127.0.0.1:{state.port}\r\n"
+        f"{daemon.TOKEN_HEADER}: {state.token}\r\nContent-Type: application/json\r\n"
+        f"Content-Length: {len(payload)}\r\n\r\n"
+    ).encode()
+    with socket.create_connection(("127.0.0.1", state.port), timeout=10) as client:
+        client.sendall(head)
+        time.sleep(0.3)  # the body arrives late, as a separate segment can under load
+        client.sendall(payload)
+        time.sleep(0.5)  # a slow reader: anything the server does meanwhile has arrived
+        reply = b""
+        while chunk := client.recv(1000):  # a reset raises here instead of a clean close
+            reply += chunk
+    assert reply.startswith(b"HTTP/1.1 413")
 
 
 def test_parallel_hooks_lose_nothing(served: Any) -> None:

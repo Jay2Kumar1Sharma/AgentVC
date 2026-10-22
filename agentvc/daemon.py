@@ -169,12 +169,18 @@ class _Handler(http.server.BaseHTTPRequestHandler):
         )
         self.wfile.write(head.encode("ascii") + body)  # one write (U-18: Nagle vs delayed ACK)
 
-    def _drain(self) -> None:
-        # Read a rejected request's body before answering, or closing the socket with unread
-        # data resets the connection and the client sees an error instead of the status.
+    def _drain(self, limit: int = 1024 * 1024) -> None:
+        # Read a refused request's body before answering. Closing first means a body still on
+        # its way gets a reset, and on Windows the reset discards the client's unread answer.
         length = self.headers.get("Content-Length", "0")
-        if length.isdigit() and int(length) <= 1024 * 1024:
-            self.rfile.read(int(length))
+        if not length.isdigit() or int(length) > limit:
+            return
+        left = int(length)
+        while left > 0:
+            chunk = self.rfile.read(min(left, 65536))
+            if not chunk:
+                return
+            left -= len(chunk)
 
     def _allowed(self) -> bool:
         owner = self.server.agentvc
@@ -222,6 +228,7 @@ class _Handler(http.server.BaseHTTPRequestHandler):
         length = int(length_text)
         if length > MAX_BODY_BYTES:
             owner.log_blindspot("too-large", f"{length} bytes")
+            self._drain(limit=4 * MAX_BODY_BYTES)  # authenticated: worth a clean answer
             self.close_connection = True
             self._send(413)
             return
