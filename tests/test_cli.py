@@ -102,15 +102,15 @@ def test_history_json(ws: Path, tmp_path: Path, capsys: pytest.CaptureFixture[st
 
 
 INSPECT = (
-    "Run 1 · claude-code · started 2026-10-22 09:30:00 · active\n"
+    "Run 1 | claude-code | started 2026-10-22 09:30:00 | active\n"
     "Turn 1\n"
     "  #1  09:30:02  Bash   shell  echo hello                          ok     810 ms\n"
-    "  #2  09:30:04  Write  edit   …p\\agentvc-capture-2.1.302\\new.txt"
+    "  #2  09:30:04  Write  edit   ...agentvc-capture-2.1.302\\new.txt"
     "  GAP: no post event (the tool may have run unrecorded)\n"
     "  #3  09:30:05  Bash   shell  exit 3                              error  742 ms"
     "  GAP: no pre event (state before it unknown)\n"
     "\n"
-    "Steps: 3 · recorded 1 · gaps 2 · denied 0\n"
+    "Steps: 3 | recorded 1 | gaps 2 | denied 0\n"
     "Ledger: ok\n"
 )
 
@@ -211,3 +211,45 @@ def test_a_newer_or_corrupt_ledger_is_reported_not_a_traceback(
         (ws / ".agentvc" / f"ledger.db{suffix}").unlink(missing_ok=True)
     code, out = run(capsys, tmp_path, "inspect", "1")
     assert code == 1 and "not a readable ledger" in out
+
+
+def test_piped_output_never_crashes_on_unusual_characters(tmp_path: Path) -> None:
+    # Under -I, Python ignores PYTHONIOENCODING; piped output uses the console code page
+    # (cp1252 on this Windows machine). Found in the U-20 run: separators came out garbled,
+    # and a command with characters outside that code page would crash `inspect`.
+    import os
+    import subprocess
+    import sys
+
+    workspace = tmp_path / "uni"
+    workspace.mkdir()
+    store = Store(workspace)
+    store.ensure(IO())
+    clock = FakeClock(datetime(2026, 10, 22, 9, 30, tzinfo=UTC))
+    lg = Ledger.open(
+        IO(),
+        store.ledger,
+        workspace=workspace,
+        anchor_dir=tmp_path / "home" / "anchors",
+        clock=clock,
+    )
+    rec = Recorder(lg, workspace, clock)
+    pre = fixture("0004-PreToolUse-Bash.json", workspace)
+    rec.apply(replace(pre, tool_input={"command": "echo 漢字 → done"}), timeout=5)
+    lg.close()
+    env = {**os.environ, "AGENTVC_HOME": str(tmp_path / "home")}
+
+    def agentvc(*argv: str) -> subprocess.CompletedProcess[bytes]:
+        return subprocess.run(
+            [sys.executable, "-I", "-m", "agentvc", *argv],
+            cwd=workspace, env=env, capture_output=True, timeout=60,
+        )  # fmt: skip
+
+    text = agentvc("inspect", "1")
+    assert text.returncode == 0, text.stderr
+    assert b"Run 1 | claude-code | started" in text.stdout
+    as_json = agentvc("inspect", "1", "--json")
+    assert as_json.returncode == 0
+    assert max(as_json.stdout) < 128  # pure ASCII: any consumer decodes it exactly
+    data = json.loads(as_json.stdout)
+    assert data["steps"][0]["input"]["command"] == "echo 漢字 → done"

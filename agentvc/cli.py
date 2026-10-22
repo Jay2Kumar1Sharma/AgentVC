@@ -7,6 +7,7 @@ hooks-config.
 from __future__ import annotations
 
 import argparse
+import io
 import json
 import os
 import sys
@@ -247,7 +248,7 @@ def _summary(step: Mapping[str, object], workspace: Path) -> str:
                 text = str(Path(path).relative_to(workspace))
             except ValueError:
                 text = path
-    return text if len(text) <= 34 else "…" + text[-33:]
+    return text if len(text) <= 34 else "..." + text[-31:]
 
 
 def cmd_inspect(args: argparse.Namespace, environ: Mapping[str, str]) -> int:
@@ -275,14 +276,14 @@ def cmd_inspect(args: argparse.Namespace, environ: Mapping[str, str]) -> int:
             s["input"] = json.loads(str(s["input"])) if s["input"] else None
         run = {**run, "flags": _flags(run)}
         data = {"run": run, "steps": steps, "verdict": _verdict_json(verdict)}
-        print(json.dumps(data, indent=1, ensure_ascii=False))
+        print(json.dumps(data, indent=1))
         return 0 if verdict.ok else 1
 
     flags = _flags(run)
     head = (
-        f"Run {run['id']} · {run['agent']} · started {_when(run['started_at'])} · {run['status']}"
+        f"Run {run['id']} | {run['agent']} | started {_when(run['started_at'])} | {run['status']}"
     )
-    print(head + (f" · flags: {', '.join(flags)}" if flags else ""))
+    print(head + (f" | flags: {', '.join(flags)}" if flags else ""))
     current_turn: object = object()
     for s in steps:
         if s["turn_id"] != current_turn:
@@ -311,8 +312,8 @@ def cmd_inspect(args: argparse.Namespace, environ: Mapping[str, str]) -> int:
     counts = {k: sum(1 for s in steps if s["status"] == k) for k in ("RECORDED", "GAP", "DENIED")}
     print()
     print(
-        f"Steps: {len(steps)} · recorded {counts['RECORDED']} · gaps {counts['GAP']}"
-        f" · denied {counts['DENIED']}"
+        f"Steps: {len(steps)} | recorded {counts['RECORDED']} | gaps {counts['GAP']}"
+        f" | denied {counts['DENIED']}"
     )
     print("\n".join(_verdict_lines(verdict)))
     return 0 if verdict.ok else 1
@@ -398,6 +399,11 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: Sequence[str] | None = None, environ: Mapping[str, str] | None = None) -> int:
+    for stream in (sys.stdout, sys.stderr):
+        # Piped output under -I uses the console code page; recorded commands and paths can
+        # hold characters it lacks. Show them as "?" rather than crash (JSON output is ASCII).
+        if isinstance(stream, io.TextIOWrapper):
+            stream.reconfigure(errors="replace")
     parser = build_parser()
     args = parser.parse_args(argv)
     if args.command is None:
