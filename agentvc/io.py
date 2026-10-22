@@ -163,6 +163,10 @@ class IO:
         self.faults.check("stat", str(path))
         return os.lstat(path)
 
+    def fstat(self, handle: BinaryStream[bytes]) -> os.stat_result:
+        self.faults.check("stat", getattr(handle, "name", ""))
+        return os.fstat(handle.fileno())
+
     def open_read(self, path: Path) -> BinaryStream[bytes]:
         self.faults.check("read", str(path))
         return open(path, "rb")

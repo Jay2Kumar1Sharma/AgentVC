@@ -15,7 +15,7 @@ import zlib
 from collections.abc import Sequence
 from itertools import count
 from pathlib import Path
-from typing import IO as BinaryStream
+from typing import Protocol
 
 from agentvc import crash
 from agentvc.io import IO, RunResult
@@ -34,6 +34,10 @@ _CONFIG = (
     b"[core]\n\trepositoryformatversion = 0\n\tfilemode = false\n\tbare = true\n"
     b"\tfsmonitor = false\n[gc]\n\tauto = 0\n"
 )
+
+
+class Readable(Protocol):
+    def read(self, n: int, /) -> bytes: ...
 
 
 class ObjectCorrupt(Exception):
@@ -136,7 +140,7 @@ class ObjectStore:
     def write_blob(self, data: bytes) -> str:
         return self._write("blob", data)
 
-    def write_blob_stream(self, stream: BinaryStream[bytes], size: int) -> str:
+    def write_blob_stream(self, stream: Readable, size: int) -> str:
         """Store ``size`` bytes from ``stream``; `SizeMismatch` if it holds more or fewer."""
         header = f"blob {size}\0".encode()
         digest = hashlib.sha1(header, usedforsecurity=False)
@@ -263,7 +267,7 @@ class ObjectStore:
                 name = _decode(data[space + 1 : nul])
                 entries.append((mode, name, data[nul + 1 : nul + 21].hex()))
                 pos = nul + 21
-        except (ValueError, UnicodeDecodeError) as exc:
+        except ValueError as exc:  # includes UnicodeDecodeError
             raise ObjectCorrupt(f"tree {sha} is malformed") from exc
         return entries
 
