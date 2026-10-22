@@ -1,0 +1,34 @@
+{
+ "rollback": 3,
+ "kind": "rollback",
+ "target": "1",
+ "status": "done",
+ "files": [
+  {
+   "path": "app.py",
+   "result": "restored",
+   "detail": ""
+  },
+  {
+   "path": "data/keep.txt",
+   "result": "restored",
+   "detail": ""
+  },
+  {
+   "path": "notes.md",
+   "result": "restored",
+   "detail": ""
+  }
+ ],
+ "counts": {
+  "restored": 3
+ },
+ "uncaptured_steps": [
+  {
+   "step": 2,
+   "why": "no snapshot after it (missing)"
+  }
+ ],
+ "unprotected": [],
+ "repaired": []
+}

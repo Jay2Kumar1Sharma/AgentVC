@@ -1,0 +1,15 @@
+Run 1 | claude-code | started 2026-10-22 12:22:56 | ended
+Turn 1
+  #1  12:23:00  Read   read   app.py                              ok     19 ms
+  #2  12:23:02  Edit   edit   app.py                              GAP: no post event (the tool may have run unrecorded)  [not snapshotted: no snapshot after it]
+Turn 2
+  #3  12:23:21  Edit   edit   app.py                              ok     10 ms
+Turn 3
+  #4  12:23:35  Bash   shell  rm notes.md data/keep.txt           ok     871 ms
+
+Steps: 4 | recorded 3 | gaps 1 | denied 0
+Snapshots: 2 of 3 file-changing steps protected
+Rollback 1 (rollback of run 1): done, reversed by rollback 2
+Rollback 2 (rollback-undo of rollback 1): done
+Rollback 3 (rollback of run 1): done
+Ledger: ok

@@ -1,0 +1,17 @@
+{
+ "date": "2026-10-22",
+ "what": "Session 4: a real Edit and a real shell rm snapshotted by AgentVC, then rolled back",
+ "claude_code": "2.1.302 (Claude Code)",
+ "agentvc_commit": "9eab05d",
+ "python": "3.12.7",
+ "how": "3 resumed `claude -p` turns in a throwaway git repo in %TEMP%, --setting-sources project, hooks from `agentvc hooks-config --agent-version 2.1.302` in the project's own .claude/settings.json, AGENTVC_HOME and AGENTVC_DEBUG=1 set, parent CLAUDE* variables removed. Permissions per invocation only: turn 2 --permission-mode acceptEdits, turn 3 --allowedTools 'Bash(rm notes.md data/keep.txt)'. Then, from the CLI: inspect, diff, rollback 1, rollback --undo, rollback 1 again.",
+ "prompts": [
+  "Use the Edit tool to change the word hello to goodbye in app.py. Do not do anything else. Then reply with just: done",
+  "Edit permission is granted now. Use the Edit tool to change the word hello to goodbye in app.py. Do not do anything else. Then reply with just: done",
+  "Run exactly this command with the Bash tool: rm notes.md data/keep.txt   Do not do anything else. Then reply with just: done"
+ ],
+ "notes": [
+  "Turn 1's edit was denied by Claude Code itself (untrusted workspace ignores project permissions.allow); AgentVC recorded it as a GAP (no post event), not as denied: Claude Code's PermissionDenied event isn't subscribed yet.",
+  "After the final rollback, `git status` showed only the untracked .claude/ settings folder: every tracked file identical to the initial commit; the ignored .env untouched."
+ ]
+}
