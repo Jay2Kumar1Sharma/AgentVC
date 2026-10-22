@@ -17,10 +17,11 @@ For each guarantee (plan §2), the conditions under which it could be violated. 
 | HZ-G1-07 | A forced rollback runs without saving the current state first | FM-RST-05 |
 | HZ-G1-08 | Compare-and-swap compares metadata (inode, mtime) instead of content | FM-RST-02 |
 | HZ-G1-09 | A path changes type (file ↔ directory ↔ symlink) between snapshot and restore | FM-RST-06 |
-| HZ-G1-10 | Two names map to one file (case-insensitive file system, Unicode normalisation) | — |
-| HZ-G1-11 | Rollback runs while the agent is still writing | — |
+| HZ-G1-10 | Two names map to one file (case-insensitive file system, Unicode normalisation) | FM-RST-09 |
+| HZ-G1-11 | Rollback runs while the agent is still writing | FM-RST-11 |
 | HZ-G1-12 | An older AgentVC opens a newer ledger and misreads it | FM-LED-04 |
 | HZ-G1-13 | The agent deletes a nested repository or a worktree inside the workspace, whose files the snapshot doesn't hold | FM-SNAP-06 |
+| HZ-G1-14 | A path a snapshot couldn't capture is read back as absent, so a rollback takes it for a file the agent created and deletes it | FM-SNAP-11 |
 
 ## G2: Nothing silent
 

@@ -7,9 +7,9 @@
 # Attack ids follow the catalog in plan §15.3 (later: eval/adversarial/<component>/<attack>/).
 
 guarantees:
-  - {id: G1, title: "Never destroy user work", tests: [TODO]}
+  - {id: G1, title: "Never destroy user work", tests: [tests/test_restore.py::test_a_file_the_user_changed_after_the_run_is_a_conflict_and_kept, tests/test_restore.py::test_a_change_made_between_two_agent_steps_is_never_rolled_back, tests/test_restore.py::test_force_overwrites_a_conflict_but_saves_it_first, tests/test_restore_attacks.py::test_a_file_changed_while_the_rollback_runs_is_kept, tests/test_restore.py::test_a_crash_at_any_point_is_repaired_without_touching_user_work]}
   - {id: G2, title: "Nothing silent", tests: [tests/test_recorder.py::test_post_without_pre_is_a_visible_gap, tests/test_recorder.py::test_pre_without_post_becomes_a_gap_when_the_turn_ends, tests/test_hook.py::test_a_failed_write_fails_open_visibly_and_leaves_a_gap]}
-  - {id: G3, title: "Honest accounting", tests: [tests/test_ledger.py::test_corrupted_database_is_reported_never_repaired, tests/test_cli.py::test_tampering_is_shown_in_text_and_json]}
+  - {id: G3, title: "Honest accounting", tests: [tests/test_ledger.py::test_corrupted_database_is_reported_never_repaired, tests/test_cli.py::test_tampering_is_shown_in_text_and_json, tests/test_cli_rollback.py::test_a_conflict_is_shown_with_its_reason_and_exits_1, tests/test_cli_rollback.py::test_inspect_shows_what_was_not_protected]}
   - {id: G4, title: "Never repeat the world", tests: [TODO]}
   - {id: G5, title: "Nothing leaves early", tests: [TODO]}
   - {id: G6, title: "Local and private", tests: [tests/test_adapter_claude_code.py::test_no_file_content_prompt_or_assistant_text_reaches_the_event, tests/test_scrub.py::test_known_formats_are_redacted]}
@@ -17,19 +17,20 @@ guarantees:
   - {id: G8, title: "Can't be silently switched off", tests: [tests/test_protect.py::test_edit_tools_cannot_write_into_the_store, tests/test_ledger.py::test_entries_appended_outside_agentvc_are_detected_and_not_laundered, tests/test_cli_hook.py::test_a_planted_agentvc_package_in_the_project_is_not_run]}
 
 hazards:
-  - {id: HZ-G1-01, hazard: "Restore writes to a path the user changed after the run", fmea: [FM-RST-03], tests: [TODO]}
-  - {id: HZ-G1-02, hazard: "User edits a file *during* the run, and the edit is attributed to the agent", fmea: [FM-OUT-01], tests: [TODO]}
-  - {id: HZ-G1-03, hazard: "Restore follows a symlink, or writes through a symlinked directory, to outside the workspace", fmea: [FM-RST-04, FM-SNAP-03], tests: [TODO]}
-  - {id: HZ-G1-04, hazard: "Crash or kill between two file writes of one rollback", fmea: [FM-RST-01], tests: [TODO]}
-  - {id: HZ-G1-05, hazard: "The snapshot holds a torn file (written during the read), and restore writes it back", fmea: [FM-SNAP-01], tests: [TODO]}
-  - {id: HZ-G1-06, hazard: "Snapshot objects disappear (user's `git gc`, AgentVC's own `gc`, disk full)", fmea: [FM-OBJ-01, FM-OBJ-02, FM-GC-01], tests: [TODO]}
-  - {id: HZ-G1-07, hazard: "A forced rollback runs without saving the current state first", fmea: [FM-RST-05], tests: [TODO]}
-  - {id: HZ-G1-08, hazard: "Compare-and-swap compares metadata (inode, mtime) instead of content", fmea: [FM-RST-02], tests: [TODO]}
-  - {id: HZ-G1-09, hazard: "A path changes type (file ↔ directory ↔ symlink) between snapshot and restore", fmea: [FM-RST-06], tests: [TODO]}
-  - {id: HZ-G1-10, hazard: "Two names map to one file (case-insensitive file system, Unicode normalisation)", fmea: [], tests: [TODO]}
-  - {id: HZ-G1-11, hazard: "Rollback runs while the agent is still writing", fmea: [], tests: [TODO]}
+  - {id: HZ-G1-01, hazard: "Restore writes to a path the user changed after the run", fmea: [FM-RST-03], tests: [tests/test_restore.py::test_a_file_the_user_changed_after_the_run_is_a_conflict_and_kept, tests/test_restore_attacks.py::test_a_file_changed_while_the_rollback_runs_is_kept]}
+  - {id: HZ-G1-02, hazard: "User edits a file *during* the run, and the edit is attributed to the agent", fmea: [FM-OUT-01], tests: [tests/test_restore.py::test_a_change_made_between_two_agent_steps_is_never_rolled_back, tests/test_hook_snapshots.py::test_changes_between_two_steps_are_recorded_as_outside_changes]}
+  - {id: HZ-G1-03, hazard: "Restore follows a symlink, or writes through a symlinked directory, to outside the workspace", fmea: [FM-RST-04, FM-SNAP-03], tests: [tests/test_restore_attacks.py::test_nothing_is_deleted_or_written_through_a_junction, tests/test_snapshot_attacks.py::test_junctions_out_of_the_workspace_and_into_itself_are_not_followed, tests/test_snapshot_attacks.py::test_symlinks_are_stored_as_links_never_followed]}
+  - {id: HZ-G1-04, hazard: "Crash or kill between two file writes of one rollback", fmea: [FM-RST-01], tests: [tests/test_restore.py::test_a_crash_at_any_point_is_repaired_without_touching_user_work, tests/test_restore_attacks.py::test_a_killed_rollback_is_finished_by_repair]}
+  - {id: HZ-G1-05, hazard: "The snapshot holds a torn file (written during the read), and restore writes it back", fmea: [FM-SNAP-01], tests: [tests/test_snapshot_attacks.py::test_a_file_rewritten_while_it_is_read_is_never_saved_as_whole]}
+  - {id: HZ-G1-06, hazard: "Snapshot objects disappear (user's `git gc`, AgentVC's own `gc`, disk full)", fmea: [FM-OBJ-01, FM-OBJ-02, FM-GC-01], tests: [tests/test_snapshot_attacks.py::test_snapshots_survive_the_user_rewriting_and_pruning_their_repository, tests/test_objects.py::test_pinned_snapshots_survive_git_gc_and_packed_objects_still_read, tests/test_snapshot.py::test_disk_full_fails_the_snapshot_visibly]}
+  - {id: HZ-G1-07, hazard: "A forced rollback runs without saving the current state first", fmea: [FM-RST-05], tests: [tests/test_restore.py::test_force_overwrites_a_conflict_but_saves_it_first]}
+  - {id: HZ-G1-08, hazard: "Compare-and-swap compares metadata (inode, mtime) instead of content", fmea: [FM-RST-02], tests: [tests/test_restore_attacks.py::test_an_editor_saving_by_rename_is_judged_by_content_not_by_inode, tests/test_restore_attacks.py::test_a_file_the_agent_deleted_and_the_user_recreated_is_kept]}
+  - {id: HZ-G1-09, hazard: "A path changes type (file ↔ directory ↔ symlink) between snapshot and restore", fmea: [FM-RST-06], tests: [tests/test_restore.py::test_a_file_replaced_by_a_folder_and_back_rolls_back, tests/test_restore_attacks.py::test_a_file_the_agent_turned_into_a_symlink_comes_back, tests/test_restore.py::test_a_folder_holding_user_files_is_never_removed]}
+  - {id: HZ-G1-10, hazard: "Two names map to one file (case-insensitive file system, Unicode normalisation)", fmea: [FM-RST-09], tests: [tests/test_restore_attacks.py::test_two_paths_differing_only_in_case_are_both_skipped, tests/test_snapshot_attacks.py::test_names_differing_only_in_case_are_both_kept_where_the_disk_allows]}
+  - {id: HZ-G1-11, hazard: "Rollback runs while the agent is still writing", fmea: [FM-RST-11], tests: [tests/test_restore.py::test_a_run_with_a_tool_still_running_is_not_rolled_back, tests/test_restore_attacks.py::test_a_file_changed_while_the_rollback_runs_is_kept]}
   - {id: HZ-G1-12, hazard: "An older AgentVC opens a newer ledger and misreads it", fmea: [FM-LED-04], tests: [tests/test_ledger.py::test_a_newer_schema_is_refused_and_left_untouched]}
-  - {id: HZ-G1-13, hazard: "The agent deletes a nested repository or a worktree inside the workspace, whose files the snapshot doesn't hold", fmea: [FM-SNAP-06], tests: [TODO]}
+  - {id: HZ-G1-13, hazard: "The agent deletes a nested repository or a worktree inside the workspace, whose files the snapshot doesn't hold", fmea: [FM-SNAP-06], tests: [tests/test_snapshot.py::test_a_nested_repository_is_listed_not_entered]}
+  - {id: HZ-G1-14, hazard: "A path a snapshot couldn't capture is read back as absent, so a rollback takes it for a file the agent created and deletes it", fmea: [FM-SNAP-11], tests: [tests/test_snapshot.py::test_more_than_200_unprotected_paths_are_all_remembered]}
   - {id: HZ-G2-01, hazard: "A Pre event arrives with no Post event, and no GAP is recorded", fmea: [FM-HOOK-02], tests: [tests/test_recorder.py::test_pre_without_post_becomes_a_gap_when_the_turn_ends]}
   - {id: HZ-G2-02, hazard: "AgentVC's hook crashes or times out without recording a GAP", fmea: [FM-HOOK-01], tests: [tests/test_hook.py::test_a_recorder_crash_is_caught_and_becomes_a_gap, tests/test_hook.py::test_a_locked_ledger_fails_open_within_the_deadline]}
   - {id: HZ-G2-03, hazard: "A payload field is renamed or missing, and the event is dropped instead of logged as a blind spot", fmea: [FM-ADP-01], tests: [tests/test_adapter_claude_code.py::test_renamed_field_is_a_blind_spot, tests/test_hook.py::test_unreadable_payloads_go_to_the_blind_spot_log]}
@@ -40,8 +41,8 @@ hazards:
   - {id: HZ-G2-08, hazard: "An action bypasses hooks entirely (a script calls an API); must be documented as a limit", fmea: [], tests: [TODO]}
   - {id: HZ-G2-09, hazard: "An install writes a hook event the agent version doesn't know, and the agent silently drops all hooks", fmea: [FM-INS-03], tests: [tests/test_wiring.py::test_config_names_only_events_the_version_knows]}
   - {id: HZ-G2-10, hazard: "AgentVC's background process is down, so every hook fails silently as a non-blocking error", fmea: [FM-HOOK-04], tests: [tests/test_daemon.py::test_liveness_starts_the_daemon_and_recovers_from_a_kill]}
-  - {id: HZ-G3-01, hazard: "A report says \"restored\" for a file that was skipped, conflicted or locked", fmea: [FM-RST-07], tests: [TODO]}
-  - {id: HZ-G3-02, hazard: "A path over the budget, or unreadable, is reported as protected", fmea: [FM-SNAP-04, FM-SNAP-05], tests: [TODO]}
+  - {id: HZ-G3-01, hazard: "A report says \"restored\" for a file that was skipped, conflicted or locked", fmea: [FM-RST-07], tests: [tests/test_restore_attacks.py::test_a_file_held_open_by_an_editor_is_reported_and_finished_later, tests/test_restore_attacks.py::test_permission_denied_is_reported_never_hidden, tests/test_cli_rollback.py::test_a_conflict_is_shown_with_its_reason_and_exits_1]}
+  - {id: HZ-G3-02, hazard: "A path over the budget, or unreadable, is reported as protected", fmea: [FM-SNAP-04, FM-SNAP-05], tests: [tests/test_snapshot.py::test_a_file_over_the_size_limit_is_listed_and_not_read, tests/test_snapshot.py::test_an_unreadable_file_is_listed, tests/test_cli_rollback.py::test_inspect_shows_what_was_not_protected]}
   - {id: HZ-G3-03, hazard: "An irreversible or unknown effect is classed as restorable", fmea: [FM-CLS-01, FM-CLS-02], tests: [TODO]}
   - {id: HZ-G3-04, hazard: "A corrupt ledger is silently \"repaired\" into a false history", fmea: [FM-LED-03], tests: [tests/test_ledger.py::test_corrupted_database_is_reported_never_repaired, tests/test_ledger.py::test_missing_version_row_is_corruption_not_a_guess]}
   - {id: HZ-G4-01, hazard: "A replayed or forked step re-executes an effect the parent already performed", fmea: [FM-FEN-01], tests: [TODO]}
@@ -55,7 +56,7 @@ hazards:
   - {id: HZ-G6-04, hazard: "The debug log or diagnostics bundle contains secrets, prompts or file contents", fmea: [FM-SEC-01], tests: [tests/test_debuglog.py::test_values_are_scrubbed_and_capped, tests/test_hook.py::test_debug_log_has_timings_and_no_content]}
   - {id: HZ-G6-05, hazard: "Development tooling (usage study, payload capture) writes transcript content, prompts or secrets into the repository", fmea: [FM-DEV-01], tests: [tests/test_usage_study.py::test_written_result_contains_no_transcript_data, tests/test_usage_study.py::test_result_holds_only_whitelisted_strings_and_numbers, tests/test_usage_study.py::test_assert_aggregate_only_rejects_foreign_strings, tests/test_capture_payloads.py::test_scrub_removes_known_token_formats, tests/test_capture_payloads.py::test_scrub_anonymises_home_user_and_email, tests/test_capture_payloads.py::test_hook_writes_scrubbed_payload]}
   - {id: HZ-G7-01, hazard: "Cold-start hook latency exceeds 50 ms p95 (Windows in particular)", fmea: [FM-HOOK-03], tests: [TODO]}
-  - {id: HZ-G7-02, hazard: "Snapshotting a huge or pathological repository blows the budget or hangs", fmea: [FM-SNAP-04], tests: [TODO]}
+  - {id: HZ-G7-02, hazard: "Snapshotting a huge or pathological repository blows the budget or hangs", fmea: [FM-SNAP-04], tests: [tests/test_snapshot_attacks.py::test_thousands_of_tiny_files_stop_at_the_budget_and_never_hang, tests/test_snapshot.py::test_running_out_of_time_is_incomplete_and_the_work_is_kept, tests/test_hook_snapshots.py::test_the_first_snapshot_is_built_in_the_background_never_in_a_hook]}
   - {id: HZ-G7-03, hazard: "Disk use grows without bound", fmea: [FM-GC-01], tests: [TODO]}
   - {id: HZ-G8-01, hazard: "The agent removes or edits AgentVC's hooks in the agent's settings", fmea: [FM-CFG-02], tests: [TODO]}
   - {id: HZ-G8-02, hazard: "The agent switches AgentVC to `observe` mode", fmea: [FM-CFG-01], tests: [TODO]}
@@ -65,24 +66,36 @@ hazards:
   - {id: HZ-G8-06, hazard: "Repository content runs in place of AgentVC's hook (module shadowing)", fmea: [FM-INS-04], tests: [TODO]}
 
 fmea:
-  - {id: FM-SNAP-01, component: "Snapshotter", failure: "File modified while being read", tests: [TODO]}
-  - {id: FM-SNAP-02, component: "Snapshotter", failure: "Ignored `.env` deleted by the agent", tests: [TODO]}
-  - {id: FM-SNAP-03, component: "Snapshotter", failure: "Follows a symlink to outside the project", tests: [TODO]}
-  - {id: FM-SNAP-04, component: "Snapshotter", failure: "Size, count or time budget exceeded", tests: [TODO]}
-  - {id: FM-SNAP-05, component: "Snapshotter", failure: "Unreadable file (permission denied, locked by an editor)", tests: [TODO]}
-  - {id: FM-SNAP-06, component: "Snapshotter", failure: "Nested repository or worktree inside the workspace is recorded as a gitlink", tests: [TODO]}
-  - {id: FM-SNAP-07, component: "Snapshotter", failure: "First snapshot of a large repository runs inside a hook", tests: [TODO]}
-  - {id: FM-OBJ-01, component: "Object store", failure: "User's `git gc` prunes objects AgentVC borrowed via alternates", tests: [TODO]}
-  - {id: FM-OBJ-02, component: "Object store", failure: "Disk full during object write", tests: [TODO]}
-  - {id: FM-OBJ-03, component: "Object store", failure: "An alternates file is malformed (e.g. CRLF)", tests: [TODO]}
-  - {id: FM-RST-01, component: "Restore", failure: "Crash after writing half the files", tests: [TODO]}
-  - {id: FM-RST-02, component: "Restore", failure: "Editor saves by rename (atomic save)", tests: [TODO]}
-  - {id: FM-RST-03, component: "Restore", failure: "User edited the file after the run", tests: [TODO]}
-  - {id: FM-RST-04, component: "Restore", failure: "Writes through a symlinked directory", tests: [TODO]}
-  - {id: FM-RST-05, component: "Restore", failure: "`--force` without a pre-rollback snapshot", tests: [TODO]}
-  - {id: FM-RST-06, component: "Restore", failure: "File ↔ directory ↔ symlink type change between snapshots", tests: [TODO]}
-  - {id: FM-RST-07, component: "Restore", failure: "File locked by an editor or antivirus (Windows)", tests: [TODO]}
-  - {id: FM-OUT-01, component: "Outside-change detection", failure: "User edits during the run are attributed to the agent", tests: [TODO]}
+  - {id: FM-SNAP-01, component: "Snapshotter", failure: "File modified while being read", tests: [tests/test_snapshot_attacks.py::test_a_file_rewritten_while_it_is_read_is_never_saved_as_whole, tests/test_snapshot_attacks.py::test_a_file_that_settles_after_one_retry_is_captured_as_it_ended]}
+  - {id: FM-SNAP-02, component: "Snapshotter", failure: "Ignored `.env` deleted by the agent", tests: [tests/test_snapshot.py::test_ignored_files_follow_adr_0006, tests/test_restore.py::test_an_ignored_env_file_the_agent_deleted_comes_back]}
+  - {id: FM-SNAP-03, component: "Snapshotter", failure: "Follows a symlink to outside the project", tests: [tests/test_snapshot_attacks.py::test_symlinks_are_stored_as_links_never_followed, tests/test_snapshot_attacks.py::test_junctions_out_of_the_workspace_and_into_itself_are_not_followed]}
+  - {id: FM-SNAP-04, component: "Snapshotter", failure: "Size, count or time budget exceeded", tests: [tests/test_snapshot.py::test_running_out_of_time_is_incomplete_and_the_work_is_kept, tests/test_snapshot.py::test_a_file_over_the_size_limit_is_listed_and_not_read, tests/test_snapshot.py::test_ignored_files_share_one_budget_per_snapshot]}
+  - {id: FM-SNAP-05, component: "Snapshotter", failure: "Unreadable file (permission denied, locked by an editor)", tests: [tests/test_snapshot.py::test_an_unreadable_file_is_listed, tests/test_snapshot_attacks.py::test_a_folder_that_cannot_be_listed_is_reported]}
+  - {id: FM-SNAP-06, component: "Snapshotter", failure: "Nested repository or worktree inside the workspace is recorded as a gitlink", tests: [tests/test_snapshot.py::test_a_nested_repository_is_listed_not_entered]}
+  - {id: FM-SNAP-07, component: "Snapshotter", failure: "First snapshot of a large repository runs inside a hook", tests: [tests/test_hook_snapshots.py::test_the_first_snapshot_is_built_in_the_background_never_in_a_hook]}
+  - {id: FM-OBJ-01, component: "Object store", failure: "User's `git gc` prunes objects AgentVC borrowed via alternates", tests: [tests/test_snapshot_attacks.py::test_snapshots_survive_the_user_rewriting_and_pruning_their_repository, tests/test_objects.py::test_pinned_snapshots_survive_git_gc_and_packed_objects_still_read]}
+  - {id: FM-OBJ-02, component: "Object store", failure: "Disk full during object write", tests: [tests/test_objects.py::test_disk_full_leaves_no_object_and_no_temp_file, tests/test_snapshot.py::test_disk_full_fails_the_snapshot_visibly, tests/test_restore_attacks.py::test_damaged_saved_content_is_reported_not_written]}
+  - {id: FM-OBJ-03, component: "Object store", failure: "An alternates file is malformed (e.g. CRLF)", tests: [tests/test_objects.py::test_alternates_are_reported_never_used, tests/test_snapshot.py::test_a_store_with_alternates_does_not_count_as_protected]}
+  - {id: FM-RST-01, component: "Restore", failure: "Crash after writing half the files", tests: [tests/test_restore.py::test_a_crash_at_any_point_is_repaired_without_touching_user_work, tests/test_restore_attacks.py::test_a_killed_rollback_is_finished_by_repair]}
+  - {id: FM-RST-02, component: "Restore", failure: "Editor saves by rename (atomic save)", tests: [tests/test_restore_attacks.py::test_an_editor_saving_by_rename_is_judged_by_content_not_by_inode]}
+  - {id: FM-RST-03, component: "Restore", failure: "User edited the file after the run", tests: [tests/test_restore.py::test_a_file_the_user_changed_after_the_run_is_a_conflict_and_kept]}
+  - {id: FM-RST-04, component: "Restore", failure: "Writes through a symlinked directory", tests: [tests/test_restore_attacks.py::test_nothing_is_deleted_or_written_through_a_junction]}
+  - {id: FM-RST-05, component: "Restore", failure: "`--force` without a pre-rollback snapshot", tests: [tests/test_restore.py::test_force_overwrites_a_conflict_but_saves_it_first]}
+  - {id: FM-RST-06, component: "Restore", failure: "File ↔ directory ↔ symlink type change between snapshots", tests: [tests/test_restore.py::test_a_file_replaced_by_a_folder_and_back_rolls_back, tests/test_restore_attacks.py::test_a_file_the_agent_turned_into_a_symlink_comes_back]}
+  - {id: FM-RST-07, component: "Restore", failure: "File locked by an editor or antivirus (Windows)", tests: [tests/test_restore_attacks.py::test_a_file_held_open_by_an_editor_is_reported_and_finished_later, tests/test_restore_attacks.py::test_permission_denied_is_reported_never_hidden]}
+  - {id: FM-OUT-01, component: "Outside-change detection", failure: "User edits during the run are attributed to the agent", tests: [tests/test_hook_snapshots.py::test_changes_between_two_steps_are_recorded_as_outside_changes, tests/test_restore.py::test_a_change_made_between_two_agent_steps_is_never_rolled_back]}
+  - {id: FM-OUT-02, component: "Restore", failure: "A change made between two agent steps is rolled back as if the agent made it", tests: [tests/test_restore.py::test_a_change_made_between_two_agent_steps_is_never_rolled_back]}
+  - {id: FM-SNAP-08, component: "Snapshotter", failure: "A Windows junction (or other link to a directory) is entered like a folder", tests: [tests/test_snapshot_attacks.py::test_junctions_out_of_the_workspace_and_into_itself_are_not_followed]}
+  - {id: FM-SNAP-09, component: "Snapshotter", failure: "A stale index entry makes a snapshot hold old content", tests: [tests/test_snapshot.py::test_racy_entries_are_read_again, tests/test_snapshot.py::test_unchanged_files_are_not_read_again_and_changes_are_seen]}
+  - {id: FM-SNAP-10, component: "Snapshotter", failure: "git run by AgentVC executes repository-controlled commands", tests: [tests/test_snapshot_attacks.py::test_a_tampered_git_folder_runs_nothing_and_changes_nothing, tests/test_objects.py::test_inherited_git_variables_cannot_redirect_agentvcs_git]}
+  - {id: FM-SNAP-11, component: "Snapshotter", failure: "A path a snapshot couldn't capture is read back as absent", tests: [tests/test_snapshot.py::test_more_than_200_unprotected_paths_are_all_remembered]}
+  - {id: FM-RST-08, component: "Restore", failure: "A tampered tree holds unsafe paths", tests: [tests/test_restore_attacks.py::test_paths_from_a_tampered_tree_never_escape_the_workspace]}
+  - {id: FM-RST-09, component: "Restore", failure: "Two paths differ only by case on a case-insensitive file system", tests: [tests/test_restore_attacks.py::test_two_paths_differing_only_in_case_are_both_skipped]}
+  - {id: FM-RST-10, component: "Restore", failure: "A new rollback starts on top of an interrupted one", tests: [tests/test_restore_attacks.py::test_a_new_rollback_finishes_an_interrupted_one_first]}
+  - {id: FM-RST-11, component: "Restore", failure: "Rollback while the agent is running a tool", tests: [tests/test_restore.py::test_a_run_with_a_tool_still_running_is_not_rolled_back]}
+  - {id: FM-RST-12, component: "Restore", failure: "A restored file is written through a hard link", tests: [tests/test_restore_attacks.py::test_a_hard_link_to_a_file_outside_is_never_written_through]}
+  - {id: FM-LED-06, component: "Ledger", failure: "A crash during a schema migration", tests: [tests/test_ledger_migration.py::test_a_crash_during_the_migration_leaves_schema_1_intact]}
+  - {id: FM-CLI-04, component: "CLI", failure: "Rollback output hides conflicts, or a partial rollback exits 0", tests: [tests/test_cli_rollback.py::test_a_conflict_is_shown_with_its_reason_and_exits_1]}
   - {id: FM-LED-01, component: "Ledger", failure: "Two hooks write at once", tests: [tests/test_ledger.py::test_processes_writing_at_once_lose_nothing, tests/test_ledger.py::test_threads_writing_at_once_lose_nothing]}
   - {id: FM-LED-02, component: "Ledger", failure: "Agent edits or deletes rows", tests: [tests/test_ledger.py::test_tampering_with_rows_or_entries_is_detected, tests/test_ledger.py::test_deleting_the_newest_row_stays_visible_after_later_writes]}
   - {id: FM-LED-03, component: "Ledger", failure: "Database corrupted (crash, disk)", tests: [tests/test_ledger.py::test_corrupted_database_is_reported_never_repaired]}
@@ -136,29 +149,29 @@ attacks:
   - {id: ATK-CAP-07, attack: "events from another project directory", tests: [tests/test_recorder.py::test_an_unknown_session_from_another_project_is_not_recorded]}
   - {id: ATK-CAP-08, attack: "two sessions at once", tests: [tests/test_recorder.py::test_two_sessions_at_once_get_separate_runs]}
   # Snapshotter
-  - {id: ATK-SNAP-01, attack: "files changing during the snapshot", tests: [TODO]}
-  - {id: ATK-SNAP-02, attack: "symlinks to outside the project and symlink loops", tests: [TODO]}
-  - {id: ATK-SNAP-03, attack: "hardlinks", tests: [TODO]}
-  - {id: ATK-SNAP-04, attack: "FIFOs, sockets, device files", tests: [TODO]}
-  - {id: ATK-SNAP-05, attack: "unreadable files", tests: [TODO]}
-  - {id: ATK-SNAP-06, attack: "very large files", tests: [TODO]}
-  - {id: ATK-SNAP-07, attack: "a million tiny files", tests: [TODO]}
-  - {id: ATK-SNAP-08, attack: "names with newlines or ..", tests: [TODO]}
-  - {id: ATK-SNAP-09, attack: "case collisions", tests: [TODO]}
-  - {id: ATK-SNAP-10, attack: "nested repos, submodules, LFS pointers", tests: [TODO]}
-  - {id: ATK-SNAP-11, attack: "a tampered .git", tests: [TODO]}
-  - {id: ATK-SNAP-12, attack: "disk full", tests: [TODO]}
-  - {id: ATK-SNAP-13, attack: "read-only file system", tests: [TODO]}
+  - {id: ATK-SNAP-01, attack: "files changing during the snapshot", tests: [tests/test_snapshot_attacks.py::test_a_file_rewritten_while_it_is_read_is_never_saved_as_whole, tests/test_snapshot_attacks.py::test_a_file_that_settles_after_one_retry_is_captured_as_it_ended]}
+  - {id: ATK-SNAP-02, attack: "symlinks to outside the project and symlink loops", tests: [tests/test_snapshot_attacks.py::test_junctions_out_of_the_workspace_and_into_itself_are_not_followed, tests/test_snapshot_attacks.py::test_symlinks_are_stored_as_links_never_followed]}
+  - {id: ATK-SNAP-03, attack: "hardlinks", tests: [tests/test_snapshot_attacks.py::test_hard_links_are_captured_as_their_content, tests/test_restore_attacks.py::test_a_hard_link_to_a_file_outside_is_never_written_through]}
+  - {id: ATK-SNAP-04, attack: "FIFOs, sockets, device files", tests: [tests/test_snapshot_attacks.py::test_a_fifo_is_listed_and_never_opened]}
+  - {id: ATK-SNAP-05, attack: "unreadable files", tests: [tests/test_snapshot.py::test_an_unreadable_file_is_listed, tests/test_snapshot_attacks.py::test_a_folder_that_cannot_be_listed_is_reported]}
+  - {id: ATK-SNAP-06, attack: "very large files", tests: [tests/test_snapshot.py::test_a_file_over_the_size_limit_is_listed_and_not_read]}
+  - {id: ATK-SNAP-07, attack: "a million tiny files", tests: [tests/test_snapshot_attacks.py::test_thousands_of_tiny_files_stop_at_the_budget_and_never_hang]}
+  - {id: ATK-SNAP-08, attack: "names with newlines or ..", tests: [tests/test_snapshot_attacks.py::test_odd_but_legal_names_round_trip, tests/test_restore_attacks.py::test_paths_from_a_tampered_tree_never_escape_the_workspace]}
+  - {id: ATK-SNAP-09, attack: "case collisions", tests: [tests/test_snapshot_attacks.py::test_names_differing_only_in_case_are_both_kept_where_the_disk_allows, tests/test_restore_attacks.py::test_two_paths_differing_only_in_case_are_both_skipped]}
+  - {id: ATK-SNAP-10, attack: "nested repos, submodules, LFS pointers", tests: [tests/test_snapshot.py::test_a_nested_repository_is_listed_not_entered, tests/test_snapshot_attacks.py::test_an_lfs_pointer_is_captured_as_the_pointer]}
+  - {id: ATK-SNAP-11, attack: "a tampered .git", tests: [tests/test_snapshot_attacks.py::test_a_tampered_git_folder_runs_nothing_and_changes_nothing]}
+  - {id: ATK-SNAP-12, attack: "disk full", tests: [tests/test_snapshot.py::test_disk_full_fails_the_snapshot_visibly, tests/test_objects.py::test_disk_full_leaves_no_object_and_no_temp_file]}
+  - {id: ATK-SNAP-13, attack: "read-only file system", tests: [tests/test_snapshot_attacks.py::test_a_read_only_store_fails_the_snapshot_visibly]}
   # Restore / rollback
-  - {id: ATK-RST-01, attack: "user edits after the run", tests: [TODO]}
-  - {id: ATK-RST-02, attack: "file deleted then recreated", tests: [TODO]}
-  - {id: ATK-RST-03, attack: "file / directory / symlink type changes", tests: [TODO]}
-  - {id: ATK-RST-04, attack: "restoring through a symlinked directory", tests: [TODO]}
-  - {id: ATK-RST-05, attack: "rollback while the agent is still running", tests: [TODO]}
-  - {id: ATK-RST-06, attack: "rollback of a rollback", tests: [TODO]}
-  - {id: ATK-RST-07, attack: "crash halfway through", tests: [TODO]}
-  - {id: ATK-RST-08, attack: "files locked by an editor (Windows)", tests: [TODO]}
-  - {id: ATK-RST-09, attack: "permission denied", tests: [TODO]}
+  - {id: ATK-RST-01, attack: "user edits after the run", tests: [tests/test_restore.py::test_a_file_the_user_changed_after_the_run_is_a_conflict_and_kept]}
+  - {id: ATK-RST-02, attack: "file deleted then recreated", tests: [tests/test_restore_attacks.py::test_a_file_the_agent_deleted_and_the_user_recreated_is_kept]}
+  - {id: ATK-RST-03, attack: "file / directory / symlink type changes", tests: [tests/test_restore.py::test_a_file_replaced_by_a_folder_and_back_rolls_back, tests/test_restore_attacks.py::test_a_file_the_agent_turned_into_a_symlink_comes_back, tests/test_restore.py::test_a_folder_holding_user_files_is_never_removed]}
+  - {id: ATK-RST-04, attack: "restoring through a symlinked directory", tests: [tests/test_restore_attacks.py::test_nothing_is_deleted_or_written_through_a_junction]}
+  - {id: ATK-RST-05, attack: "rollback while the agent is still running", tests: [tests/test_restore.py::test_a_run_with_a_tool_still_running_is_not_rolled_back]}
+  - {id: ATK-RST-06, attack: "rollback of a rollback", tests: [tests/test_restore.py::test_rolling_back_twice_finds_everything_already_restored, tests/test_restore.py::test_rollback_then_rollback_undo_changes_nothing]}
+  - {id: ATK-RST-07, attack: "crash halfway through", tests: [tests/test_restore.py::test_a_crash_at_any_point_is_repaired_without_touching_user_work, tests/test_restore_attacks.py::test_a_killed_rollback_is_finished_by_repair, tests/test_restore_attacks.py::test_a_new_rollback_finishes_an_interrupted_one_first]}
+  - {id: ATK-RST-08, attack: "files locked by an editor (Windows)", tests: [tests/test_restore_attacks.py::test_a_file_held_open_by_an_editor_is_reported_and_finished_later]}
+  - {id: ATK-RST-09, attack: "permission denied", tests: [tests/test_restore_attacks.py::test_permission_denied_is_reported_never_hidden]}
   # Ledger and state
   - {id: ATK-LED-01, attack: "editing or deleting rows", tests: [tests/test_ledger.py::test_tampering_with_rows_or_entries_is_detected, tests/test_ledger.py::test_a_consistently_rewritten_chain_is_caught_by_the_anchor, tests/test_ledger.py::test_deleting_the_newest_row_stays_visible_after_later_writes]}
   - {id: ATK-LED-02, attack: "truncating the newest entries", tests: [tests/test_ledger.py::test_truncation_is_detected_by_the_anchor]}
@@ -211,7 +224,7 @@ attacks:
   - {id: ATK-ARCH-02, attack: "a deleted module still on the map", tests: [TODO]}
   - {id: ATK-ARCH-03, attack: "a script error in the page", tests: [TODO]}
   # CLI
-  - {id: ATK-CLI-01, attack: "running from a subdirectory", tests: [TODO]}
+  - {id: ATK-CLI-01, attack: "running from a subdirectory", tests: [tests/test_cli_rollback.py::test_undo_redo_and_errors_from_a_subfolder, tests/test_cli.py::test_same_answer_from_a_subfolder]}
   - {id: ATK-CLI-02, attack: "two terminals at once", tests: [TODO]}
   - {id: ATK-CLI-03, attack: "wrong arguments", tests: [TODO]}
   - {id: ATK-CLI-04, attack: "Ctrl-C at every step", tests: [TODO]}
