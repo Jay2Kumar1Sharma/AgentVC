@@ -86,6 +86,10 @@ def test_rollback_prints_every_file_and_the_totals(
     assert (ws / "user.txt").exists()  # an outside change: never touched
     code, out = run(capsys, ws, "rollback", "--undo")
     assert code == 0 and out.startswith("Rollback 2 | rollback-undo of rollback 1 | done")
+    assert (
+        "--undo" not in out
+    )  # a reversal can't itself be reversed that way (found in U-20-style run)
+    assert out.endswith(f"To roll it back again: agentvc rollback {agent.run}\n")
     assert (ws / "src" / "new.py").exists()
     agent.close()
 
@@ -118,6 +122,7 @@ def test_undo_redo_and_errors_from_a_subfolder(
     assert not (ws / "src" / "b.txt").exists()
     code, out = run(capsys, ws, "redo")
     assert code == 0 and (ws / "src" / "b.txt").read_bytes() == b"turn 2"
+    assert out.endswith("To undo it again: agentvc undo\n")
     code, out = run(capsys, ws, "rollback", "9")
     assert (code, out) == (1, "agentvc: no run 9\n")
     code, out = run(capsys, ws, "redo")

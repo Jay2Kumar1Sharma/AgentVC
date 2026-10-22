@@ -408,9 +408,12 @@ def _report_lines(report: Report, *, recovered: bool = False) -> list[str]:
         )
     if report.rollback_id is not None and not recovered:
         lines.append(
-            "To redo: agentvc redo"
-            if report.kind == "undo"
-            else "To undo this rollback: agentvc rollback --undo"
+            {
+                "rollback": "To undo this rollback: agentvc rollback --undo",
+                "undo": "To redo: agentvc redo",
+                "redo": "To undo it again: agentvc undo",
+                "rollback-undo": f"To roll it back again: {report.again}",
+            }[report.kind]
         )
     return lines
 

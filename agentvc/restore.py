@@ -133,6 +133,7 @@ class Report:
     uncaptured: list[tuple[int, str]] = field(default_factory=list)  # (step seq, why)
     unprotected: list[str] = field(default_factory=list)
     repaired: list[Report] = field(default_factory=list)
+    again: str = ""  # for a reversal: the command that would redo what it reversed
 
     def counts(self) -> dict[str, int]:
         out: dict[str, int] = defaultdict(int)
@@ -536,6 +537,11 @@ class Restorer:
                 force,
             )
         report.repaired = repaired
+        report.again = (
+            "agentvc undo"
+            if original["kind"] == "undo"
+            else f"agentvc rollback {original['target']}"
+        )
         return report
 
     def _run_op(
