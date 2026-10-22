@@ -1,6 +1,6 @@
 # ADR-0003: Hook process model (S1 / D1)
 
-- **Status:** accepted (2026-10-21)
+- **Status:** accepted (2026-10-21); amended 2026-10-22 (token sent as a literal header, see the Amendment)
 - **Date:** 2026-10-18
 - **Decided by:** the maintainer, 2026-10-21 (drafted in Discovery part 2)
 - **Related:** plan §7.1 S1/D1, §10 budgets, G7; spike `scripts/spikes/hook_latency.py`, results `results/spikes/2026-10-18/hook_latency-windows.json` and (U-18) `results/spikes/2026-10-21/hook_latency_http-windows.json`; CI job `.github/workflows/spike-latency.yml`; ADR-0004 (D2)
@@ -61,7 +61,7 @@ Shared runners are small (2–5 CPUs) and noisy; read them as orders of magnitud
 - **Fallback: per-call exec-form process** (`args`, absolute interpreter, `-I -S`) for agents or versions without `http` hooks, and whenever `agentvcd` can't be started. Over budget on Windows; reported as such by `agentvc ready` rather than hidden.
 - **Liveness is checked per prompt, not per tool call:** a command hook on `SessionStart` and `UserPromptSubmit` (≈ 77 ms, once per prompt) starts `agentvcd` if needed and tells the user if it can't. Otherwise a dead daemon would make every `http` hook fail as a *non-blocking* error, which is a silent gap (G2, G8).
 - **Hook URLs name `127.0.0.1` literally, never `localhost`** (about 2 s per call on Windows, U-18).
-- **The local endpoint is authenticated:** each session gets a random token, stored in `.agentvc/` and sent as a header through `allowedEnvVars`, so other local processes can't write into the ledger. Nothing listens beyond `127.0.0.1` (G6).
+- **The local endpoint is authenticated:** each workspace gets a random token, stored in `.agentvc/daemon.json` and written as a **literal header value** into the generated hook settings (amended 2026-10-22: not through `allowedEnvVars`, see the Amendment), so other local processes and web pages can't write into the ledger. Nothing listens beyond `127.0.0.1` (G6).
 - **First snapshots never run inside a hook:** building the index for a large repo takes seconds to minutes, so it runs in `agentvcd` at install or session start, in the background. Until it finishes, steps are recorded with a visible "baseline snapshot pending" notice.
 - **Confirmed on Windows (U-18, 2026-10-21):** the round trip is well under the budget (above). Linux and macOS numbers come from the CI spike job, which now runs the same measurement.
 
@@ -76,7 +76,7 @@ Shared runners are small (2–5 CPUs) and noisy; read them as orders of magnitud
 - New moving parts: process lifecycle, port selection, token handling, and crash recovery for `agentvcd`. Each needs tests and FMEA rows (session 3 design note).
 - Payload handling and scrubbing move into a long-lived process, so a memory leak or a stuck request becomes possible; per-request timeouts below the hook timeout apply (ADR-0004).
 
-## Amendment (2026-10-21, proposed, awaiting the maintainer)
+## Amendment (proposed 2026-10-21, accepted by the maintainer 2026-10-22)
 
 **How the token reaches the `http` hook.** The decision above says the token is "sent as a header through `allowedEnvVars`". Reading the Claude Code 2.1.302 binary (session 3) shows that when a header names an environment variable, Claude Code **blanks it** if its own heuristics consider the variable a credential, and logs only a debug-level warning ("is a credential and is not interpolated into an HTTP hook header"). A blanked token would make every hook a rejected request: a silent gap (G2).
 

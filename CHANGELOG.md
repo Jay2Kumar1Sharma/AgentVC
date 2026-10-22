@@ -30,5 +30,5 @@ All notable changes to AgentVC are listed here. The format follows [Keep a Chang
 - Design notes for session 3 in `docs/design/`; attack reviews in `docs/adversarial/` (capture, ledger).
 
 ### Changed
-- ADRs 0003–0009 accepted by the maintainer (2026-10-21). Proposed amendment to ADR-0003: the token travels as a literal header value, because Claude Code blanks environment variables it considers credentials in `http` hook headers.
+- ADRs 0003–0009 accepted by the maintainer (2026-10-21). ADR-0003 amended (accepted 2026-10-22, verified with Claude Code 2.1.302): the token travels as a literal header value, because Claude Code blanks environment variables it considers credentials in `http` hook headers.
 - `python -m agentvc` now runs the CLI (with no command it still prints the version).
