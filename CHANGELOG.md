@@ -29,6 +29,9 @@ All notable changes to AgentVC are listed here. The format follows [Keep a Chang
 - CLI: `agentvc history`, `inspect <run>`, `check` (a realistic tool call through the real hook path), each with `--json`; `hooks-config`; internal `hook` and `daemon` commands.
 - Design notes for session 3 in `docs/design/`; attack reviews in `docs/adversarial/` (capture, ledger).
 
+### Fixed
+- Found in the first real Claude Code run (U-20): hook timings were quantised to Windows' 15.6 ms clock tick; `agentvcd` wrote a traceback whenever a client dropped a kept-alive connection; `agentvc inspect` could crash on piped output containing characters outside the console code page (text output now uses ASCII separators, `--json` is pure ASCII).
+
 ### Changed
 - ADRs 0003–0009 accepted by the maintainer (2026-10-21). ADR-0003 amended (accepted 2026-10-22, verified with Claude Code 2.1.302): the token travels as a literal header value, because Claude Code blanks environment variables it considers credentials in `http` hook headers.
 - `python -m agentvc` now runs the CLI (with no command it still prints the version).
