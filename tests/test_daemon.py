@@ -9,6 +9,7 @@ import http.client
 import json
 import os
 import socket
+import struct
 import subprocess
 import sys
 import threading
@@ -211,6 +212,21 @@ def test_a_refused_body_still_gets_a_clean_answer_to_a_slow_reader(
         while chunk := client.recv(1000):  # a reset raises here instead of a clean close
             reply += chunk
     assert reply.startswith(b"HTTP/1.1 413")
+
+
+def test_a_client_resetting_its_connection_is_not_an_error(
+    served: Any, capfd: pytest.CaptureFixture[str]
+) -> None:
+    # Claude Code drops idle kept-alive connections; that wrote a traceback to daemon.log
+    # every time (found in the U-20 run).
+    _server, state, _ctx = served
+    client = socket.create_connection(("127.0.0.1", state.port), timeout=10)
+    client.sendall(b"GET /hea")
+    client.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER, struct.pack("ii", 1, 0))
+    client.close()  # with linger 0: a reset, not a clean close
+    time.sleep(0.5)
+    assert "Traceback" not in capfd.readouterr().err
+    assert daemon.is_healthy(state)
 
 
 def test_parallel_hooks_lose_nothing(served: Any) -> None:
