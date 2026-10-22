@@ -316,3 +316,28 @@ def test_damaged_saved_content_is_reported_not_written(ws: Path) -> None:
     assert results(report) == {"a.txt": "could-not"} and "damaged" in report.files[0].detail
     assert (ws / "a.txt").read_bytes() == b"agent"
     agent.close()
+
+
+# --- FM-RST-02: an editor that saves by writing a new file and renaming it ---------------------
+
+
+def test_an_editor_saving_by_rename_is_judged_by_content_not_by_inode(ws: Path) -> None:
+    (ws / "same.txt").write_bytes(b"s0")
+    (ws / "changed.txt").write_bytes(b"c0")
+    agent = Agent(ws)
+
+    def edit() -> None:
+        (ws / "same.txt").write_bytes(b"s1")
+        (ws / "changed.txt").write_bytes(b"c1")
+
+    agent.shell(edit)
+    for name, data in (("same.txt", b"s1"), ("changed.txt", b"the user's save")):
+        temp = ws / f".{name}.swp"
+        temp.write_bytes(data)
+        os.utime(temp, (1_000_000_000, 1_000_000_000))  # a different time, too
+        os.replace(temp, ws / name)  # a new inode with the given bytes
+    report = agent.restorer().rollback(str(agent.run))
+    assert results(report) == {"changed.txt": "conflict", "same.txt": "restored"}
+    assert (ws / "same.txt").read_bytes() == b"s0"
+    assert (ws / "changed.txt").read_bytes() == b"the user's save"
+    agent.close()

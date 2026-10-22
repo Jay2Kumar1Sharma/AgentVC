@@ -251,3 +251,14 @@ def test_a_crash_at_any_point_is_repaired_without_touching_user_work(ws: Path, p
         assert report.status == "done"
     assert tree(ws) == expected  # no stray temp files either
     agent.close()
+
+
+def test_an_ignored_env_file_the_agent_deleted_comes_back(ws: Path) -> None:
+    (ws / ".gitignore").write_bytes(b".env\n")
+    (ws / ".env").write_bytes(b"API_KEY=only-copy-anywhere\n")
+    agent = Agent(ws)
+    agent.shell(lambda: (ws / ".env").unlink(), "rm .env")
+    report = agent.restorer().rollback(str(agent.run))
+    assert results(report) == {".env": "restored"}
+    assert (ws / ".env").read_bytes() == b"API_KEY=only-copy-anywhere\n"
+    agent.close()
