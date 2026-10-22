@@ -1,0 +1,117 @@
+{
+ "run": {
+  "id": 1,
+  "agent": "claude-code",
+  "workspace": "~\\appdata\\local\\temp\\agentvc-u20",
+  "start_dir": "~\\AppData\\Local\\Temp\\agentvc-u20",
+  "started_at": "2026-10-22T10:56:50.799230+00:00",
+  "ended_at": "2026-10-22T10:57:20.716532+00:00",
+  "status": "ended",
+  "flags": [],
+  "parent_run": null,
+  "fork_step": null
+ },
+ "steps": [
+  {
+   "id": 1,
+   "run_id": 1,
+   "turn_id": 1,
+   "seq": 1,
+   "agent_id": null,
+   "tool": "Bash",
+   "category": "shell",
+   "tool_use_id": "toolu_012vv6R6CC6E23F8XiJP9WcS",
+   "input": {
+    "command": "echo 漢字 → done",
+    "description": "Print test string with Unicode characters"
+   },
+   "status": "RECORDED",
+   "outcome": "ok",
+   "error": null,
+   "gap_reason": null,
+   "flags": [],
+   "cwd": "~\\AppData\\Local\\Temp\\agentvc-u20",
+   "started_at": "2026-10-22T10:56:55.108624+00:00",
+   "ended_at": "2026-10-22T10:56:55.932259+00:00",
+   "duration_ms": 794
+  },
+  {
+   "id": 2,
+   "run_id": 1,
+   "turn_id": 2,
+   "seq": 2,
+   "agent_id": null,
+   "tool": "Write",
+   "category": "edit",
+   "tool_use_id": "toolu_01LEPEsr1dWR7MH4vTS42iyk",
+   "input": {
+    "file_path": "~\\AppData\\Local\\Temp\\agentvc-u20\\notes.txt",
+    "content": {
+     "chars": 3
+    }
+   },
+   "status": "RECORDED",
+   "outcome": "ok",
+   "error": null,
+   "gap_reason": null,
+   "flags": [],
+   "cwd": "~\\AppData\\Local\\Temp\\agentvc-u20",
+   "started_at": "2026-10-22T10:57:12.873576+00:00",
+   "ended_at": "2026-10-22T10:57:12.909017+00:00",
+   "duration_ms": 7
+  },
+  {
+   "id": 3,
+   "run_id": 1,
+   "turn_id": 2,
+   "seq": 3,
+   "agent_id": null,
+   "tool": "Bash",
+   "category": "shell",
+   "tool_use_id": "toolu_01SDM8gj3LLQYc237ZQwnRxM",
+   "input": {
+    "command": "exit 3",
+    "description": "Exit with status code 3"
+   },
+   "status": "RECORDED",
+   "outcome": "error",
+   "error": "Exit code 3",
+   "gap_reason": null,
+   "flags": [],
+   "cwd": "~\\AppData\\Local\\Temp\\agentvc-u20",
+   "started_at": "2026-10-22T10:57:15.092170+00:00",
+   "ended_at": "2026-10-22T10:57:15.870236+00:00",
+   "duration_ms": 757
+  },
+  {
+   "id": 4,
+   "run_id": 1,
+   "turn_id": 2,
+   "seq": 4,
+   "agent_id": null,
+   "tool": "Write",
+   "category": "edit",
+   "tool_use_id": "toolu_0118QY5G8PEKEJPSFX5fou75",
+   "input": {
+    "file_path": "~\\AppData\\Local\\Temp\\agentvc-u20\\.agentvc\\test.txt",
+    "content": {
+     "chars": 1
+    }
+   },
+   "status": "DENIED",
+   "outcome": null,
+   "error": "AgentVC: writing into .agentvc/ is not allowed; it holds the record of what the agent did. Use the `agentvc` command to read it.",
+   "gap_reason": null,
+   "flags": [],
+   "cwd": "~\\AppData\\Local\\Temp\\agentvc-u20",
+   "started_at": "2026-10-22T10:57:17.872342+00:00",
+   "ended_at": "2026-10-22T10:57:17.872342+00:00",
+   "duration_ms": null
+  }
+ ],
+ "verdict": {
+  "status": "ok",
+  "problems": [],
+  "head_seq": 13
+ }
+}

@@ -1,0 +1,12 @@
+{
+ "date": "2026-10-22",
+ "what": "U-20 re-run after the fixes (perf_counter timings, quiet connection drops, ASCII-safe CLI output)",
+ "claude_code": "2.1.302 (Claude Code)",
+ "agentvc_commit": "f55a011",
+ "python": "3.12.7",
+ "how": "2 resumed `claude -p` turns in a throwaway git repo in %TEMP%, --setting-sources project, hooks from `agentvc hooks-config --agent-version 2.1.302`, AGENTVC_HOME and AGENTVC_DEBUG=1 set; parent CLAUDE* variables removed",
+ "prompts": [
+  "Run `echo \u6f22\u5b57 \u2192 done` with the Bash tool, then reply with just the output.",
+  "Do these three things in order: 1) use the Write tool to create notes.txt containing the word one; 2) run `exit 3` with the Bash tool; 3) use the Write tool to create .agentvc/test.txt containing x, and if it is blocked do not try any other way. Then tell me the exit code from step 2 and the exact reason step 3 was blocked, if it was."
+ ]
+}
