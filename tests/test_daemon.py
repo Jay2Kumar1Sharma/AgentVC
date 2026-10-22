@@ -146,10 +146,11 @@ def test_requests_without_the_token_are_rejected_and_counted(served: Any) -> Non
 
 def test_a_foreign_host_header_is_rejected(served: Any) -> None:
     # DNS rebinding: a web page reaching 127.0.0.1 under another name.
-    _server, state, ctx = served
+    server, state, ctx = served
     headers = {**auth(state), "Host": "evil.example:80"}
     data = body(ctx.workspace, "0004-PreToolUse-Bash.json")
     assert request(state, "POST", "/hook", data, headers)[0] == 403
+    assert server.rejected == 1  # reported at the next prompt, never silent (U-20)
 
 
 def test_the_server_listens_on_loopback_only(served: Any) -> None:

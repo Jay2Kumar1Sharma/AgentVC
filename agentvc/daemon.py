@@ -180,6 +180,7 @@ class _Handler(http.server.BaseHTTPRequestHandler):
         owner = self.server.agentvc
         if self.headers.get("Host") != f"127.0.0.1:{owner.state.port}":
             self._drain()
+            owner.count_rejected()  # an agent client sending another Host must not be silent
             self.close_connection = True
             self._send(403)
             return False
@@ -357,8 +358,9 @@ class Server:
         if rejected:
             lines.append(
                 f"AgentVC: {rejected} hook request{'s' if rejected != 1 else ''} "
-                f"{'were' if rejected != 1 else 'was'} rejected (missing or wrong token): those "
-                "actions weren't recorded. The hook settings may be stale; run `agentvc check`."
+                f"{'were' if rejected != 1 else 'was'} rejected (wrong token or Host header): "
+                "those actions weren't recorded. The hook settings may be stale; "
+                "run `agentvc check`."
             )
         for problem in self.ctx.config.problems:
             lines.append(f"AgentVC config: {problem}.")
