@@ -28,6 +28,22 @@ Updated at the end of every session by the agent doing the work. Newest handoff 
 
 ## Handoff log
 
+### 2026-10-22: U-20, real Claude Code against agentvcd (your go-ahead)
+Same branch, `alpha/session-3`. Three resumed `claude -p` turns (Claude Code 2.1.302, the terminal binary) in a throwaway git repo in `%TEMP%`, with `--setting-sources project`, hooks from `agentvc hooks-config --agent-version 2.1.302`, a temporary `AGENTVC_HOME` and `AGENTVC_DEBUG=1`. Evidence: `results/spikes/2026-10-22/u20-real-claude-code/` (scrubbed).
+
+**Result: the hook path works with the real client.**
+- All events arrived and were recorded: SessionStart and UserPromptSubmit through the liveness command hook (which started `agentvcd`); PreToolUse, PostToolUse, PostToolUseFailure, PostToolBatch, Stop and SessionEnd as `http` hooks. 4 steps (Bash `echo hello`, Write `notes.txt`, Bash `exit 3` recorded as `error`, a denied Write into `.agentvc/`); 0 gaps; 0 rejected requests; ledger verified.
+- Claude Code's client sends a Host and the literal token header that `agentvcd` accepts, and treats `200 {}` as success. A resume stayed in the same run (same session id).
+- The deny reply works: the Write into `.agentvc/` didn't happen, and the agent quoted AgentVC's reason. The step is `DENIED` in the ledger.
+- ADR-0003's amendment (literal token) is now verified, still awaiting your decision. U-20 marked answered.
+
+**Small defects it exposed (all S3, in session 3's code; to fix at the start of session 4):**
+1. The debug log times phases with `time.monotonic()`, which ticks every 15.6 ms on Windows: it shows 0 or 15–16 ms. Use `perf_counter` for durations (G7 measurements in session 5 depend on it).
+2. `agentvcd` writes a traceback to `daemon.log` when Claude Code drops an idle kept-alive connection (`ConnectionResetError`); it's harmless and should be ignored quietly.
+3. `agentvc history`/`inspect` print `·` as `�` when their output goes through a pipe: under `-I`, Python ignores `PYTHONIOENCODING` and writes cp1252. Print UTF-8 (or ASCII separators).
+
+**Side effects:** the three runs used your Claude account (3 short prompts) and left a transcript under `~/.claude/projects/` for the throwaway folder, as the earlier capture runs did. No settings were changed. The real `~/.agentvc` was not touched. The throwaway folder and its temporary home are deleted, and the test daemon was shut down.
+
 ### 2026-10-22: session 3, Alpha A (foundations, capture, ledger)
 Branch **`alpha/session-3`**, created from **`discovery/session-2`** because PR #2 was **not merged** when the session started (`origin/main` still ends at the PR #1 merge, `fd44c41`). 45 signed commits, each `G` with the repository's email; **not pushed**, no pull request.
 
