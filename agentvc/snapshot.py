@@ -147,7 +147,8 @@ class _Entry:
     racy: bool
 
 
-def _mode(st: os.stat_result) -> str:
+def file_mode(st: os.stat_result) -> str:
+    """git's mode for a regular file: executable on POSIX if any x bit is set."""
     if not WINDOWS and st.st_mode & 0o111:
         return "100755"
     return "100644"
@@ -335,6 +336,7 @@ class Snapshotter:
         self._known: set[str] = set()  # blobs known to exist in the store
         self._flats: OrderedDict[str, Flat] = OrderedDict()
         self._baseline: threading.Thread | None = None
+        self._holder: int | None = None  # the thread holding the file lock
 
     # --- locking and set-up -------------------------------------------------------------------
 
@@ -344,11 +346,18 @@ class Snapshotter:
         if not self._lock.acquire(timeout=max(timeout, 0.001)):
             raise LockTimeout(f"snapshot store busy for {timeout:.1f} s")
         try:
+            if self._holder == threading.get_ident():
+                yield  # already held by this thread (restore snapshots under its own lock)
+                return
             with self.io.lock(self._lock_path, timeout=timeout):
-                if not self._index.loaded:
-                    self.objects.ensure()
-                    self._index.load()
-                yield
+                self._holder = threading.get_ident()
+                try:
+                    if not self._index.loaded:
+                        self.objects.ensure()
+                        self._index.load()
+                    yield
+                finally:
+                    self._holder = None
         finally:
             self._lock.release()
 
@@ -601,7 +610,7 @@ class Snapshotter:
             cached is not None
             and not cached.racy
             and (cached.size, cached.mtime_ns, cached.ctime_ns) == _sig(st)
-            and cached.mode == _mode(st)
+            and cached.mode == file_mode(st)
             and self._exists(cached.sha)
         ):
             return cached.mode, cached.sha
@@ -617,9 +626,9 @@ class Snapshotter:
             return None
         size, mtime_ns, ctime_ns = _sig(seen)
         racy = stamp - mtime_ns < RACY_NS
-        self._index.put(path, _Entry(size, mtime_ns, ctime_ns, _mode(seen), sha, racy))
+        self._index.put(path, _Entry(size, mtime_ns, ctime_ns, file_mode(seen), sha, racy))
         self._known.add(sha)
-        return _mode(seen), sha
+        return file_mode(seen), sha
 
     def _hash_file(self, path: Path) -> tuple[str, os.stat_result]:
         for _ in range(2):
@@ -726,8 +735,8 @@ class Snapshotter:
             for key in keys:
                 try:
                     st = self.io.lstat(self.workspace / key)
-                except FileNotFoundError:
-                    continue  # absent, and in scope: that's what the snapshot says
+                except (FileNotFoundError, NotADirectoryError):
+                    continue  # absent (or a file is where its folder was): in scope, absent
                 except OSError as exc:
                     unprotected.append((key, f"can't read it ({_why(exc)})"))
                     continue
