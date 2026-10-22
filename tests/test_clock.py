@@ -50,3 +50,17 @@ def test_seeded_random_repeats_and_system_random_varies() -> None:
     assert len(SeededRandom(7).token_hex(16)) == 32
     system = SystemRandom()
     assert system.token_hex(16) != system.token_hex(16)
+
+
+def test_system_clock_measures_short_durations_finely() -> None:
+    # time.monotonic() ticks every 15.6 ms on Windows, which made every hook timing read 0 or
+    # 16 ms (found in the U-20 run). Durations need a sub-millisecond clock.
+    clock = SystemClock()
+    steps: list[float] = []
+    last = clock.monotonic()
+    while len(steps) < 50:
+        now = clock.monotonic()
+        if now != last:
+            steps.append(now - last)
+            last = now
+    assert min(steps) < 0.001

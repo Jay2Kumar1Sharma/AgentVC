@@ -28,7 +28,9 @@ class SystemClock:
         return datetime.now(UTC)
 
     def monotonic(self) -> float:
-        return time.monotonic()
+        # perf_counter, not time.monotonic: both never go back, but on Windows time.monotonic
+        # advances in 15.6 ms ticks, too coarse to time a hook.
+        return time.perf_counter()
 
 
 class FakeClock:
