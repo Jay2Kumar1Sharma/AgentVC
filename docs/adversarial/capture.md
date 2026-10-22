@@ -53,6 +53,7 @@ These runs were ad hoc (session 5 builds `eval/adversarial/` with attacks as dat
 - **Port takeover on Windows (S1, G2/G6).** With `SO_REUSEADDR` (Python's `HTTPServer` default), any other local socket could bind `agentvcd`'s port and receive hook traffic, token included. Now an exclusive bind on Windows.
 - **Self-connection (S2).** A port picked from the ephemeral range let a health check connect to itself while nothing listened, and read its own request back. Ports now come from 20000–32767.
 - **Silent rejections (S1, G2).** A request with a wrong token or Host is refused; that is now counted and reported at the next prompt.
+- **Lost 413 answers (S3).** Found by the end-of-session full suite: answering an oversized request before reading its body let a late-arriving body draw a reset, which on Windows discarded the client's unread answer. Refused bodies are now read first (`test_a_refused_body_still_gets_a_clean_answer_to_a_slow_reader`).
 
 ## Limits (not covered yet)
 
