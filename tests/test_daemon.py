@@ -374,3 +374,41 @@ def test_a_taken_port_falls_back_to_recording_in_process(tmp_path: Path) -> None
     ctx.anchor_dir = tmp_path / "home" / "anchors"
     assert len(ctx.ledger().rows("turns")) == 1  # the event itself was still recorded
     ctx.close()
+
+
+def test_liveness_reply_reports_unprotected_steps_and_interrupted_rollbacks(served: Any) -> None:
+    _server, state, ctx = served
+    ws = ctx.workspace
+    request(state, "POST", "/hook", body(ws, "0003-UserPromptSubmit.json"), auth(state))
+    request(state, "POST", "/hook", body(ws, "0004-PreToolUse-Bash.json"), auth(state))
+    [step] = ctx.ledger().rows("steps")
+    with ctx.ledger().transaction(timeout=5) as tx:
+        for _ in range(2):
+            tx.insert(
+                "snapshots",
+                "snapshot.before",
+                {
+                    "run_id": step["run_id"],
+                    "step_id": step["id"],
+                    "phase": "before",
+                    "status": "incomplete",
+                    "reason": "time budget of 2000 ms used up",
+                },
+            )
+        tx.insert(
+            "rollbacks",
+            "rollback.start",
+            {"kind": "rollback", "target": "1", "status": "started", "plan": "[]"},
+        )
+    _, reply = request(
+        state, "POST", "/hook?liveness=1", body(ws, "0003-UserPromptSubmit.json"), auth(state)
+    )
+    message = reply["systemMessage"]
+    assert "2 snapshots" in message and "time budget" in message
+    assert "rollback 1 was interrupted" in message and "agentvc repair" in message
+    _, reply = request(
+        state, "POST", "/hook?liveness=1", body(ws, "0003-UserPromptSubmit.json"), auth(state)
+    )
+    again = reply.get("systemMessage", "")
+    assert "snapshots" not in again  # told once
+    assert "rollback 1 was interrupted" in again  # until it's repaired

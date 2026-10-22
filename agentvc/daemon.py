@@ -357,6 +357,29 @@ class Server:
                 "see `agentvc inspect`)."
             )
             seen["gap_step"] = max(g["id"] for g in gaps)
+        try:
+            unsnapped = self.ctx.ledger().rows(
+                "snapshots",
+                "where status = 'incomplete' and id > ? and run_id not in "
+                "(select id from runs where flags like '%\"check\"%')",
+                (seen.get("snapshot", 0),),
+            )
+            interrupted = self.ctx.ledger().rows("rollbacks", "where status = 'started'")
+        except Exception:
+            unsnapped, interrupted = [], []
+        if unsnapped:
+            n = len(unsnapped)
+            lines.append(
+                f"AgentVC: {n} snapshot{'s' if n != 1 else ''} since the last notice "
+                f"{'were' if n != 1 else 'was'} not taken ({unsnapped[-1]['reason']}); those "
+                "actions can't be rolled back. See `agentvc inspect`."
+            )
+            seen["snapshot"] = max(s["id"] for s in unsnapped)
+        for row in interrupted:
+            lines.append(
+                f"AgentVC: rollback {row['id']} was interrupted and some files may be half "
+                "restored; run `agentvc repair`."
+            )
         blind = blindspots.count(io, store.blindspots)
         new_blind = blind - int(seen.get("blindspots", 0))
         if new_blind > 0:
@@ -577,6 +600,7 @@ def run_daemon(
         config=load_config(io, store.config),
         anchor_dir=agentvc_home(dict(environ)) / "anchors",
         debug_enabled=enabled_from_env(environ),
+        background_baseline=True,  # ADR-0003: the first snapshot never runs inside a hook
     )
     state = ensure_state(io, store, rand)
     try:
