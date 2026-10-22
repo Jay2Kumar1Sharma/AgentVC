@@ -39,6 +39,7 @@ _SCHEMA_V2 = (
     id INTEGER PRIMARY KEY, run_id INTEGER, step_id INTEGER, rollback_id INTEGER,
     phase TEXT NOT NULL, status TEXT NOT NULL, tree TEXT, scope TEXT,
     unprotected TEXT NOT NULL DEFAULT '[]', unprotected_count INTEGER NOT NULL DEFAULT 0,
+    unprotected_blob TEXT,
     outside TEXT NOT NULL DEFAULT '[]', reason TEXT, files INTEGER, bytes INTEGER,
     duration_ms INTEGER, taken_at TEXT)""",
     "CREATE INDEX snapshots_step ON snapshots (step_id)",
