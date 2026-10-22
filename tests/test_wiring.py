@@ -139,3 +139,19 @@ def test_tool_categories() -> None:
     assert wiring.tool_category("Edit") == "edit"
     assert wiring.tool_category("mcp__slack__post") == "mcp"
     assert wiring.tool_category("BrandNewTool") == "unknown"
+
+
+def test_wiring_adapter_and_recorder_agree() -> None:
+    # A handler can't exist without a subscription, or the reverse (FM-ADP-03, HZ-G2-04).
+    from agentvc.adapters import claude_code
+    from agentvc.events import Kind
+    from agentvc.recorder import Recorder
+
+    assert set(claude_code.EVENT_KINDS) == set(wiring.EVENTS)
+    assert set(claude_code.EVENT_KINDS.values()) == set(Kind)
+    import inspect
+
+    rules = inspect.getsource(Recorder._apply)
+    for kind in Kind:
+        if kind is not Kind.SUBAGENT_START:  # attribution comes from agent_id on each event
+            assert f"Kind.{kind.name}" in rules, kind
