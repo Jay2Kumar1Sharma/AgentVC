@@ -1,0 +1,47 @@
+{
+  "environment": {
+    "os": "Windows",
+    "git": "git version 2.49.0.windows.1"
+  },
+  "roots": [
+    {
+      "start": "main",
+      "toplevel": "main",
+      "is_linked_worktree": false
+    },
+    {
+      "start": "monorepo_subfolder",
+      "toplevel": "main",
+      "is_linked_worktree": false
+    },
+    {
+      "start": "nested_repo",
+      "toplevel": "nested_repo",
+      "is_linked_worktree": false
+    },
+    {
+      "start": "nested_worktree",
+      "toplevel": "nested_worktree",
+      "is_linked_worktree": true
+    },
+    {
+      "start": "sibling_worktree",
+      "toplevel": "sibling_worktree",
+      "is_linked_worktree": true
+    },
+    {
+      "start": "no_git",
+      "toplevel": null,
+      "is_linked_worktree": false
+    }
+  ],
+  "outer_snapshot": {
+    "main_files_captured": true,
+    "nested_repo": "gitlink",
+    "nested_worktree": "gitlink"
+  },
+  "meta": {
+    "script": "scripts/spikes/workspace_roots.py",
+    "date": "2026-10-18"
+  }
+}

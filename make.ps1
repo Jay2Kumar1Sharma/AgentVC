@@ -29,8 +29,8 @@ function Stop-NotYet([string]$Name, [string]$When) {
 switch ($Target) {
     'help' {
         Write-Host 'make.ps1 fast   lint, types and fast tests (< 2 min; run before every push)'
-        Write-Host 'make.ps1 test   everything a pull request runs (not implemented yet)'
-        Write-Host 'make.ps1 arch   architecture checks (not implemented yet)'
+        Write-Host 'make.ps1 test   full local suite: lint, types, all tests incl. slow (end of every session)'
+        Write-Host 'make.ps1 arch   architecture structure and render checks'
         Write-Host 'make.ps1 fuzz   fuzzers (not implemented yet)'
         Write-Host 'make.ps1 chaos  kill-at-random-point tests (not implemented yet)'
     }
@@ -40,8 +40,19 @@ switch ($Target) {
         Invoke-Python @('-m', 'mypy')
         Invoke-Python @('-m', 'pytest', '-m', 'not slow', '-q')
     }
-    'test' { Stop-NotYet 'test' 'with v0.1-alpha, plan section 16.5' }
-    'arch' { Stop-NotYet 'arch' 'in Discovery part 2, plan section 5.2' }
+    'test' {
+        # Full local suite (AGENTS.md step 8): everything in fast, plus slow tests.
+        Invoke-Python @('-m', 'ruff', 'check', '.')
+        Invoke-Python @('-m', 'ruff', 'format', '--check', '.')
+        Invoke-Python @('-m', 'mypy')
+        Invoke-Python @('scripts/arch_check.py')
+        Invoke-Python @('-m', 'pytest', '-q')
+    }
+    'arch' {
+        # Architecture page (plan section 5.3): structure checks, then the render check.
+        Invoke-Python @('scripts/arch_check.py')
+        Invoke-Python @('-m', 'pytest', '-q', 'tests/test_arch_render.py')
+    }
     'fuzz' { Stop-NotYet 'fuzz' 'with v0.1-alpha, plan section 15.5' }
     'chaos' { Stop-NotYet 'chaos' 'with v0.1-alpha, plan section 15.5' }
 }

@@ -1,0 +1,45 @@
+{
+  "meta": {
+    "script": "scripts/spikes/hook_failure.py",
+    "date": "2026-10-18",
+    "claude_code": "2.1.302 (Claude Code)",
+    "pre_timeout_seconds": 3,
+    "hook_sleep_seconds": 30
+  },
+  "scenarios": [
+    {
+      "scenario": "block",
+      "pre_hook_started": true,
+      "pre_hook_finished": false,
+      "tool_ran": false,
+      "post_events": [],
+      "claude_exit_code": 0,
+      "wall_seconds": 7.6,
+      "agent_reply": "The command didn't run. A PreToolUse hook (`pre.py` in this directory) blocked the Bash call with the message \"blocked by the hook_failure spike\", so `tool_ran.txt` wasn't created. I didn't try to get around the hook another way, such as through PowerShell.\n\nNot done. If you want it to run, change o"
+    },
+    {
+      "scenario": "crash",
+      "pre_hook_started": true,
+      "pre_hook_finished": false,
+      "tool_ran": true,
+      "post_events": [
+        "PostToolUse"
+      ],
+      "claude_exit_code": 0,
+      "wall_seconds": 8.0,
+      "agent_reply": "done"
+    },
+    {
+      "scenario": "timeout",
+      "pre_hook_started": true,
+      "pre_hook_finished": false,
+      "tool_ran": true,
+      "post_events": [
+        "PostToolUse"
+      ],
+      "claude_exit_code": 0,
+      "wall_seconds": 12.3,
+      "agent_reply": "done"
+    }
+  ]
+}

@@ -1,0 +1,109 @@
+{
+  "meta": {
+    "updated": "2026-10-18",
+    "version": "0.1.0.dev0",
+    "changelog": [
+      "2026-10-18  first graph from plan diagrams 4.1-4.3; every node planned"
+    ]
+  },
+  "layers": [
+    { "id": "agents", "label": "Agents" },
+    { "id": "capture", "label": "Capture layer" },
+    { "id": "engine", "label": "Engine" },
+    { "id": "store", "label": ".agentvc/ store" },
+    { "id": "interface", "label": "Interface" }
+  ],
+  "nodes": [
+    { "id": "claude_code", "label": "Claude Code", "sub": "hooks: PreToolUse, PostToolUse, ...", "layer": "agents", "path": null, "status": "planned", "desc": "First supported agent (v0.1). Its hook payloads are captured as fixtures in tests/fixtures/hosts/claude-code/.", "adr": [] },
+    { "id": "codex", "label": "Codex", "sub": "hooks", "layer": "agents", "path": null, "status": "planned", "desc": "Second agent (v0.2).", "adr": [] },
+    { "id": "other_agents", "label": "Gemini CLI / Cursor / Copilot", "sub": "hooks", "layer": "agents", "path": null, "status": "planned", "desc": "Further hook-based agents (v0.5).", "adr": [] },
+    { "id": "any_cli_agent", "label": "Any CLI agent", "sub": "no hooks", "layer": "agents", "path": null, "status": "planned", "desc": "Agents without hooks, wrapped by agentvc run (v0.5).", "adr": [] },
+    { "id": "mcp_clients", "label": "MCP clients", "sub": "tools/call", "layer": "agents", "path": null, "status": "planned", "desc": "Agents that call MCP servers through AgentVC's proxy (v0.4).", "adr": [] },
+
+    { "id": "adapters", "label": "Agent adapters", "sub": "hooks to one event model", "layer": "capture", "path": "agentvc/adapters/", "status": "planned", "desc": "Translate each agent's hook payloads into one internal event model; unknown payloads go to the blind-spot log. Event and tool list comes from agentvc/wiring.py.", "adr": ["0003", "0004", "0008"] },
+    { "id": "run_wrapper", "label": "Run wrapper", "sub": "agentvc run -- cmd", "layer": "capture", "path": null, "status": "planned", "desc": "Records agents that have no hooks by snapshotting around the whole command (v0.5).", "adr": [] },
+    { "id": "mcp_proxy", "label": "MCP proxy", "sub": "agentvc mcp-wrap", "layer": "capture", "path": null, "status": "planned", "desc": "Sits between an agent and its MCP servers; classifies calls and stages stageable ones in the outbox (v0.4).", "adr": [] },
+
+    { "id": "recorder", "label": "Step recorder", "sub": "pending step, then recorded or GAP", "layer": "engine", "path": "agentvc/recorder.py", "status": "planned", "desc": "Turns hook events into steps; a Pre without a Post becomes a visible GAP (G2).", "adr": ["0004"] },
+    { "id": "snapshotter", "label": "Snapshotter", "sub": "git trees per step", "layer": "engine", "path": "agentvc/snapshot.py", "status": "planned", "desc": "Snapshots the workspace (or an edit tool's target file) into AgentVC's own object store; anything it can't capture is marked unprotected.", "adr": ["0005", "0006", "0009"] },
+    { "id": "classifier", "label": "Effect classifier", "sub": "+ contracts", "layer": "engine", "path": null, "status": "planned", "desc": "Classifies each action's external effects into recovery classes using contracts (v0.2). When unsure: UNKNOWN.", "adr": [] },
+    { "id": "restore", "label": "Restore", "sub": "per-file compare-and-swap", "layer": "engine", "path": "agentvc/restore.py", "status": "planned", "desc": "Rolls back only files that still hold exactly what the agent left; everything else is a conflict (G1). Saves the current state first, so a rollback can be undone.", "adr": [] },
+    { "id": "compensator", "label": "Compensator", "sub": "inverse actions for effects", "layer": "engine", "path": null, "status": "planned", "desc": "Runs compensations for compensatable effects after the user confirms (v0.2+).", "adr": [] },
+    { "id": "replay", "label": "Replay / fork / fence", "sub": "never repeat the world", "layer": "engine", "path": null, "status": "planned", "desc": "Replays or forks a run; the fence blocks effects the parent already performed (G4, v0.3).", "adr": [] },
+    { "id": "outbox", "label": "Outbox", "sub": "stage, commit, abort", "layer": "engine", "path": null, "status": "planned", "desc": "Holds stageable effects until commit; releases each exactly once (G5, v0.4).", "adr": [] },
+
+    { "id": "ledger", "label": "ledger.db", "sub": "runs, steps, effects, outbox", "layer": "store", "path": null, "status": "planned", "desc": "SQLite (WAL) ledger with a schema_version table and a hash chain anchored outside the workspace.", "adr": ["0007"] },
+    { "id": "objects", "label": "objects/", "sub": "snapshot trees", "layer": "store", "path": null, "status": "planned", "desc": "AgentVC's own git object store; owns every object it references.", "adr": ["0005"] },
+    { "id": "contracts", "label": "contracts/", "sub": "YAML effect contracts", "layer": "store", "path": null, "status": "planned", "desc": "One YAML file per kind of effect: class, detection, undo, idempotency, outcome check (v0.2).", "adr": [] },
+
+    { "id": "cli", "label": "CLI", "sub": "history, inspect, diff, rollback, ...", "layer": "interface", "path": "agentvc/cli.py", "status": "planned", "desc": "history, inspect, diff, rollback, undo/redo (v0.1); replay, fork (v0.3); review, commit, abort (v0.4).", "adr": [] },
+    { "id": "reports", "label": "Reports", "sub": "terminal, Markdown, JSON, HTML", "layer": "interface", "path": null, "status": "planned", "desc": "Run reports, including the offline HTML timeline (v0.2).", "adr": [] },
+    { "id": "health", "label": "Health", "sub": "check, ready, selftest", "layer": "interface", "path": null, "status": "planned", "desc": "check sends a fake tool call through the real hook path (v0.1); ready and selftest follow in v0.2.", "adr": [] }
+  ],
+  "edges": [
+    { "from": "claude_code", "to": "adapters", "kind": "hooks" },
+    { "from": "codex", "to": "adapters", "kind": "hooks" },
+    { "from": "other_agents", "to": "adapters", "kind": "hooks" },
+    { "from": "any_cli_agent", "to": "run_wrapper", "kind": "wraps" },
+    { "from": "mcp_clients", "to": "mcp_proxy", "kind": "calls" },
+    { "from": "adapters", "to": "recorder", "kind": "events" },
+    { "from": "run_wrapper", "to": "recorder", "kind": "events" },
+    { "from": "mcp_proxy", "to": "recorder", "kind": "events" },
+    { "from": "recorder", "to": "snapshotter", "kind": "calls" },
+    { "from": "recorder", "to": "classifier", "kind": "calls" },
+    { "from": "classifier", "to": "contracts", "kind": "reads" },
+    { "from": "recorder", "to": "ledger", "kind": "writes" },
+    { "from": "snapshotter", "to": "objects", "kind": "writes" },
+    { "from": "mcp_proxy", "to": "outbox", "kind": "stages" },
+    { "from": "ledger", "to": "restore", "kind": "reads" },
+    { "from": "objects", "to": "restore", "kind": "reads" },
+    { "from": "ledger", "to": "compensator", "kind": "reads" },
+    { "from": "objects", "to": "compensator", "kind": "reads" },
+    { "from": "ledger", "to": "replay", "kind": "reads" },
+    { "from": "objects", "to": "replay", "kind": "reads" },
+    { "from": "ledger", "to": "outbox", "kind": "reads" },
+    { "from": "objects", "to": "outbox", "kind": "reads" },
+    { "from": "restore", "to": "cli", "kind": "serves" },
+    { "from": "compensator", "to": "cli", "kind": "serves" },
+    { "from": "replay", "to": "cli", "kind": "serves" },
+    { "from": "outbox", "to": "cli", "kind": "serves" },
+    { "from": "ledger", "to": "reports", "kind": "reads" },
+    { "from": "ledger", "to": "health", "kind": "reads" }
+  ],
+  "views": {
+    "dataflow": [
+      { "from": "claude_code", "to": "adapters", "label": "PreToolUse (tool, input)" },
+      { "from": "adapters", "to": "classifier", "label": "classify command" },
+      { "from": "classifier", "to": "adapters", "label": "class, e.g. IRREVERSIBLE (ask if policy says so)" },
+      { "from": "adapters", "to": "snapshotter", "label": "snapshot before (paths or workspace)" },
+      { "from": "snapshotter", "to": "objects", "label": "tree id (before)" },
+      { "from": "adapters", "to": "ledger", "label": "write pending step" },
+      { "from": "claude_code", "to": "claude_code", "label": "tool runs" },
+      { "from": "claude_code", "to": "adapters", "label": "PostToolUse (outcome)" },
+      { "from": "adapters", "to": "snapshotter", "label": "snapshot after" },
+      { "from": "adapters", "to": "ledger", "label": "complete step + effects; no Post = visible GAP" }
+    ],
+    "lifecycle": {
+      "states": ["PENDING", "RECORDED", "GAP", "RESTORABLE", "HAS_EFFECTS", "COMPENSATABLE", "STAGED", "IRREVERSIBLE", "UNKNOWN", "ROLLED_BACK", "COMPENSATED", "RELEASED", "DROPPED"],
+      "transitions": [
+        { "from": "PENDING", "to": "RECORDED", "on": "PostToolUse" },
+        { "from": "PENDING", "to": "GAP", "on": "no post event" },
+        { "from": "RECORDED", "to": "RESTORABLE", "on": "only workspace changes" },
+        { "from": "RECORDED", "to": "HAS_EFFECTS", "on": "external effects detected" },
+        { "from": "HAS_EFFECTS", "to": "COMPENSATABLE", "on": "contract has an inverse" },
+        { "from": "HAS_EFFECTS", "to": "STAGED", "on": "outbox on, stageable" },
+        { "from": "HAS_EFFECTS", "to": "IRREVERSIBLE", "on": "no inverse" },
+        { "from": "HAS_EFFECTS", "to": "UNKNOWN", "on": "not classified" },
+        { "from": "RESTORABLE", "to": "ROLLED_BACK", "on": "rollback" },
+        { "from": "COMPENSATABLE", "to": "COMPENSATED", "on": "rollback + confirm" },
+        { "from": "STAGED", "to": "RELEASED", "on": "commit" },
+        { "from": "STAGED", "to": "DROPPED", "on": "abort" },
+        { "from": "ROLLED_BACK", "to": "RESTORABLE", "on": "rollback --undo" }
+      ]
+    }
+  },
+  "roadmap": [
+    { "id": "v01_alpha_engine", "title": "Undo for files and shell (v0.1-alpha)", "status": "planned", "goal": "Record every Claude Code action and roll back workspace changes, including shell changes, without ever overwriting user work.", "acceptance": ["0 data-loss failures across scenario, property and model-based tests", "the maintainer uses it daily"], "first_contribution": "Not open yet: contributions are closed during the alpha.", "links": ["docs/master-plan.md#v01-alpha-it-never-loses-my-work-weeks-23-private"] },
+    { "id": "v04_outbox", "title": "Approve before it leaves (v0.4)", "status": "planned", "goal": "Hold stageable MCP calls in an outbox until the user commits, releasing each exactly once.", "acceptance": ["0 early releases", "a crash during commit never sends twice"], "first_contribution": "Not open yet.", "links": ["docs/master-plan.md#v04-approve-before-it-leaves-weeks-1012"] }
+  ]
+}

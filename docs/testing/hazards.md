@@ -20,6 +20,7 @@ For each guarantee (plan §2), the conditions under which it could be violated. 
 | HZ-G1-10 | Two names map to one file (case-insensitive file system, Unicode normalisation) | — |
 | HZ-G1-11 | Rollback runs while the agent is still writing | — |
 | HZ-G1-12 | An older AgentVC opens a newer ledger and misreads it | FM-LED-04 |
+| HZ-G1-13 | The agent deletes a nested repository or a worktree inside the workspace, whose files the snapshot doesn't hold | FM-SNAP-06 |
 
 ## G2: Nothing silent
 
@@ -34,6 +35,7 @@ For each guarantee (plan §2), the conditions under which it could be violated. 
 | HZ-G2-07 | The agent changes directory or adds a root outside the project, and its actions there go unreported | — |
 | HZ-G2-08 | An action bypasses hooks entirely (a script calls an API); must be documented as a limit | — |
 | HZ-G2-09 | An install writes a hook event the agent version doesn't know, and the agent silently drops all hooks | FM-INS-03 |
+| HZ-G2-10 | AgentVC's background process is down, so every hook fails silently as a non-blocking error | FM-HOOK-04 |
 
 ## G3: Honest accounting
 
@@ -86,3 +88,4 @@ For each guarantee (plan §2), the conditions under which it could be violated. 
 | HZ-G8-03 | The agent deletes or edits `.agentvc/` (history, config) | FM-LED-02 |
 | HZ-G8-04 | The agent runs `agentvc purge`, `uninstall` or `rollback --force`, or kills AgentVC's processes | — |
 | HZ-G8-05 | Hooks fail on every call (wrong interpreter) and nobody notices | FM-INS-01 |
+| HZ-G8-06 | Repository content runs in place of AgentVC's hook (module shadowing) | FM-INS-04 |

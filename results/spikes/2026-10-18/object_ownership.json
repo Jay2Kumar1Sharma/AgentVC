@@ -1,0 +1,43 @@
+{
+  "environment": {
+    "os": "Windows",
+    "python": "3.12.7",
+    "git": "git version 2.49.0.windows.1"
+  },
+  "scenarios": [
+    {
+      "name": "alternates",
+      "uses_alternates_at_restore": true,
+      "snapshot_ms": 73.1,
+      "store_bytes": 107,
+      "restore_ok_before_prune": true,
+      "user_repo_lost_objects": true,
+      "missing_objects_after_prune": 1,
+      "restore_ok_after_prune": false
+    },
+    {
+      "name": "own_every_object",
+      "uses_alternates_at_restore": false,
+      "snapshot_ms": 78.7,
+      "store_bytes": 253,
+      "restore_ok_before_prune": true,
+      "user_repo_lost_objects": true,
+      "missing_objects_after_prune": 0,
+      "restore_ok_after_prune": true
+    },
+    {
+      "name": "alternates_then_repack",
+      "uses_alternates_at_restore": false,
+      "snapshot_ms": 122.2,
+      "store_bytes": 1720,
+      "restore_ok_before_prune": true,
+      "user_repo_lost_objects": true,
+      "missing_objects_after_prune": 0,
+      "restore_ok_after_prune": true
+    }
+  ],
+  "meta": {
+    "script": "scripts/spikes/object_ownership.py",
+    "date": "2026-10-18"
+  }
+}
