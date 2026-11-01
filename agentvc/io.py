@@ -19,6 +19,7 @@ from contextlib import contextmanager, suppress
 from dataclasses import dataclass
 from pathlib import Path
 from typing import IO as BinaryStream
+from typing import Protocol
 
 from agentvc import crash
 
@@ -305,12 +306,20 @@ class _CappedReader:
         return b"".join(self._chunks)
 
 
+class _Job(Protocol):
+    """What _ProcessTree needs of a Windows job object (agentvc._winjob.Job)."""
+
+    def terminate(self) -> None: ...
+
+    def close(self) -> None: ...
+
+
 class _ProcessTree:
     """The process and everything it starts: a job object on Windows, a session elsewhere."""
 
     def __init__(self, proc: subprocess.Popen[bytes]) -> None:
         self._proc = proc
-        self._job = None
+        self._job: _Job | None = None  # stays None off Windows
         if sys.platform == "win32":
             from agentvc._winjob import Job
 
