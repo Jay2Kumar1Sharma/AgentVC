@@ -16,6 +16,7 @@ import http.server
 import json
 import os
 import socket
+import socketserver
 import sys
 import threading
 import time
@@ -154,7 +155,11 @@ class _HTTPServer(http.server.ThreadingHTTPServer):
     def server_bind(self) -> None:
         if sys.platform == "win32":
             self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
-        super().server_bind()
+        # TCPServer's bind only: HTTPServer's also reverse-resolves the address
+        # (socket.getfqdn), which can take seconds on macOS while the liveness hook waits.
+        socketserver.TCPServer.server_bind(self)
+        host, port = self.server_address[:2]
+        self.server_name, self.server_port = str(host), int(port)
 
     def handle_error(self, request: Any, client_address: Any) -> None:
         # Agents drop idle kept-alive connections; that's normal, not worth a traceback.
