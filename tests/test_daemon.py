@@ -412,3 +412,31 @@ def test_liveness_reply_reports_unprotected_steps_and_interrupted_rollbacks(serv
     again = reply.get("systemMessage", "")
     assert "snapshots" not in again  # told once
     assert "rollback 1 was interrupted" in again  # until it's repaired
+
+
+def test_a_slow_name_lookup_never_delays_the_daemon(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # http.server's bind reverse-resolves its address (socket.getfqdn), which can take seconds
+    # on macOS: long enough for the liveness hook to give up on a daemon that is starting.
+    def slow_getfqdn(name: str = "") -> str:
+        time.sleep(30)
+        return name
+
+    monkeypatch.setattr(socket, "getfqdn", slow_getfqdn)
+    ws = tmp_path / "ws"
+    ws.mkdir()
+    ctx = make_ctx(ws)
+    ctx.store.ensure(ctx.io)
+    state = daemon.ensure_state(ctx.io, ctx.store, SystemRandom())
+    server = daemon.Server(ctx, state)
+    thread = threading.Thread(target=server.serve, daemon=True)
+    started = time.monotonic()
+    thread.start()
+    try:
+        assert daemon.wait_healthy(state, timeout=5)
+        assert time.monotonic() - started < 3
+    finally:
+        server.shutdown()
+        thread.join(timeout=10)
+        ctx.close()
