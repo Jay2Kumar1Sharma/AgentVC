@@ -1,8 +1,8 @@
 # ADR-0006: Which git-ignored files snapshots include (D4)
 
-- **Status:** proposed
+- **Status:** accepted (2026-10-21)
 - **Date:** 2026-10-18
-- **Decided by:** pending the maintainer's review (drafted in Discovery part 2)
+- **Decided by:** the maintainer, 2026-10-21 (drafted in Discovery part 2)
 - **Related:** plan §7.1 D4, §14.5, G1, G3, G6, G7; FMEA FM-SNAP-02, FM-SNAP-04; spike `scripts/spikes/ignored_files.py`, results `results/spikes/2026-10-18/ignored_files.json`
 
 ## Context
@@ -19,7 +19,7 @@ A snapshot built with git's own rules would skip everything in `.gitignore`. Tha
 2. **Snapshot everything:** dependency folders blow every budget and fill the disk.
 3. **Snapshot ignored files under a budget, minus known heavy folders, always including small dotenv files** (the plan's default).
 
-## Decision (proposed)
+## Decision
 
 - Snapshots include git-ignored files **except** inside known heavy folders: `node_modules`, `.venv`, `venv`, `target`, `dist`, `build`, `out`, `.next`, `.gradle`, `__pycache__` and the other names listed in `scripts/spikes/ignored_files.py` (`HEAVY`), configurable in `config.toml`.
 - **Always included:** `.env` and `.env.*` files, and other ignored files of at most **1 MB each**, up to **50 MB of ignored files per snapshot** in total. Both limits are configurable.

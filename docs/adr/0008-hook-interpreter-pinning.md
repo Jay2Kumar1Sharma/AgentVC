@@ -1,8 +1,8 @@
 # ADR-0008: Hooks run AgentVC's own interpreter, by absolute path, isolated (D6)
 
-- **Status:** proposed
+- **Status:** accepted (2026-10-21)
 - **Date:** 2026-10-18
-- **Decided by:** pending the maintainer's review (drafted in Discovery part 2)
+- **Decided by:** the maintainer, 2026-10-21 (drafted in Discovery part 2)
 - **Related:** plan §7.1 D6, §14.5 threat model, G2, G8; FMEA FM-INS-01; spike `scripts/spikes/interpreter_pinning.py`, results `results/spikes/2026-10-18/interpreter_pinning.json`; ADR-0003
 
 ## Context
@@ -26,7 +26,7 @@ So an absolute interpreter path alone is **not enough**: a repository can hijack
 2. **Absolute interpreter path:** fixes the wrong-interpreter problem, but not the shadowing.
 3. **Absolute path plus isolated mode (`-I`)**, optionally a launcher so `-S` can also be used.
 
-## Decision (proposed)
+## Decision
 
 - `agentvc install` writes hooks that call **AgentVC's own interpreter by absolute path** (the pipx or venv interpreter it was installed with), **always with `-I`**, in exec form where the agent supports it (ADR-0003).
 - No hook ever depends on `PATH`, `PYTHONPATH`, `VIRTUAL_ENV`, the working directory or the user site directory.

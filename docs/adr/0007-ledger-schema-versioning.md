@@ -1,8 +1,8 @@
 # ADR-0007: Ledger schema versioning (D5)
 
-- **Status:** proposed
+- **Status:** accepted (2026-10-21)
 - **Date:** 2026-10-18
-- **Decided by:** pending the maintainer's review (drafted in Discovery part 2)
+- **Decided by:** the maintainer, 2026-10-21 (drafted in Discovery part 2)
 - **Related:** plan §7.1 D5, §16.2 "Upgrade / migration tests"; FMEA FM-LED-04; hazard HZ-G1-12
 
 ## Context

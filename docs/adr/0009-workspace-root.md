@@ -1,8 +1,8 @@
 # ADR-0009: Where `.agentvc/` lives: worktrees, nested repositories, monorepos (D7)
 
-- **Status:** proposed
+- **Status:** accepted (2026-10-21)
 - **Date:** 2026-10-18
-- **Decided by:** pending the maintainer's review (drafted in Discovery part 2)
+- **Decided by:** the maintainer, 2026-10-21 (drafted in Discovery part 2)
 - **Related:** plan §7.1 D7, §14.1 "Working-directory and multi-root changes", G1, G3; spike `scripts/spikes/workspace_roots.py`, results `results/spikes/2026-10-18/workspace_roots.json`; ADR-0005, ADR-0006
 
 ## Context
@@ -22,7 +22,7 @@ An agent session starts in one folder, but that folder may be a monorepo subfold
 
 **Snapshot of the outer repository** (private index, `git add -A`, as AgentVC would do it): the repository's own files are captured, but a nested repository and a worktree inside the project are each recorded as a **gitlink** (a pointer to another repository's commit). **Their files are not in the snapshot.**
 
-## Decision (proposed)
+## Decision
 
 - **The workspace root** is `git rev-parse --show-toplevel` of the folder the session starts in (`CLAUDE_PROJECT_DIR` for Claude Code), or that folder itself when it isn't in a repository. `.agentvc/` lives at the workspace root.
 - **A monorepo subfolder** shares the repository root's `.agentvc/`: an agent started in `packages/app` can still edit or delete anything in the repository, and a rollback must cover it. Each run records the folder it started in.

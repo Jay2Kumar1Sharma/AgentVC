@@ -18,8 +18,8 @@ Updated at the end of every session by the agent doing the work. Newest handoff 
 
 | Milestone (plan §8) | Status |
 |---|---|
-| Discovery (week 1) | parts 1 and 2 done. Part 1 merged (PR #1, 2026-10-20); part 2 in review (PR #2, `discovery/session-2`). ADRs 0003–0009 proposed, awaiting review; outside conversations still open |
-| v0.1-alpha (private) | not started |
+| Discovery (week 1) | parts 1 and 2 done. Part 1 merged (PR #1, 2026-10-20); part 2 in review (PR #2, `discovery/session-2`). ADRs 0003–0009 accepted 2026-10-21; outside conversations still open |
+| v0.1-alpha (private) | in progress: session 3 (Alpha A: foundations, capture, ledger) done on `alpha/session-3`, not pushed; sessions 4–5 next |
 | v0.1 (public) | not started |
 | v0.2 Know your effects | not started |
 | v0.3 Replay safely | not started |
@@ -27,6 +27,95 @@ Updated at the end of every session by the agent doing the work. Newest handoff 
 | v0.5 Beyond the workspace | not started |
 
 ## Handoff log
+
+### 2026-10-22: real Claude Code re-run after the fixes (your request)
+Same set-up as the first U-20 run (throwaway git repo in `%TEMP%`, `--setting-sources project`, hooks from `hooks-config`, temporary `AGENTVC_HOME`), code at `f55a011`, Claude Code 2.1.302, 2 resumed `claude -p` turns. Evidence: `results/spikes/2026-10-22/u20-real-claude-code-rerun/`.
+- **Recorded correctly:** 1 run, 2 turns, 4 steps (Bash `echo 漢字 → done`, Write `notes.txt`, Bash `exit 3` as `error`, the Write into `.agentvc/` DENIED with the file not created), 0 gaps, ledger verified.
+- **Fix 1 (timings) confirmed:** the debug log now shows real durations. AgentVC's own server-side cost per event was 0.9–13 ms for tool events (21 ms for the first event, which creates the ledger).
+- **Fix 3 (CLI output) confirmed:** piped `inspect` printed `|` separators and `echo ?? ? done` with no crash; `inspect --json` was pure ASCII and decoded to exactly `echo 漢字 → done`.
+- **Fix 2 (quiet connection drops):** `daemon.log` stayed empty. That proves no traceback was written, not that a drop happened in this run; the unit test covers the drop itself.
+- Seen, not AgentVC: the agent's own reply showed the non-ASCII output garbled (`æ¼¢å­—`), from how Claude Code on Windows decodes shell output. AgentVC recorded the command correctly.
+- **Side effects:** 2 more short prompts on your account and one more transcript under `~/.claude/projects/`; no settings changed; throwaway folders deleted; no daemon left running; the real `~/.agentvc` untouched.
+
+### 2026-10-22: ADR-0003 amendment accepted; the three U-20 defects fixed
+Same branch, `alpha/session-3`, not pushed.
+- **ADR-0003 amendment accepted by you:** the token is a literal header value in the generated hook settings. The decision text now says so, and also says the token is per workspace (the old text said per session).
+- **Fixed** (each with a test seen to fail first, then searched for the same mistake elsewhere):
+  1. `SystemClock.monotonic()` now uses `perf_counter`: hook timings had been quantised to Windows' 15.6 ms tick. The other `time.monotonic()` uses only time out coarse waits and stay.
+  2. `agentvcd` ignores clients dropping their connection (no more tracebacks in `daemon.log`); other errors are still reported.
+  3. The CLI no longer crashes when piped output can't encode a recorded command or path (worse than the garbled `·` first seen). Text uses ASCII separators (`|`, `...`), unencodable characters become `?`, and `--json` is pure ASCII. The golden `inspect` output changed accordingly. New FMEA row FM-CLI-03.
+- **Full suite:** `make test` (MSYS2) at `3689e73`, Python 3.12.7: **pass, 801 passed, 0 failed, 1 skipped** (the Windows symlink case), 92.4 s (93.4 s wall).
+- **Still open for you:** pushing this branch and the PR plan once PR #2 is merged; the earlier open items (pivot recommendation, PyYAML and Playwright, CI for slow tests).
+
+### 2026-10-22: U-20, real Claude Code against agentvcd (your go-ahead)
+Same branch, `alpha/session-3`. Three resumed `claude -p` turns (Claude Code 2.1.302, the terminal binary) in a throwaway git repo in `%TEMP%`, with `--setting-sources project`, hooks from `agentvc hooks-config --agent-version 2.1.302`, a temporary `AGENTVC_HOME` and `AGENTVC_DEBUG=1`. Evidence: `results/spikes/2026-10-22/u20-real-claude-code/` (scrubbed).
+
+**Result: the hook path works with the real client.**
+- All events arrived and were recorded: SessionStart and UserPromptSubmit through the liveness command hook (which started `agentvcd`); PreToolUse, PostToolUse, PostToolUseFailure, PostToolBatch, Stop and SessionEnd as `http` hooks. 4 steps (Bash `echo hello`, Write `notes.txt`, Bash `exit 3` recorded as `error`, a denied Write into `.agentvc/`); 0 gaps; 0 rejected requests; ledger verified.
+- Claude Code's client sends a Host and the literal token header that `agentvcd` accepts, and treats `200 {}` as success. A resume stayed in the same run (same session id).
+- The deny reply works: the Write into `.agentvc/` didn't happen, and the agent quoted AgentVC's reason. The step is `DENIED` in the ledger.
+- ADR-0003's amendment (literal token) is now verified, still awaiting your decision. U-20 marked answered.
+
+**Small defects it exposed (all S3, in session 3's code; to fix at the start of session 4):**
+1. The debug log times phases with `time.monotonic()`, which ticks every 15.6 ms on Windows: it shows 0 or 15–16 ms. Use `perf_counter` for durations (G7 measurements in session 5 depend on it).
+2. `agentvcd` writes a traceback to `daemon.log` when Claude Code drops an idle kept-alive connection (`ConnectionResetError`); it's harmless and should be ignored quietly.
+3. `agentvc history`/`inspect` print `·` as `�` when their output goes through a pipe: under `-I`, Python ignores `PYTHONIOENCODING` and writes cp1252. Print UTF-8 (or ASCII separators).
+
+**Side effects:** the three runs used your Claude account (3 short prompts) and left a transcript under `~/.claude/projects/` for the throwaway folder, as the earlier capture runs did. No settings were changed. The real `~/.agentvc` was not touched. The throwaway folder and its temporary home are deleted, and the test daemon was shut down.
+
+### 2026-10-22: session 3, Alpha A (foundations, capture, ledger)
+Branch **`alpha/session-3`**, created from **`discovery/session-2`** because PR #2 was **not merged** when the session started (`origin/main` still ends at the PR #1 merge, `fd44c41`). 45 signed commits, each `G` with the repository's email; **not pushed**, no pull request.
+
+**Done**
+- **U-18 measured first** (`scripts/spikes/hook_latency.py --http-only`, test first; `results/spikes/2026-10-21/`): `http` hook round trip to a local server on 127.0.0.1, Windows, 200 calls: **p95 2.7 ms with Node's `fetch`** (3.4 ms on a re-run), 1.1 ms kept-alive, 27 ms for Python with a new connection per call (a timer artifact of Python's connect with a timeout). Well under 50 ms, so ADR-0003 stands and the hook path was built. **The name `localhost` costs ~2 s per call on Windows**, so hook URLs say `127.0.0.1`. ADR-0003 and U-18 updated; the CI spike job now runs it too (Linux/macOS pending a push).
+- **ADRs 0003–0009 marked accepted** (your decision). One **proposed amendment to ADR-0003**, needing your decision (below).
+- **Session 3, items 1–8** (design notes in `docs/design/`: foundations, wiring, capture, hook-path, ledger, cli; each written before its code):
+  1. Foundations: `agentvc/io.py` (fault injection on every operation, atomic write with crash points, cross-process locks, SQLite, bounded subprocesses that kill the whole tree via a job object on Windows), `clock.py`, `crash.py`, `scrub.py` (moved from the capture script, more token formats), `debuglog.py`.
+  2. `agentvc/wiring.py`: one list of events and tools; hook settings generated per Claude Code version (only events that version knows; `http` to 127.0.0.1 from 2.1.302, exec-form command hooks with absolute interpreter and `-I`; per-call command everywhere for 2.1.72; `onFailure: block` in strict mode where supported). Tests fail if wiring, adapter and recorder disagree.
+  3. Event model + Claude Code adapter, tested only against the fixtures of both versions (and mutations of them); blind-spot log; hook core with the ADR-0004 policy (5 s deadline, fail open with message + GAP, strict blocks PreToolUse); **`agentvcd`** (ADR-0003) with liveness per prompt.
+  4. Ledger: hash-chained journal + runs/turns/steps, anchor in `~/.agentvc/anchors/`, `schema_version` + `migrations`; Pre without Post and Post without Pre are GAPs.
+  5. CLI: `history`, `inspect <run>`, `check` (real hook path, plus the failure path), all with `--json`; `hooks-config`.
+  6. `.agentvc/` ignores itself; PreToolUse denies agent writes into it (edit tools by resolved path, shell commands naming it).
+  7. Adversarial tests for capture and ledger (ATK-CAP-01…08, ATK-LED-01…06, ATK-SELF-04), each group **seen to fail against deliberately broken builds** (about 30 mutations, listed in `docs/adversarial/capture.md` and `ledger.md`).
+  8. `architecture/graph.json` (7 nodes added, 6 updated; `make arch` passes), `tests/traceability.yml` (47 rows now name real tests), `docs/testing/fmea.md` (15 new rows), `CHANGELOG.md`.
+
+**Found and fixed while building (all in this session's code, all on Windows)**
+- Another local socket could bind `agentvcd`'s port (Python's `SO_REUSEADDR`) and take over hook traffic and the token: now an exclusive bind.
+- A port from the ephemeral range let a client connect to itself while nothing listened: ports now 20000–32767.
+- Probing a port by binding it stole it from the starting daemon; a refused connect costs ~1 s on Windows: health checks now use short connects, start-up is locked.
+- Laundering: entries forged into the ledger would have been adopted by the next real write; the anchor now records the pending head, and row ids never get reused.
+- **Found by the end-of-session `make test`** (first run: 1 failed): a 413 answer could be lost to a connection reset when the request body arrived late. Reproduced deterministically, fixed, test added, suite re-run green.
+
+**Corrections to the facts this session was given**
+- **U-17:** replaying the fixtures shows **both** 2.1.72 and 2.1.302 keep one `session_id` across `-p --resume` turns; only the first `InstructionsLoaded` of each resume has a one-off id. The earlier "a new id every resume in 2.1.72" counted those one-off ids. The design still never keys runs on `session_id` alone. `unknowns.md` corrected.
+- Your terminal `claude` is now 2.1.302, and the IDE extension 2.1.306; the 2.1.72 binary is gone, so whether 2.1.72 supports `http` hooks is unknown (U-21). It gets the per-call command form.
+
+**Full test suite (AGENTS.md step 8)**, Windows 11, Python 3.12.7, git 2.49.0.windows.1, on `alpha/session-3` at `7d5ce03` (only documentation commits follow it):
+- `make test` (MSYS2 make; ruff, format, mypy on 65 files, `arch_check` 28 nodes, all pytest tests): **pass, exit 0: 798 passed, 0 failed, 1 skipped**, 91.4 s (92.4 s wall). The skip is the symlink case of `test_protect.py`, which needs privileges on Windows (a directory-junction variant runs instead). The one warning is the intended `TraceabilityGap` report: still TODO are guarantees 3/8, hazards 32/46, FMEA 28/58, attacks 61/76 (snapshot, restore, classifier and later components).
+- `./make.ps1 test`: **797 passed, 1 failed, 1 skipped**, 88.5 s. The failure is **unrelated** (it fails the same way on `discovery/session-2`): the latency spike's `hook_via_bash` uses WSL's `bash.exe`, which PowerShell finds first. Recorded in `docs/known-issues.md` (no `gh` here).
+- Fast lane: 784 passed, 14 deselected, about 30 s.
+- Not run: Linux and macOS (CI runs when you push), Python 3.11 and 3.13 locally.
+
+**Mistakes made and fixed this session**
+- My first commit carried a `Co-Authored-By` trailer, which AGENTS.md forbids; amended before anything else (unpushed).
+- A pipeline (`make fast | tail`) hid a failing lint run, so one commit went in with two over-long lines; amended, and every later run used `pipefail`.
+- Inline Python through the shell turned regex backslashes into control characters in `scrub.py`; caught by the tests before committing, and every changed file was scanned for control characters.
+
+**Needs your decision**
+1. **ADR-0003 amendment (proposed):** send the token as a literal header value instead of through `allowedEnvVars`. The 2.1.302 binary blanks environment variables it considers credentials in `http` hook headers, with only a debug-level warning, which would make every hook a silent rejection.
+2. **U-20, verify with real Claude Code:** I didn't run `claude -p` this session. One short run in a throwaway project with project-local hooks from `agentvc hooks-config` would confirm the Host header, the literal token and the real round trip. It uses your account; OK to do it next session?
+3. **Pushing and the PR:** this branch sits on `discovery/session-2`. Once PR #2 is merged, it can go up as its own PR (about 45 commits, larger than the ~400-line PR guideline; it could be split into foundations / capture+ledger / daemon+CLI).
+4. Still open from earlier handoffs: the pivot recommendation, PyYAML and Playwright as dev dependencies, CI for slow tests.
+
+**Worth knowing**
+- `agentvc check` measured 8–30 ms per hook including the recording (ledger transaction and two anchor writes, timed with Python's client), within the 50 ms budget but well above the bare 3 ms round trip. Session 5 measures the budgets properly.
+- Installing the hooks into an agent's settings is session 6; `agentvc hooks-config --agent-version 2.1.302` prints what would be installed.
+
+**Side effects outside the repository:** none left. The real `~/.agentvc` was never created (tests and the demo used temporary homes); no `agentvcd` process is running; my scratch folders in `%TEMP%` are deleted. The Claude Code binaries were only read for strings; no Claude Code run, no settings changed.
+
+**Next (session 4, Alpha B):** snapshots and rollback, per `docs/agent-prompts.md`. Before that: your answers to 1–2 above.
+
+**Unrelated issues found:** one, S3: `spikes: hook latency spike fails under PowerShell when bash on PATH is WSL's` (`docs/known-issues.md`; raise on GitHub once `gh` is available).
 
 ### 2026-10-21: PR #1 merged; PR #2 opened for session 2
 - **PR #1** (`discovery/session-1`: session 1 plus the Claude Code 2.1.302 capture) was merged by the maintainer on 2026-10-20 as merge commit `fd44c41`. `main`'s files are identical to the PR's last commit `12b4eed`; GitHub reports the merge commit as verified; the fast lane passed on `main` after the merge.

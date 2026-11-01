@@ -8,13 +8,13 @@
 
 guarantees:
   - {id: G1, title: "Never destroy user work", tests: [TODO]}
-  - {id: G2, title: "Nothing silent", tests: [TODO]}
-  - {id: G3, title: "Honest accounting", tests: [TODO]}
+  - {id: G2, title: "Nothing silent", tests: [tests/test_recorder.py::test_post_without_pre_is_a_visible_gap, tests/test_recorder.py::test_pre_without_post_becomes_a_gap_when_the_turn_ends, tests/test_hook.py::test_a_failed_write_fails_open_visibly_and_leaves_a_gap]}
+  - {id: G3, title: "Honest accounting", tests: [tests/test_ledger.py::test_corrupted_database_is_reported_never_repaired, tests/test_cli.py::test_tampering_is_shown_in_text_and_json]}
   - {id: G4, title: "Never repeat the world", tests: [TODO]}
   - {id: G5, title: "Nothing leaves early", tests: [TODO]}
-  - {id: G6, title: "Local and private", tests: [TODO]}
-  - {id: G7, title: "Cheap enough to leave on", tests: [TODO]}
-  - {id: G8, title: "Can't be silently switched off", tests: [TODO]}
+  - {id: G6, title: "Local and private", tests: [tests/test_adapter_claude_code.py::test_no_file_content_prompt_or_assistant_text_reaches_the_event, tests/test_scrub.py::test_known_formats_are_redacted]}
+  - {id: G7, title: "Cheap enough to leave on", tests: [tests/test_io_run.py::test_timeout_kills_the_child_and_its_grandchild, tests/test_hook.py::test_a_locked_ledger_fails_open_within_the_deadline]}
+  - {id: G8, title: "Can't be silently switched off", tests: [tests/test_protect.py::test_edit_tools_cannot_write_into_the_store, tests/test_ledger.py::test_entries_appended_outside_agentvc_are_detected_and_not_laundered, tests/test_cli_hook.py::test_a_planted_agentvc_package_in_the_project_is_not_run]}
 
 hazards:
   - {id: HZ-G1-01, hazard: "Restore writes to a path the user changed after the run", fmea: [FM-RST-03], tests: [TODO]}
@@ -28,31 +28,31 @@ hazards:
   - {id: HZ-G1-09, hazard: "A path changes type (file ↔ directory ↔ symlink) between snapshot and restore", fmea: [FM-RST-06], tests: [TODO]}
   - {id: HZ-G1-10, hazard: "Two names map to one file (case-insensitive file system, Unicode normalisation)", fmea: [], tests: [TODO]}
   - {id: HZ-G1-11, hazard: "Rollback runs while the agent is still writing", fmea: [], tests: [TODO]}
-  - {id: HZ-G1-12, hazard: "An older AgentVC opens a newer ledger and misreads it", fmea: [FM-LED-04], tests: [TODO]}
+  - {id: HZ-G1-12, hazard: "An older AgentVC opens a newer ledger and misreads it", fmea: [FM-LED-04], tests: [tests/test_ledger.py::test_a_newer_schema_is_refused_and_left_untouched]}
   - {id: HZ-G1-13, hazard: "The agent deletes a nested repository or a worktree inside the workspace, whose files the snapshot doesn't hold", fmea: [FM-SNAP-06], tests: [TODO]}
-  - {id: HZ-G2-01, hazard: "A Pre event arrives with no Post event, and no GAP is recorded", fmea: [FM-HOOK-02], tests: [TODO]}
-  - {id: HZ-G2-02, hazard: "AgentVC's hook crashes or times out without recording a GAP", fmea: [FM-HOOK-01], tests: [TODO]}
-  - {id: HZ-G2-03, hazard: "A payload field is renamed or missing, and the event is dropped instead of logged as a blind spot", fmea: [FM-ADP-01], tests: [TODO]}
-  - {id: HZ-G2-04, hazard: "A tool or event is not subscribed in the wiring", fmea: [FM-ADP-03], tests: [TODO]}
-  - {id: HZ-G2-05, hazard: "Subagent or parallel-batch actions are missed or misattributed", fmea: [FM-ADP-02], tests: [TODO]}
-  - {id: HZ-G2-06, hazard: "Concurrent hooks lose a ledger write", fmea: [FM-LED-01], tests: [TODO]}
-  - {id: HZ-G2-07, hazard: "The agent changes directory or adds a root outside the project, and its actions there go unreported", fmea: [], tests: [TODO]}
+  - {id: HZ-G2-01, hazard: "A Pre event arrives with no Post event, and no GAP is recorded", fmea: [FM-HOOK-02], tests: [tests/test_recorder.py::test_pre_without_post_becomes_a_gap_when_the_turn_ends]}
+  - {id: HZ-G2-02, hazard: "AgentVC's hook crashes or times out without recording a GAP", fmea: [FM-HOOK-01], tests: [tests/test_hook.py::test_a_recorder_crash_is_caught_and_becomes_a_gap, tests/test_hook.py::test_a_locked_ledger_fails_open_within_the_deadline]}
+  - {id: HZ-G2-03, hazard: "A payload field is renamed or missing, and the event is dropped instead of logged as a blind spot", fmea: [FM-ADP-01], tests: [tests/test_adapter_claude_code.py::test_renamed_field_is_a_blind_spot, tests/test_hook.py::test_unreadable_payloads_go_to_the_blind_spot_log]}
+  - {id: HZ-G2-04, hazard: "A tool or event is not subscribed in the wiring", fmea: [FM-ADP-03], tests: [tests/test_wiring.py::test_wiring_adapter_and_recorder_agree, tests/test_wiring.py::test_tool_events_match_every_tool_both_shells_included]}
+  - {id: HZ-G2-05, hazard: "Subagent or parallel-batch actions are missed or misattributed", fmea: [FM-ADP-02], tests: [tests/test_recorder.py::test_parallel_calls_pair_by_tool_use_id, tests/test_recorder.py::test_subagent_steps_keep_their_agent_id, tests/test_recorder.py::test_batch_reconciles_missing_posts_and_unseen_calls]}
+  - {id: HZ-G2-06, hazard: "Concurrent hooks lose a ledger write", fmea: [FM-LED-01], tests: [tests/test_ledger.py::test_processes_writing_at_once_lose_nothing, tests/test_daemon.py::test_parallel_hooks_lose_nothing]}
+  - {id: HZ-G2-07, hazard: "The agent changes directory or adds a root outside the project, and its actions there go unreported", fmea: [], tests: [tests/test_recorder.py::test_a_known_session_that_leaves_the_workspace_is_recorded_and_flagged]}
   - {id: HZ-G2-08, hazard: "An action bypasses hooks entirely (a script calls an API); must be documented as a limit", fmea: [], tests: [TODO]}
-  - {id: HZ-G2-09, hazard: "An install writes a hook event the agent version doesn't know, and the agent silently drops all hooks", fmea: [FM-INS-03], tests: [TODO]}
-  - {id: HZ-G2-10, hazard: "AgentVC's background process is down, so every hook fails silently as a non-blocking error", fmea: [FM-HOOK-04], tests: [TODO]}
+  - {id: HZ-G2-09, hazard: "An install writes a hook event the agent version doesn't know, and the agent silently drops all hooks", fmea: [FM-INS-03], tests: [tests/test_wiring.py::test_config_names_only_events_the_version_knows]}
+  - {id: HZ-G2-10, hazard: "AgentVC's background process is down, so every hook fails silently as a non-blocking error", fmea: [FM-HOOK-04], tests: [tests/test_daemon.py::test_liveness_starts_the_daemon_and_recovers_from_a_kill]}
   - {id: HZ-G3-01, hazard: "A report says \"restored\" for a file that was skipped, conflicted or locked", fmea: [FM-RST-07], tests: [TODO]}
   - {id: HZ-G3-02, hazard: "A path over the budget, or unreadable, is reported as protected", fmea: [FM-SNAP-04, FM-SNAP-05], tests: [TODO]}
   - {id: HZ-G3-03, hazard: "An irreversible or unknown effect is classed as restorable", fmea: [FM-CLS-01, FM-CLS-02], tests: [TODO]}
-  - {id: HZ-G3-04, hazard: "A corrupt ledger is silently \"repaired\" into a false history", fmea: [FM-LED-03], tests: [TODO]}
+  - {id: HZ-G3-04, hazard: "A corrupt ledger is silently \"repaired\" into a false history", fmea: [FM-LED-03], tests: [tests/test_ledger.py::test_corrupted_database_is_reported_never_repaired, tests/test_ledger.py::test_missing_version_row_is_corruption_not_a_guess]}
   - {id: HZ-G4-01, hazard: "A replayed or forked step re-executes an effect the parent already performed", fmea: [FM-FEN-01], tests: [TODO]}
   - {id: HZ-G4-02, hazard: "The same effect is reached through a reworded command or another tool", fmea: [FM-FEN-01], tests: [TODO]}
   - {id: HZ-G5-01, hazard: "A staged effect is released before `commit`", fmea: [FM-OBX-02], tests: [TODO]}
   - {id: HZ-G5-02, hazard: "A crash between release and record makes the next `commit` release again", fmea: [FM-OBX-01], tests: [TODO]}
   - {id: HZ-G5-03, hazard: "`commit` runs twice at once (two terminals)", fmea: [FM-OBX-01], tests: [TODO]}
-  - {id: HZ-G6-01, hazard: "A secret in a command, output or environment is written to the ledger", fmea: [FM-SEC-01], tests: [TODO]}
+  - {id: HZ-G6-01, hazard: "A secret in a command, output or environment is written to the ledger", fmea: [FM-SEC-01], tests: [tests/test_adapter_claude_code.py::test_secrets_in_commands_are_scrubbed, tests/test_scrub.py::test_known_formats_are_redacted]}
   - {id: HZ-G6-02, hazard: "An export includes `.env` or other secret-bearing files", fmea: [FM-SEC-01], tests: [TODO]}
   - {id: HZ-G6-03, hazard: "AgentVC's own code makes a network call", fmea: [], tests: [TODO]}
-  - {id: HZ-G6-04, hazard: "The debug log or diagnostics bundle contains secrets, prompts or file contents", fmea: [FM-SEC-01], tests: [TODO]}
+  - {id: HZ-G6-04, hazard: "The debug log or diagnostics bundle contains secrets, prompts or file contents", fmea: [FM-SEC-01], tests: [tests/test_debuglog.py::test_values_are_scrubbed_and_capped, tests/test_hook.py::test_debug_log_has_timings_and_no_content]}
   - {id: HZ-G6-05, hazard: "Development tooling (usage study, payload capture) writes transcript content, prompts or secrets into the repository", fmea: [FM-DEV-01], tests: [tests/test_usage_study.py::test_written_result_contains_no_transcript_data, tests/test_usage_study.py::test_result_holds_only_whitelisted_strings_and_numbers, tests/test_usage_study.py::test_assert_aggregate_only_rejects_foreign_strings, tests/test_capture_payloads.py::test_scrub_removes_known_token_formats, tests/test_capture_payloads.py::test_scrub_anonymises_home_user_and_email, tests/test_capture_payloads.py::test_hook_writes_scrubbed_payload]}
   - {id: HZ-G7-01, hazard: "Cold-start hook latency exceeds 50 ms p95 (Windows in particular)", fmea: [FM-HOOK-03], tests: [TODO]}
   - {id: HZ-G7-02, hazard: "Snapshotting a huge or pathological repository blows the budget or hangs", fmea: [FM-SNAP-04], tests: [TODO]}
@@ -83,42 +83,58 @@ fmea:
   - {id: FM-RST-06, component: "Restore", failure: "File ↔ directory ↔ symlink type change between snapshots", tests: [TODO]}
   - {id: FM-RST-07, component: "Restore", failure: "File locked by an editor or antivirus (Windows)", tests: [TODO]}
   - {id: FM-OUT-01, component: "Outside-change detection", failure: "User edits during the run are attributed to the agent", tests: [TODO]}
-  - {id: FM-LED-01, component: "Ledger", failure: "Two hooks write at once", tests: [TODO]}
-  - {id: FM-LED-02, component: "Ledger", failure: "Agent edits or deletes rows", tests: [TODO]}
-  - {id: FM-LED-03, component: "Ledger", failure: "Database corrupted (crash, disk)", tests: [TODO]}
-  - {id: FM-LED-04, component: "Ledger", failure: "Opened by an older AgentVC with a newer schema", tests: [TODO]}
-  - {id: FM-HOOK-01, component: "Hook", failure: "AgentVC's hook crashes or exceeds the timeout", tests: [TODO]}
-  - {id: FM-HOOK-02, component: "Hook", failure: "Pre event with no matching Post event", tests: [TODO]}
+  - {id: FM-LED-01, component: "Ledger", failure: "Two hooks write at once", tests: [tests/test_ledger.py::test_processes_writing_at_once_lose_nothing, tests/test_ledger.py::test_threads_writing_at_once_lose_nothing]}
+  - {id: FM-LED-02, component: "Ledger", failure: "Agent edits or deletes rows", tests: [tests/test_ledger.py::test_tampering_with_rows_or_entries_is_detected, tests/test_ledger.py::test_deleting_the_newest_row_stays_visible_after_later_writes]}
+  - {id: FM-LED-03, component: "Ledger", failure: "Database corrupted (crash, disk)", tests: [tests/test_ledger.py::test_corrupted_database_is_reported_never_repaired]}
+  - {id: FM-LED-04, component: "Ledger", failure: "Opened by an older AgentVC with a newer schema", tests: [tests/test_ledger.py::test_a_newer_schema_is_refused_and_left_untouched, tests/test_hook.py::test_a_newer_ledger_is_a_visible_recording_failure]}
+  - {id: FM-LED-05, component: "Ledger", failure: "Crash between commit and anchor write", tests: [tests/test_ledger.py::test_crash_between_commit_and_anchor_is_noted_not_alarmed, tests/test_ledger.py::test_entries_appended_outside_agentvc_are_detected_and_not_laundered]}
+  - {id: FM-HOOK-01, component: "Hook", failure: "AgentVC's hook crashes or exceeds the timeout", tests: [tests/test_hook.py::test_a_failed_write_fails_open_visibly_and_leaves_a_gap, tests/test_hook.py::test_strict_mode_blocks_a_pre_tool_use_it_cannot_record, tests/test_hook.py::test_a_locked_ledger_fails_open_within_the_deadline]}
+  - {id: FM-HOOK-02, component: "Hook", failure: "Pre event with no matching Post event", tests: [tests/test_recorder.py::test_pre_without_post_becomes_a_gap_when_the_turn_ends, tests/test_recorder.py::test_post_without_pre_is_a_visible_gap]}
   - {id: FM-HOOK-03, component: "Hook", failure: "Hook too slow (cold Python start on Windows)", tests: [TODO]}
-  - {id: FM-HOOK-04, component: "Hook", failure: "The background process (agentvcd) is down while hooks are http hooks", tests: [TODO]}
-  - {id: FM-ADP-01, component: "Adapter", failure: "Agent update renames a payload field", tests: [TODO]}
-  - {id: FM-ADP-02, component: "Adapter", failure: "Subagent or parallel-batch tool calls not attributed", tests: [TODO]}
-  - {id: FM-ADP-03, component: "Adapter", failure: "Tool the wiring doesn't subscribe to (new tool name)", tests: [TODO]}
+  - {id: FM-HOOK-04, component: "Hook", failure: "The background process (agentvcd) is down while hooks are http hooks", tests: [tests/test_daemon.py::test_liveness_starts_the_daemon_and_recovers_from_a_kill]}
+  - {id: FM-HOOK-05, component: "Hook", failure: "agentvcd's port is taken by another program", tests: [tests/test_daemon.py::test_a_taken_port_falls_back_to_recording_in_process]}
+  - {id: FM-HOOK-06, component: "Hook", failure: "Hook requests with a wrong or blanked token, or a foreign Host header", tests: [tests/test_daemon.py::test_requests_without_the_token_are_rejected_and_counted, tests/test_daemon.py::test_a_foreign_host_header_is_rejected, tests/test_daemon.py::test_liveness_reply_reports_gaps_blind_spots_and_rejections]}
+  - {id: FM-HOOK-07, component: "Hook", failure: "The hook URL says `localhost`", tests: [tests/test_wiring.py::test_http_hooks_use_127_0_0_1_and_a_literal_token]}
+  - {id: FM-HOOK-08, component: "Hook", failure: "Another local socket binds agentvcd's port (SO_REUSEADDR on Windows), or the port is ephemeral and a client connects to itself", tests: [tests/test_daemon.py::test_no_other_socket_can_take_over_the_daemons_port, tests/test_daemon.py::test_port_is_outside_every_ephemeral_range, tests/test_daemon.py::test_a_garbage_answer_means_not_healthy]}
+  - {id: FM-ADP-01, component: "Adapter", failure: "Agent update renames a payload field", tests: [tests/test_adapter_claude_code.py::test_renamed_field_is_a_blind_spot, tests/test_adapter_claude_code.py::test_dropping_or_retyping_any_field_never_crashes]}
+  - {id: FM-ADP-02, component: "Adapter", failure: "Subagent or parallel-batch tool calls not attributed", tests: [tests/test_recorder.py::test_parallel_calls_pair_by_tool_use_id, tests/test_recorder.py::test_subagent_steps_keep_their_agent_id]}
+  - {id: FM-ADP-03, component: "Adapter", failure: "Tool the wiring doesn't subscribe to (new tool name)", tests: [tests/test_wiring.py::test_wiring_adapter_and_recorder_agree, tests/test_wiring.py::test_tool_categories]}
+  - {id: FM-ADP-04, component: "Adapter", failure: "A one-off session id (InstructionsLoaded on resume) starts a phantom run", tests: [tests/test_recorder.py::test_a_whole_captured_session_is_one_run_with_every_step_recorded]}
+  - {id: FM-ADP-05, component: "Adapter", failure: "File contents, prompts or assistant text stored in the ledger", tests: [tests/test_adapter_claude_code.py::test_no_file_content_prompt_or_assistant_text_reaches_the_event, tests/test_hook.py::test_prompts_are_stored_only_when_enabled]}
+  - {id: FM-SELF-01, component: "Self-protection", failure: "The agent writes into `.agentvc/` through an edit tool or a plain shell command", tests: [tests/test_protect.py::test_edit_tools_cannot_write_into_the_store, tests/test_protect.py::test_shell_commands_naming_the_store_are_denied, tests/test_protect.py::test_a_junction_into_the_store_is_followed, tests/test_protect.py::test_ordinary_work_is_not_denied]}
   - {id: FM-CLS-01, component: "Classifier", failure: "New CLI with a destructive subcommand", tests: [TODO]}
   - {id: FM-CLS-02, component: "Classifier", failure: "Obfuscated command (`sh -c`, `eval`, base64)", tests: [TODO]}
   - {id: FM-FEN-01, component: "Fence", failure: "Same effect via a different tool", tests: [TODO]}
   - {id: FM-OBX-01, component: "Outbox", failure: "Release succeeds but the result is lost in a crash", tests: [TODO]}
   - {id: FM-OBX-02, component: "Outbox", failure: "Staged effect released before `commit`", tests: [TODO]}
-  - {id: FM-SEC-01, component: "Scrubber", failure: "Token format not recognised", tests: [TODO]}
+  - {id: FM-SEC-01, component: "Scrubber", failure: "Token format not recognised", tests: [tests/test_scrub.py::test_known_formats_are_redacted, tests/test_scrub.py::test_credentials_inside_urls_are_redacted_but_the_host_stays]}
   - {id: FM-CFG-01, component: "Config", failure: "Agent switches mode to `observe`", tests: [TODO]}
   - {id: FM-CFG-02, component: "Install", failure: "Agent removes AgentVC's hooks from `.claude/settings.json`", tests: [TODO]}
-  - {id: FM-INS-01, component: "Install", failure: "Hook calls the wrong Python (project venv)", tests: [TODO]}
+  - {id: FM-INS-01, component: "Install", failure: "Hook calls the wrong Python (project venv)", tests: [tests/test_wiring.py::test_liveness_events_run_agentvc_by_absolute_path_in_isolated_mode, tests/test_wiring.py::test_interpreter_must_be_absolute]}
   - {id: FM-INS-02, component: "Install", failure: "Install overwrites the user's other hooks", tests: [TODO]}
-  - {id: FM-INS-03, component: "Install", failure: "Hook config names an event the installed agent version doesn't know", tests: [TODO]}
-  - {id: FM-INS-04, component: "Install", failure: "Repo content shadows AgentVC's modules", tests: [TODO]}
+  - {id: FM-INS-03, component: "Install", failure: "Hook config names an event the installed agent version doesn't know", tests: [tests/test_wiring.py::test_config_names_only_events_the_version_knows, tests/test_wiring.py::test_unknown_version_between_known_ones_uses_the_older_list]}
+  - {id: FM-INS-04, component: "Install", failure: "Repo content shadows AgentVC's modules", tests: [tests/test_cli_hook.py::test_a_planted_agentvc_package_in_the_project_is_not_run]}
+  - {id: FM-WIR-01, component: "Wiring", failure: "The agent's hook timeout and AgentVC's own deadline drift apart", tests: [tests/test_wiring.py::test_hook_timeout_is_derived_from_agentvc_deadline]}
+  - {id: FM-IO-01, component: "I/O layer", failure: "Crash between the temp write and the rename", tests: [tests/test_io.py::test_crash_before_replace_keeps_the_old_file, tests/test_io.py::test_a_killed_process_never_leaves_a_torn_file]}
+  - {id: FM-IO-02, component: "I/O layer", failure: "A lock holder is killed", tests: [tests/test_io.py::test_lock_held_by_a_killed_process_is_released, tests/test_io.py::test_lock_excludes_a_second_holder_and_times_out]}
+  - {id: FM-IO-03, component: "I/O layer", failure: "A child process outlives its timeout (a grandchild keeps the pipes open)", tests: [tests/test_io_run.py::test_timeout_kills_the_child_and_its_grandchild, tests/test_io_run.py::test_a_grandchild_holding_the_pipes_cannot_hang_a_finished_run]}
+  - {id: FM-IO-04, component: "I/O layer", failure: "Unbounded child output", tests: [tests/test_io_run.py::test_output_is_capped]}
+  - {id: FM-CLI-01, component: "CLI", failure: "Output hides gaps or a tampered ledger", tests: [tests/test_cli.py::test_inspect_golden, tests/test_cli.py::test_tampering_is_shown_in_text_and_json]}
+  - {id: FM-CLI-02, component: "CLI", failure: "`agentvc check` passes without exercising the real hook path", tests: [tests/test_check.py::test_check_fails_when_recording_is_broken]}
+  - {id: FM-CLI-03, component: "CLI", failure: "Piped output can't encode a recorded command or path", tests: [tests/test_cli.py::test_piped_output_never_crashes_on_unusual_characters]}
   - {id: FM-GC-01, component: "GC", failure: "Deletes a snapshot still referenced by a fork", tests: [TODO]}
   - {id: FM-DEV-01, component: "Dev tooling", failure: "Usage study or payload capture writes transcript content, prompts or secrets into the repository", tests: [tests/test_usage_study.py::test_written_result_contains_no_transcript_data, tests/test_usage_study.py::test_result_holds_only_whitelisted_strings_and_numbers, tests/test_usage_study.py::test_assert_aggregate_only_rejects_foreign_strings, tests/test_capture_payloads.py::test_scrub_removes_known_token_formats, tests/test_capture_payloads.py::test_scrub_anonymises_home_user_and_email, tests/test_capture_payloads.py::test_hook_writes_scrubbed_payload]}
 
 attacks:
   # Hook capture / adapters
-  - {id: ATK-CAP-01, attack: "malformed, truncated or huge payloads", tests: [TODO]}
-  - {id: ATK-CAP-02, attack: "missing or renamed fields", tests: [TODO]}
-  - {id: ATK-CAP-03, attack: "NUL and odd Unicode", tests: [TODO]}
-  - {id: ATK-CAP-04, attack: "duplicated or out-of-order events", tests: [TODO]}
-  - {id: ATK-CAP-05, attack: "a Pre with no Post", tests: [TODO]}
-  - {id: ATK-CAP-06, attack: "reused tool_use_id", tests: [TODO]}
-  - {id: ATK-CAP-07, attack: "events from another project directory", tests: [TODO]}
-  - {id: ATK-CAP-08, attack: "two sessions at once", tests: [TODO]}
+  - {id: ATK-CAP-01, attack: "malformed, truncated or huge payloads", tests: [tests/test_adapter_claude_code.py::test_malformed_bodies_become_blind_spots, tests/test_adapter_claude_code.py::test_huge_but_valid_write_payload_is_recorded_without_its_content, tests/test_daemon.py::test_oversized_bodies_are_refused_and_logged]}
+  - {id: ATK-CAP-02, attack: "missing or renamed fields", tests: [tests/test_adapter_claude_code.py::test_dropping_or_retyping_any_field_never_crashes, tests/test_adapter_claude_code.py::test_renamed_field_is_a_blind_spot]}
+  - {id: ATK-CAP-03, attack: "NUL and odd Unicode", tests: [tests/test_adapter_claude_code.py::test_nul_and_lone_surrogates_are_made_storable]}
+  - {id: ATK-CAP-04, attack: "duplicated or out-of-order events", tests: [tests/test_recorder.py::test_out_of_order_post_then_pre_stays_a_gap_marked_late, tests/test_recorder.py::test_duplicate_events_change_nothing_and_are_reported]}
+  - {id: ATK-CAP-05, attack: "a Pre with no Post", tests: [tests/test_recorder.py::test_pre_without_post_becomes_a_gap_when_the_turn_ends]}
+  - {id: ATK-CAP-06, attack: "reused tool_use_id", tests: [tests/test_recorder.py::test_a_reused_tool_use_id_opens_a_new_flagged_step]}
+  - {id: ATK-CAP-07, attack: "events from another project directory", tests: [tests/test_recorder.py::test_an_unknown_session_from_another_project_is_not_recorded]}
+  - {id: ATK-CAP-08, attack: "two sessions at once", tests: [tests/test_recorder.py::test_two_sessions_at_once_get_separate_runs]}
   # Snapshotter
   - {id: ATK-SNAP-01, attack: "files changing during the snapshot", tests: [TODO]}
   - {id: ATK-SNAP-02, attack: "symlinks to outside the project and symlink loops", tests: [TODO]}
@@ -144,17 +160,17 @@ attacks:
   - {id: ATK-RST-08, attack: "files locked by an editor (Windows)", tests: [TODO]}
   - {id: ATK-RST-09, attack: "permission denied", tests: [TODO]}
   # Ledger and state
-  - {id: ATK-LED-01, attack: "editing or deleting rows", tests: [TODO]}
-  - {id: ATK-LED-02, attack: "truncating the newest entries", tests: [TODO]}
-  - {id: ATK-LED-03, attack: "corrupting the database", tests: [TODO]}
-  - {id: ATK-LED-04, attack: "writing into .agentvc/ through a shell script or Python", tests: [TODO]}
-  - {id: ATK-LED-05, attack: "two writers at once", tests: [TODO]}
-  - {id: ATK-LED-06, attack: "clock changes", tests: [TODO]}
+  - {id: ATK-LED-01, attack: "editing or deleting rows", tests: [tests/test_ledger.py::test_tampering_with_rows_or_entries_is_detected, tests/test_ledger.py::test_a_consistently_rewritten_chain_is_caught_by_the_anchor, tests/test_ledger.py::test_deleting_the_newest_row_stays_visible_after_later_writes]}
+  - {id: ATK-LED-02, attack: "truncating the newest entries", tests: [tests/test_ledger.py::test_truncation_is_detected_by_the_anchor]}
+  - {id: ATK-LED-03, attack: "corrupting the database", tests: [tests/test_ledger.py::test_corrupted_database_is_reported_never_repaired]}
+  - {id: ATK-LED-04, attack: "writing into .agentvc/ through a shell script or Python", tests: [tests/test_protect.py::test_shell_commands_naming_the_store_are_denied, tests/test_ledger.py::test_entries_appended_outside_agentvc_are_detected_and_not_laundered]}
+  - {id: ATK-LED-05, attack: "two writers at once", tests: [tests/test_ledger.py::test_processes_writing_at_once_lose_nothing, tests/test_ledger.py::test_threads_writing_at_once_lose_nothing]}
+  - {id: ATK-LED-06, attack: "clock changes", tests: [tests/test_ledger.py::test_a_clock_jumping_back_cannot_reorder_history]}
   # Self-protection
   - {id: ATK-SELF-01, attack: "agent runs agentvc purge, uninstall or rollback --force", tests: [TODO]}
   - {id: ATK-SELF-02, attack: "agent edits .claude/settings.json to drop the hooks", tests: [TODO]}
   - {id: ATK-SELF-03, attack: "agent changes config.toml to observe mode", tests: [TODO]}
-  - {id: ATK-SELF-04, attack: "agent kills AgentVC processes", tests: [TODO]}
+  - {id: ATK-SELF-04, attack: "agent kills AgentVC processes", tests: [tests/test_daemon.py::test_liveness_starts_the_daemon_and_recovers_from_a_kill]}
   - {id: ATK-SELF-05, attack: "prompt injection in a repo file asks for any of the above", tests: [TODO]}
   # Effect classifier
   - {id: ATK-CLS-01, attack: "sh -c, eval, bash <<EOF", tests: [TODO]}
