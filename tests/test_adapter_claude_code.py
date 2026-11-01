@@ -282,7 +282,8 @@ def test_blind_spot_keeps_shape_not_content() -> None:
 )
 def test_edit_targets_are_kept_for_snapshots_but_never_stored(rel: str, key: str) -> None:
     data = payload(rel)
-    secret_path = "C:/work/ghp_" + "a" * 36 + "/notes.txt"  # a path that looks like a token
+    # Absolute on this OS (a drive path isn't absolute on POSIX), and looks like a token.
+    secret_path = str(Path(Path.cwd().anchor, "work", "ghp_" + "a" * 36, "notes.txt"))
     data["tool_input"][key] = secret_path
     event = cc.parse(data, record_prompts=False)
     assert isinstance(event, Event)
