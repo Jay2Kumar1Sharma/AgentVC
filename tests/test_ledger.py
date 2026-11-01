@@ -50,9 +50,11 @@ def test_new_ledger_has_schema_version_and_migration_history(tmp_path: Path) -> 
     lg = open_ledger(tmp_path)
     lg.close()
     db = raw(tmp_path)
-    assert db.execute("select version from schema_version").fetchall() == [(1,)]
-    [(version, applied_at, agentvc_version)] = db.execute("select * from migrations").fetchall()
-    assert version == 1 and applied_at and agentvc_version
+    current = ledger.SCHEMA_VERSION
+    assert db.execute("select version from schema_version").fetchall() == [(current,)]
+    history = db.execute("select * from migrations order by version").fetchall()
+    assert [version for version, _, _ in history] == list(range(1, current + 1))
+    assert all(applied_at and agentvc_version for _, applied_at, agentvc_version in history)
     db.close()
 
 
@@ -89,16 +91,20 @@ def test_migration_backs_up_first_and_is_recorded(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     add_run(open_ledger(tmp_path))
+    current = ledger.SCHEMA_VERSION
     ran: list[int] = []
-    monkeypatch.setattr(ledger, "SCHEMA_VERSION", 2)
-    monkeypatch.setattr(ledger, "MIGRATIONS", {2: lambda db: ran.append(2)})
+    monkeypatch.setattr(ledger, "SCHEMA_VERSION", current + 1)
+    monkeypatch.setattr(
+        ledger, "MIGRATIONS", {**ledger.MIGRATIONS, current + 1: lambda db: ran.append(1)}
+    )
     lg = open_ledger(tmp_path)
     lg.close()
-    assert ran == [2]
-    assert (tmp_path / "ws" / ".agentvc" / "ledger.db.bak-v1").exists()
+    assert ran == [1]
+    assert (tmp_path / "ws" / ".agentvc" / f"ledger.db.bak-v{current}").exists()
     db = raw(tmp_path)
-    assert db.execute("select version from schema_version").fetchall() == [(2,)]
-    assert [v for (v,) in db.execute("select version from migrations order by version")] == [1, 2]
+    assert db.execute("select version from schema_version").fetchall() == [(current + 1,)]
+    history = [v for (v,) in db.execute("select version from migrations order by version")]
+    assert history == list(range(1, current + 2))
     db.close()
 
 

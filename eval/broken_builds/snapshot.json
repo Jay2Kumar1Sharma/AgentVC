@@ -1,0 +1,146 @@
+[
+  {
+    "id": "snap-never-include-ignored",
+    "why": "never_include patterns not applied",
+    "file": "agentvc/snapshot.py",
+    "find": "                if _matches(path, cfg.never_include):",
+    "replace": "                if False:",
+    "tests": ["tests/test_snapshot.py"]
+  },
+  {
+    "id": "snap-ignored-size-limit-off",
+    "why": "ignored files kept whatever their size",
+    "file": "agentvc/snapshot.py",
+    "find": "                    if st.st_size > cfg.ignored_file_max_kb * 1024:",
+    "replace": "                    if False:",
+    "tests": ["tests/test_snapshot.py"]
+  },
+  {
+    "id": "snap-ignored-budget-off",
+    "why": "no total budget for ignored files",
+    "file": "agentvc/snapshot.py",
+    "find": "                    if ignored_total + st.st_size > cfg.ignored_total_mb * 1024 * 1024:",
+    "replace": "                    if False:",
+    "tests": ["tests/test_snapshot.py"]
+  },
+  {
+    "id": "snap-heavy-folders-walked",
+    "why": "ignored heavy folders entered",
+    "file": "agentvc/snapshot.py",
+    "find": "                    if folder in verdict:",
+    "replace": "                    if False:",
+    "tests": ["tests/test_snapshot.py"]
+  },
+  {
+    "id": "snap-nested-repo-entered",
+    "why": "nested repositories walked as plain folders",
+    "file": "agentvc/snapshot.py",
+    "find": "            if rel and any(e.name == \".git\" for e in entries):",
+    "replace": "            if False:",
+    "tests": ["tests/test_snapshot.py"]
+  },
+  {
+    "id": "snap-store-captured",
+    "why": ".agentvc/ captured in its own snapshots",
+    "file": "agentvc/snapshot.py",
+    "find": "                if not rel and e.name in (STORE_DIR, \".git\"):",
+    "replace": "                if not rel and e.name == \".git\":",
+    "tests": ["tests/test_snapshot.py"]
+  },
+  {
+    "id": "snap-racy-trusted",
+    "why": "racy index entries trusted",
+    "file": "agentvc/snapshot.py",
+    "find": "            and not cached.racy\n",
+    "replace": "",
+    "tests": ["tests/test_snapshot.py"]
+  },
+  {
+    "id": "snap-index-size-only",
+    "why": "index compares size only, not modification time",
+    "file": "agentvc/snapshot.py",
+    "find": "            and (cached.size, cached.mtime_ns, cached.ctime_ns) == _sig(st)",
+    "replace": "            and cached.size == st.st_size",
+    "tests": ["tests/test_snapshot.py"]
+  },
+  {
+    "id": "snap-max-file-off",
+    "why": "files over max_file_mb read anyway",
+    "file": "agentvc/snapshot.py",
+    "find": "                if st.st_size > cfg.max_file_mb * 1024 * 1024:",
+    "replace": "                if False:",
+    "tests": ["tests/test_snapshot.py"]
+  },
+  {
+    "id": "snap-unreadable-silent",
+    "why": "unreadable files dropped without being listed",
+    "file": "agentvc/snapshot.py",
+    "find": "            unprotected.append((path, f\"can't read it ({_why(exc.exc)})\"))\n",
+    "replace": "",
+    "tests": ["tests/test_snapshot.py"]
+  },
+  {
+    "id": "snap-unprotected-list-truncated",
+    "why": "only the first 200 unprotected paths kept (no blob)",
+    "file": "agentvc/snapshot.py",
+    "find": "        if len(result.unprotected) > LISTED:",
+    "replace": "        if False:",
+    "tests": ["tests/test_snapshot.py"]
+  },
+  {
+    "id": "snap-no-time-budget",
+    "why": "hook snapshots ignore their deadline",
+    "file": "agentvc/snapshot.py",
+    "find": "        if deadline is not None and deadline.expired():",
+    "replace": "        if False:",
+    "tests": ["tests/test_snapshot.py"]
+  },
+  {
+    "id": "snap-alternates-ignored",
+    "why": "a store with alternates counts as protected",
+    "file": "agentvc/snapshot.py",
+    "find": "        problems = self.objects.problems()\n        if problems:\n            return SnapshotResult(\"failed\", reason=problems[0])\n        stamp = self._stamp_ns()\n        unprotected",
+    "replace": "        stamp = self._stamp_ns()\n        unprotected",
+    "tests": ["tests/test_snapshot.py"]
+  },
+  {
+    "id": "snap-targets-not-resolved",
+    "why": "edit targets used without resolving links",
+    "file": "agentvc/snapshot.py",
+    "find": "            real = Path(os.path.realpath(path))",
+    "replace": "            real = Path(os.path.abspath(path))",
+    "tests": ["tests/test_snapshot.py"]
+  },
+  {
+    "id": "obj-hash-not-checked",
+    "why": "objects read back without checking their hash",
+    "file": "agentvc/objects.py",
+    "find": "        if hashlib.sha1(raw, usedforsecurity=False).hexdigest() != sha:\n            raise ObjectCorrupt(f\"object {sha} doesn't match its content\")\n        header",
+    "replace": "        header",
+    "tests": ["tests/test_objects.py"]
+  },
+  {
+    "id": "obj-tree-order",
+    "why": "tree entries sorted by plain name (git sorts folders as name/)",
+    "file": "agentvc/objects.py",
+    "find": "            return _encode(name) + (b\"/\" if mode == TREE_MODE else b\"\")",
+    "replace": "            return _encode(name)",
+    "tests": ["tests/test_objects.py"]
+  },
+  {
+    "id": "obj-alternates-unreported",
+    "why": "an alternates file goes unreported",
+    "file": "agentvc/objects.py",
+    "find": "        if self.io.exists(alternates):",
+    "replace": "        if False:",
+    "tests": ["tests/test_objects.py"]
+  },
+  {
+    "id": "obj-git-env-inherited",
+    "why": "AgentVC's git inherits the caller's GIT_* variables",
+    "file": "agentvc/objects.py",
+    "find": "        env = {k: v for k, v in os.environ.items() if not k.upper().startswith(\"GIT_\")}",
+    "replace": "        env = dict(os.environ)",
+    "tests": ["tests/test_objects.py"]
+  }
+]

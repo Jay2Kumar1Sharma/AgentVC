@@ -156,3 +156,76 @@ def test_sqlite_connections_go_through_the_layer(tmp_path: Path) -> None:
     io.faults.fail("sqlite", sqlite3.OperationalError("database is locked"))
     with pytest.raises(sqlite3.OperationalError):
         io.connect_sqlite(tmp_path / "x.db", timeout=1.0)
+
+
+# --- file-system primitives for the snapshotter and restore (session 4) -------------------------
+
+
+def test_scandir_lists_names_with_lstat_and_never_follows_links(tmp_path: Path) -> None:
+    io = IO()
+    (tmp_path / "a.txt").write_bytes(b"12345")
+    (tmp_path / "sub").mkdir()
+    entries = {e.name: e for e in io.scandir(tmp_path)}
+    assert sorted(entries) == ["a.txt", "sub"]
+    assert entries["a.txt"].stat.st_size == 5
+    assert entries["a.txt"].is_file() and not entries["a.txt"].is_dir()
+    assert entries["sub"].is_dir() and not entries["sub"].is_link()
+
+
+@pytest.mark.skipif(sys.platform != "win32", reason="directory junctions are Windows-only")
+def test_scandir_reports_a_junction_as_a_link_not_a_directory(tmp_path: Path) -> None:
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    ws = tmp_path / "ws"
+    ws.mkdir()
+    subprocess.run(
+        ["cmd", "/c", "mklink", "/J", str(ws / "j"), str(outside)], check=True, capture_output=True
+    )
+    [entry] = IO().scandir(ws)
+    assert entry.is_link() and not entry.is_dir()
+
+
+def test_lstat_open_read_readlink_and_plain_writes(tmp_path: Path) -> None:
+    io = IO()
+    target = tmp_path / "f.bin"
+    io.write_file(target, b"data")
+    assert io.lstat(target).st_size == 4
+    with io.open_read(target) as f:
+        assert f.read() == b"data"
+    with io.open_new(tmp_path / "new.bin") as f:
+        f.write(b"x")
+    with pytest.raises(FileExistsError):
+        io.open_new(tmp_path / "new.bin")
+    (tmp_path / "d").mkdir()
+    (tmp_path / "d" / "f").write_bytes(b"")
+    with pytest.raises(OSError):
+        io.remove_dir(tmp_path / "d")  # not empty
+    io.remove(tmp_path / "d" / "f")
+    io.remove_dir(tmp_path / "d")
+    assert not (tmp_path / "d").exists()
+
+
+@pytest.mark.parametrize(
+    ("op", "call"),
+    [
+        ("list", lambda io, p: io.scandir(p.parent)),
+        ("stat", lambda io, p: io.lstat(p)),
+        ("read", lambda io, p: io.open_read(p)),
+        ("read", lambda io, p: io.readlink(p)),
+        ("write", lambda io, p: io.write_file(p, b"x")),
+        ("write", lambda io, p: io.open_new(p.with_name("other"))),
+        ("write", lambda io, p: io.chmod(p, 0o644)),
+        ("write", lambda io, p: io.symlink("x", p.with_name("link"))),
+        ("remove", lambda io, p: io.remove_dir(p.parent / "empty")),
+    ],
+)
+def test_every_new_primitive_honours_fault_injection(tmp_path: Path, op: str, call: object) -> None:
+    io = IO()
+    target = tmp_path / "f.txt"
+    target.write_bytes(b"old")
+    (tmp_path / "empty").mkdir()
+    io.faults.fail(op, OSError(errno.EIO, "injected"))
+    with pytest.raises(OSError) as info:
+        call(io, target)  # type: ignore[operator]
+    assert info.value.errno == errno.EIO
+    assert target.read_bytes() == b"old"

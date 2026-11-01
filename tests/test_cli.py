@@ -104,13 +104,15 @@ def test_history_json(ws: Path, tmp_path: Path, capsys: pytest.CaptureFixture[st
 INSPECT = (
     "Run 1 | claude-code | started 2026-10-22 09:30:00 | active\n"
     "Turn 1\n"
-    "  #1  09:30:02  Bash   shell  echo hello                          ok     810 ms\n"
+    "  #1  09:30:02  Bash   shell  echo hello                          ok     810 ms"
+    "  [not snapshotted]\n"
     "  #2  09:30:04  Write  edit   ...agentvc-capture-2.1.302\\new.txt"
-    "  GAP: no post event (the tool may have run unrecorded)\n"
+    "  GAP: no post event (the tool may have run unrecorded)  [not snapshotted]\n"
     "  #3  09:30:05  Bash   shell  exit 3                              error  742 ms"
-    "  GAP: no pre event (state before it unknown)\n"
+    "  GAP: no pre event (state before it unknown)  [not snapshotted]\n"
     "\n"
     "Steps: 3 | recorded 1 | gaps 2 | denied 0\n"
+    "Snapshots: 0 of 3 file-changing steps protected\n"
     "Ledger: ok\n"
 )
 

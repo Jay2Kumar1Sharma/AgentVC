@@ -17,7 +17,9 @@
 
 **Workspace and store** (ADR-0009). The workspace is `git rev-parse --show-toplevel` of `CLAUDE_PROJECT_DIR` (else the payload `cwd`), or that folder when it isn't a repository. `.agentvc/` is created with a `.gitignore` containing `*` before anything else is written.
 
-**Config** (`.agentvc/config.toml`, minimal until session 4): `mode` (`observe` | `protect` | `strict`, default `protect`), `record_prompts` (default `false`). An unreadable or invalid config is reported and the defaults apply; it never turns recording off (G8).
+**Config** (`.agentvc/config.toml`): `mode` (`observe` | `protect` | `strict`, default `protect`), `record_prompts` (default `false`). An unreadable or invalid config is reported and the defaults apply; it never turns recording off (G8).
+
+**Config, session 4** (plan §14.1, ADR-0006, ADR-0007, ADR-0010): `version = 1` (a higher version is reported and its unknown keys ignored), and a `[snapshot]` table: `time_budget_ms`, `max_file_mb`, `ignored_file_max_kb`, `ignored_total_mb`, `heavy_folders` (replaces the default list), `always_include` and `never_include` (glob patterns on workspace-relative paths; `never_include` paths are listed as unprotected, never silently dropped). Unknown keys and wrong types are reported per key; the rest of the file still applies. Modes: **observe** records and snapshots (rollback works) but never asks or blocks for effects; **protect** will also ask before irreversible effects once the classifier exists (v0.2); **strict** also blocks a PreToolUse it can't record or snapshot. Self-protection (writes into `.agentvc/`) holds in every mode. Retention settings arrive with `gc` (v0.1 public).
 
 ## Guarantees touched
 

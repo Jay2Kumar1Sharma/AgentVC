@@ -14,9 +14,21 @@ Internal subcommands used by the hooks: `hook [--ensure-daemon]` (per-call handl
 
 Every command finds the workspace the same way the hook does (from the current folder), so running from a subfolder gives the same answer (plan §15.3 CLI). A missing `.agentvc/` is reported plainly ("AgentVC has not recorded anything here"), never created by a read command.
 
+## Session 4 commands (snapshots and rollback)
+
+| Command | Does | `--json` |
+|---|---|---|
+| `agentvc diff <run>[:<step>]` | A step: what it changed (before → after snapshot), as unified diffs (`Binary files differ` for binary content). A run: each file from before the agent's first change to after its last, plus files changed **outside** the agent between steps and steps that weren't captured | files with status, diff text, outside changes, uncaptured steps |
+| `agentvc rollback <run>[:<step> \| :t<turn>]` | Restore design note. Prints one line per file and the totals: restored / already / conflicts / could not undo, and the rollback number. `--force` overwrites conflicts after saving them | the rollback row and per-file results |
+| `agentvc rollback --undo` | Reverses the newest rollback or undo | idem |
+| `agentvc undo` / `agentvc redo` | The newest turn back / forward | idem |
+| `agentvc repair` | Finishes an interrupted rollback | idem |
+
+`inspect` gains, per step, what wasn't protected (`[not snapshotted: baseline pending]`, `[outside changes: 2]`) and a totals line for snapshots and rollbacks. Targets accept `latest` for the run. Unencodable characters in paths print as `?` (FM-CLI-03); diffs are decoded as UTF-8 with replacement.
+
 ## Guarantees touched
 
-G2/G3: gaps and the ledger verdict are always shown, never only in `--json`. G8: `check` proves recording works on this machine.
+G2/G3: gaps and the ledger verdict are always shown, never only in `--json`. G8: `check` proves recording works on this machine. G1: `rollback`, `undo`, `redo` never write a file that isn't exactly what the agent left (restore note); G3: every file's result is printed.
 
 ## How it can fail
 

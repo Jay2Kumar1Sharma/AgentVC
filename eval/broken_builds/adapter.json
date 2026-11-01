@@ -1,0 +1,18 @@
+[
+  {
+    "id": "adapter-targets-dropped",
+    "why": "edit targets not passed on (edit snapshots can't find the file)",
+    "file": "agentvc/adapters/claude_code.py",
+    "find": "        fields[\"targets\"] = _targets(payload[\"tool_input\"], payload[\"cwd\"])\n",
+    "replace": "",
+    "tests": ["tests/test_adapter_claude_code.py"]
+  },
+  {
+    "id": "event-targets-stored",
+    "why": "unscrubbed edit targets written to the ledger",
+    "file": "agentvc/events.py",
+    "find": "            \"duration_ms\",\n        ):",
+    "replace": "            \"duration_ms\",\n            \"targets\",\n        ):",
+    "tests": ["tests/test_adapter_claude_code.py"]
+  }
+]

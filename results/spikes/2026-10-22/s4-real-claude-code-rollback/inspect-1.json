@@ -1,0 +1,197 @@
+{
+ "run": {
+  "id": 1,
+  "agent": "claude-code",
+  "workspace": "~\\appdata\\local\\temp\\agentvc-s4-real\\ws",
+  "start_dir": "~\\AppData\\Local\\Temp\\agentvc-s4-real\\ws",
+  "started_at": "2026-10-22T12:22:56.397224+00:00",
+  "ended_at": "2026-10-22T12:23:38.170039+00:00",
+  "status": "ended",
+  "flags": [],
+  "parent_run": null,
+  "fork_step": null
+ },
+ "steps": [
+  {
+   "id": 1,
+   "run_id": 1,
+   "turn_id": 1,
+   "seq": 1,
+   "agent_id": null,
+   "tool": "Read",
+   "category": "read",
+   "tool_use_id": "toolu_01NPojiPtSgKkzQ7fTjPWZyF",
+   "input": {
+    "file_path": "~\\AppData\\Local\\Temp\\agentvc-s4-real\\ws\\app.py"
+   },
+   "status": "RECORDED",
+   "outcome": "ok",
+   "error": null,
+   "gap_reason": null,
+   "flags": [],
+   "cwd": "~\\AppData\\Local\\Temp\\agentvc-s4-real\\ws",
+   "started_at": "2026-10-22T12:23:00.229597+00:00",
+   "ended_at": "2026-10-22T12:23:00.279502+00:00",
+   "duration_ms": 19,
+   "snapshots": []
+  },
+  {
+   "id": 2,
+   "run_id": 1,
+   "turn_id": 1,
+   "seq": 2,
+   "agent_id": null,
+   "tool": "Edit",
+   "category": "edit",
+   "tool_use_id": "toolu_01Lw47aHQ7HymSNDai9nRf7v",
+   "input": {
+    "file_path": "~\\AppData\\Local\\Temp\\agentvc-s4-real\\ws\\app.py",
+    "old_string": {
+     "chars": 5
+    },
+    "new_string": {
+     "chars": 7
+    },
+    "replace_all": false
+   },
+   "status": "GAP",
+   "outcome": null,
+   "error": null,
+   "gap_reason": "post-missing",
+   "flags": [],
+   "cwd": "~\\AppData\\Local\\Temp\\agentvc-s4-real\\ws",
+   "started_at": "2026-10-22T12:23:02.060936+00:00",
+   "ended_at": "2026-10-22T12:23:02.085241+00:00",
+   "duration_ms": null,
+   "snapshots": [
+    {
+     "phase": "before",
+     "status": "ok",
+     "reason": null,
+     "tree": "2fd14495b8f902e0cb2080e1948dad8a296de9af",
+     "outside": [],
+     "unprotected_count": 0
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "run_id": 1,
+   "turn_id": 2,
+   "seq": 3,
+   "agent_id": null,
+   "tool": "Edit",
+   "category": "edit",
+   "tool_use_id": "toolu_01LAHXLvr9UdxPYeYPJgHBrr",
+   "input": {
+    "file_path": "~\\AppData\\Local\\Temp\\agentvc-s4-real\\ws\\app.py",
+    "old_string": {
+     "chars": 5
+    },
+    "new_string": {
+     "chars": 7
+    },
+    "replace_all": false
+   },
+   "status": "RECORDED",
+   "outcome": "ok",
+   "error": null,
+   "gap_reason": null,
+   "flags": [],
+   "cwd": "~\\AppData\\Local\\Temp\\agentvc-s4-real\\ws",
+   "started_at": "2026-10-22T12:23:21.581381+00:00",
+   "ended_at": "2026-10-22T12:23:21.625062+00:00",
+   "duration_ms": 10,
+   "snapshots": [
+    {
+     "phase": "before",
+     "status": "ok",
+     "reason": null,
+     "tree": "2fd14495b8f902e0cb2080e1948dad8a296de9af",
+     "outside": [],
+     "unprotected_count": 0
+    },
+    {
+     "phase": "after",
+     "status": "ok",
+     "reason": null,
+     "tree": "a2996b4e03eae720f80fe49ca11819dc79c85adf",
+     "outside": [],
+     "unprotected_count": 0
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "run_id": 1,
+   "turn_id": 3,
+   "seq": 4,
+   "agent_id": null,
+   "tool": "Bash",
+   "category": "shell",
+   "tool_use_id": "toolu_014D2mC8s4RKykyccxBzVn3w",
+   "input": {
+    "command": "rm notes.md data/keep.txt",
+    "description": "Delete two files"
+   },
+   "status": "RECORDED",
+   "outcome": "ok",
+   "error": null,
+   "gap_reason": null,
+   "flags": [],
+   "cwd": "~\\AppData\\Local\\Temp\\agentvc-s4-real\\ws",
+   "started_at": "2026-10-22T12:23:35.915838+00:00",
+   "ended_at": "2026-10-22T12:23:36.836925+00:00",
+   "duration_ms": 871,
+   "snapshots": [
+    {
+     "phase": "before",
+     "status": "ok",
+     "reason": null,
+     "tree": "238e5d19111603103bf634c20f59dda1b775bd3b",
+     "outside": [],
+     "unprotected_count": 0
+    },
+    {
+     "phase": "after",
+     "status": "ok",
+     "reason": null,
+     "tree": "fbc8c50cc8a9a4c1632c1a6d851b0c46b24b8913",
+     "outside": [],
+     "unprotected_count": 0
+    }
+   ]
+  }
+ ],
+ "rollbacks": [
+  {
+   "id": 1,
+   "kind": "rollback",
+   "target": "1",
+   "status": "done",
+   "inverted_by": 2,
+   "flags": "[]"
+  },
+  {
+   "id": 2,
+   "kind": "rollback-undo",
+   "target": "rollback 1",
+   "status": "done",
+   "inverted_by": null,
+   "flags": "[]"
+  },
+  {
+   "id": 3,
+   "kind": "rollback",
+   "target": "1",
+   "status": "done",
+   "inverted_by": null,
+   "flags": "[]"
+  }
+ ],
+ "verdict": {
+  "status": "ok",
+  "problems": [],
+  "head_seq": 31
+ }
+}

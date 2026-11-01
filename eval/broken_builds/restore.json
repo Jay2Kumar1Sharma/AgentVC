@@ -1,0 +1,130 @@
+[
+  {
+    "id": "rst-undo-whatever-is-there",
+    "why": "every agent change undone without checking the file still holds what the agent left (no compare-and-swap at planning)",
+    "file": "agentvc/restore.py",
+    "find": "            if target == after:\n                target, undone = before, undone + 1",
+    "replace": "            if True:\n                target, undone = before, undone + 1",
+    "tests": ["tests/test_restore.py", "tests/test_restore_attacks.py"]
+  },
+  {
+    "id": "rst-outside-change-skipped-over",
+    "why": "a mismatch in the middle of the chain is stepped over instead of stopping",
+    "file": "agentvc/restore.py",
+    "find": "                blocked = seq\n                break",
+    "replace": "                target, undone = before, undone + 1",
+    "tests": ["tests/test_restore.py", "tests/test_restore_attacks.py"]
+  },
+  {
+    "id": "rst-no-cas-at-write",
+    "why": "no compare-and-swap when writing (a change after the save is overwritten)",
+    "file": "agentvc/restore.py",
+    "find": "        if actual != self._expected_now(entry):",
+    "replace": "        if False:",
+    "tests": ["tests/test_restore.py", "tests/test_restore_attacks.py"]
+  },
+  {
+    "id": "rst-delete-without-check",
+    "why": "files deleted without the compare-and-swap",
+    "file": "agentvc/restore.py",
+    "find": "    def _delete(self, entry: Entry) -> None:\n        if not self._check(entry):\n            return",
+    "replace": "    def _delete(self, entry: Entry) -> None:",
+    "tests": ["tests/test_restore.py", "tests/test_restore_attacks.py"]
+  },
+  {
+    "id": "rst-links-followed",
+    "why": "paths through a link (junction) are written and deleted",
+    "file": "agentvc/restore.py",
+    "find": "            if is_link(st):\n                return \"the path goes through a link\"",
+    "replace": "            if False:\n                return \"the path goes through a link\"",
+    "tests": ["tests/test_restore_attacks.py"]
+  },
+  {
+    "id": "rst-dotdot-allowed",
+    "why": "'..' and empty path parts accepted from a tree",
+    "file": "agentvc/restore.py",
+    "find": "            if part in (\"\", \".\", \"..\") or \"\\\\\" in part or chr(0) in part:",
+    "replace": "            if chr(0) in part:",
+    "tests": ["tests/test_restore_attacks.py"]
+  },
+  {
+    "id": "rst-store-writable",
+    "why": "paths inside .agentvc/ or .git/ restored",
+    "file": "agentvc/restore.py",
+    "find": "        if parts[0] in (STORE_DIR, \".git\"):",
+    "replace": "        if False:",
+    "tests": ["tests/test_restore_attacks.py"]
+  },
+  {
+    "id": "rst-case-collisions-written",
+    "why": "two paths differing only in case are both written",
+    "file": "agentvc/restore.py",
+    "find": "                if len(group) > 1:",
+    "replace": "                if False:",
+    "tests": ["tests/test_restore_attacks.py"]
+  },
+  {
+    "id": "rst-folder-in-the-way-not-checked",
+    "why": "a folder holding other files is treated as removable",
+    "file": "agentvc/restore.py",
+    "find": "            if not ok:",
+    "replace": "            if False:",
+    "tests": ["tests/test_restore.py"]
+  },
+  {
+    "id": "rst-started-as-done",
+    "why": "the intent record is written as already done (no recovery)",
+    "file": "agentvc/restore.py",
+    "find": "                    \"status\": \"started\",",
+    "replace": "                    \"status\": \"done\",",
+    "tests": ["tests/test_restore.py", "tests/test_restore_attacks.py"]
+  },
+  {
+    "id": "rst-no-repair-first",
+    "why": "a new rollback starts on top of an interrupted one",
+    "file": "agentvc/restore.py",
+    "find": "        with self.snap.locked(LOCK_WAIT_S):\n            repaired = self._repair()\n            chains, uncaptured, unprotected",
+    "replace": "        with self.snap.locked(LOCK_WAIT_S):\n            repaired = []\n            chains, uncaptured, unprotected",
+    "tests": ["tests/test_restore_attacks.py"]
+  },
+  {
+    "id": "rst-result-not-kept",
+    "why": "per-file results not recorded (a forced rollback can't be undone)",
+    "file": "agentvc/restore.py",
+    "find": "                \"result\": json.dumps([e.to_json() for e in entries]),",
+    "replace": "                \"result\": \"[]\",",
+    "tests": ["tests/test_restore.py"]
+  },
+  {
+    "id": "rst-inversion-not-marked",
+    "why": "a reversed undo isn't marked, so redo repeats",
+    "file": "agentvc/restore.py",
+    "find": "                tx.update(\"rollbacks\", inverts, \"rollback.inverted\", {\"inverted_by\": op})",
+    "replace": "                pass",
+    "tests": ["tests/test_restore.py"]
+  },
+  {
+    "id": "rst-running-agent-ignored",
+    "why": "a run with a tool still running is rolled back",
+    "file": "agentvc/restore.py",
+    "find": "        if not force and any(s[\"status\"] == \"PENDING\" for s in steps) and run[\"status\"] == \"active\":",
+    "replace": "        if False:",
+    "tests": ["tests/test_restore.py"]
+  },
+  {
+    "id": "rst-pre-snapshot-unchecked",
+    "why": "unsafe paths saved (read) before being refused",
+    "file": "agentvc/restore.py",
+    "find": "            safe = {p for p in chains if self._unsafe(p) is None}",
+    "replace": "            safe = set(chains)",
+    "tests": ["tests/test_restore_attacks.py"]
+  },
+  {
+    "id": "rst-write-in-place",
+    "why": "the target file is opened and overwritten in place (through hard links)",
+    "file": "agentvc/restore.py",
+    "find": "            self.io.replace(temp, where)",
+    "replace": "            where.write_bytes(temp.read_bytes()); self.io.remove(temp)",
+    "tests": ["tests/test_restore_attacks.py"]
+  }
+]

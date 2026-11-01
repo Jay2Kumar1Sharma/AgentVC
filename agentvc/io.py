@@ -10,6 +10,7 @@ from __future__ import annotations
 import os
 import signal
 import sqlite3
+import stat
 import subprocess
 import sys
 import threading
@@ -28,8 +29,24 @@ AFTER_FSYNC = crash.declare("io.atomic.after_fsync")
 AFTER_REPLACE = crash.declare("io.atomic.after_replace")
 
 OPERATIONS = frozenset(
-    {"read", "write", "replace", "mkdir", "remove", "append", "lock", "sqlite", "run", "spawn"}
+    {
+        "read",
+        "write",
+        "replace",
+        "mkdir",
+        "remove",
+        "append",
+        "lock",
+        "sqlite",
+        "run",
+        "spawn",
+        "list",
+        "stat",
+    }
 )
+# Windows reparse points that name another path: symbolic links and junctions (mount points).
+_REPARSE_POINT = 0x400
+_LINK_TAGS = frozenset({0xA000000C, 0xA0000003})
 DEFAULT_MAX_OUTPUT = 1024 * 1024
 
 
@@ -77,6 +94,31 @@ class FaultInjector:
 
 
 @dataclass(frozen=True)
+class Entry:
+    """One directory entry and its `lstat` result: links are never followed."""
+
+    name: str
+    stat: os.stat_result
+
+    def is_link(self) -> bool:
+        return is_link(self.stat)
+
+    def is_dir(self) -> bool:
+        return stat.S_ISDIR(self.stat.st_mode) and not self.is_link()
+
+    def is_file(self) -> bool:
+        return stat.S_ISREG(self.stat.st_mode) and not self.is_link()
+
+
+def is_link(st: os.stat_result) -> bool:
+    """A symlink, or on Windows a junction (which `lstat` reports as a directory)."""
+    if stat.S_ISLNK(st.st_mode):
+        return True
+    attributes = getattr(st, "st_file_attributes", 0)
+    return bool(attributes & _REPARSE_POINT) and getattr(st, "st_reparse_tag", 0) in _LINK_TAGS
+
+
+@dataclass(frozen=True)
 class RunResult:
     returncode: int | None
     stdout: bytes
@@ -111,6 +153,55 @@ class IO:
             return path.stat().st_size
         except FileNotFoundError:
             return 0
+
+    def scandir(self, path: Path) -> list[Entry]:
+        """The entries of a directory with their `lstat` results (no link is followed)."""
+        self.faults.check("list", str(path))
+        with os.scandir(path) as found:
+            return [Entry(e.name, e.stat(follow_symlinks=False)) for e in found]
+
+    def lstat(self, path: Path) -> os.stat_result:
+        self.faults.check("stat", str(path))
+        return os.lstat(path)
+
+    def fstat(self, handle: BinaryStream[bytes]) -> os.stat_result:
+        self.faults.check("stat", getattr(handle, "name", ""))
+        return os.fstat(handle.fileno())
+
+    def open_read(self, path: Path) -> BinaryStream[bytes]:
+        self.faults.check("read", str(path))
+        return open(path, "rb")
+
+    def open_new(self, path: Path) -> BinaryStream[bytes]:
+        """Create ``path`` for writing; fails if it exists."""
+        self.faults.check("write", str(path))
+        return open(path, "xb")
+
+    def readlink(self, path: Path) -> str:
+        self.faults.check("read", str(path))
+        return os.readlink(path)
+
+    def write_file(self, path: Path, data: bytes, *, fsync: bool = True) -> None:
+        """Create or truncate ``path`` and write ``data`` (not atomic: for temp files)."""
+        self.faults.check("write", str(path))
+        with open(path, "wb") as f:
+            f.write(data)
+            f.flush()
+            if fsync:
+                os.fsync(f.fileno())
+
+    def chmod(self, path: Path, mode: int) -> None:
+        self.faults.check("write", str(path))
+        os.chmod(path, mode)
+
+    def symlink(self, target: str, path: Path) -> None:
+        self.faults.check("write", str(path))
+        os.symlink(target, path)
+
+    def remove_dir(self, path: Path) -> None:
+        """Remove an empty directory; raises OSError if it isn't empty."""
+        self.faults.check("remove", str(path))
+        os.rmdir(path)
 
     def replace(self, source: Path, target: Path) -> None:
         self.faults.check("replace", str(target))

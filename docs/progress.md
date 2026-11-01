@@ -19,7 +19,7 @@ Updated at the end of every session by the agent doing the work. Newest handoff 
 | Milestone (plan §8) | Status |
 |---|---|
 | Discovery (week 1) | parts 1 and 2 done. Part 1 merged (PR #1, 2026-10-20); part 2 in review (PR #2, `discovery/session-2`). ADRs 0003–0009 accepted 2026-10-21; outside conversations still open |
-| v0.1-alpha (private) | in progress: session 3 (Alpha A: foundations, capture, ledger) done on `alpha/session-3`, not pushed; sessions 4–5 next |
+| v0.1-alpha (private) | in progress: session 3 (Alpha A) done on `alpha/session-3`; session 4 (Alpha B: snapshots and rollback) done on `alpha/session-4`, built on it; neither pushed. Session 5 (safety test suite) next |
 | v0.1 (public) | not started |
 | v0.2 Know your effects | not started |
 | v0.3 Replay safely | not started |
@@ -27,6 +27,55 @@ Updated at the end of every session by the agent doing the work. Newest handoff 
 | v0.5 Beyond the workspace | not started |
 
 ## Handoff log
+
+### 2026-10-22: session 4, Alpha B (snapshots and rollback)
+Branch **`alpha/session-4`**, created from **`alpha/session-3`** because session 3 was **not merged** into `main` (`origin/main` still ends at `fd44c41`, the PR #1 merge). 26 signed commits including this handoff, each `G` with the repository's email, no trailers; **not pushed**, no pull request.
+
+**Done** (design notes `docs/design/snapshots.md`, `restore.md`, plus sections in `cli.md`, `ledger.md`, `hook-path.md`, each before its code; ADR-0010 **proposed**)
+1. **Snapshotter** (`agentvc/snapshot.py`, `agentvc/objects.py`): `.agentvc/objects` is a bare git directory that AgentVC writes itself as loose objects (checked against real `git hash-object`, `ls-tree`, `fsck`, `gc`); no alternates, every tree pinned, hashes checked on read. Edit tools: only their target (raw path carried on the event, never stored); shell, MCP, unknown tools: the whole workspace. Links never followed (junctions detected by reparse tag); nested repositories, heavy ignored folders, unreadable, oversized and torn files (stat before, during, after the read) listed as unprotected. Ignored files per ADR-0006 via `git check-ignore` on AgentVC's own store (user config never read). Index `.agentvc/snapindex.db` with git's racy-timestamp rule. Budgets: ADR-0010 (proposed). `agentvcd` builds the first snapshot in a background thread; hooks never wait for it ("baseline pending").
+2. **`agentvc diff <run | run:step | run:tTURN>`**: unified diffs from snapshots, binary noted, outside changes and uncaptured steps listed.
+3. **Restore** (`agentvc/restore.py`): per file, the agent's changes undone newest first while the file still holds what the agent left (diagram 4.4 as a chain); pre-rollback snapshot of every path first, intent record (`rollbacks` row `started`), compare-and-swap through temp file + `os.replace` on every write and delete, deletions first so file ↔ folder swaps work, paths through links or with unsafe names refused **before anything is read**, case collisions skipped. `rollback`, `rollback --undo`, `--force` (still saves first), named crash points `restore.*`, `agentvc repair` (also run first by every rollback; the next prompt reports an interrupted one).
+4. **Turns:** `agentvc undo` / `redo` (newest turn that still has changes; redo reverses the newest undo).
+5. **Outside changes:** each before snapshot is compared with the run's last after snapshot; differences stored, shown by `inspect`/`diff`, never rolled back (the chain stops there: "partly").
+6. **Config:** `version`, `[snapshot]` (`time_budget_ms`, `max_file_mb`, `ignored_file_max_kb`, `ignored_total_mb`, `heavy_folders`, `always_include`, `never_include`); each bad setting reported separately. Modes: observe and protect both snapshot and allow rollback; strict also blocks a PreToolUse whose snapshot failed.
+7. **Adversarial:** `tests/test_snapshot_attacks.py`, `tests/test_restore_attacks.py` (ATK-SNAP-01..13, ATK-RST-01..09) plus `tests/test_restore.py` crash points. New `scripts/broken_build.py` + `eval/broken_builds/*.json`: **53 of 53 broken builds caught** (snapshot 31, restore + CLI 22); reviews in `docs/adversarial/snapshot.md`, `restore.md`.
+8. Ledger **schema 2** (`snapshots`, `rollbacks` tables; new tables only, so old rows still verify), tested from a **schema-1 ledger written by session 3's own code** (`tests/fixtures/ledger/`); `architecture/graph.json` (snapshotter, objects, restore shipped; `diff`, `snapindex.db` added; `make arch` passes, 30 nodes); traceability (TODO left: guarantees 2/8, hazards 17/47, FMEA 10/71, attacks 38/76); 12 FMEA rows and hazard HZ-G1-14 added; CHANGELOG.
+
+**Real Claude Code run** (2.1.302, 3 of the 4 allowed `claude -p` turns, throwaway git repo in `%TEMP%`, `--setting-sources project`, hooks from `hooks-config`, temporary `AGENTVC_HOME`, parent `CLAUDE*` variables removed; evidence `results/spikes/2026-10-22/s4-real-claude-code-rollback/`): a real Edit (`hello` → `goodbye`) and a real `rm notes.md data/keep.txt` were snapshotted; `diff` showed exactly those changes; `rollback 1` restored all three files byte for byte (`git status`: every tracked file identical to the commit, ignored `.env` untouched); `rollback --undo` brought the agent's state back; rolling back again worked; ledger verified. Hook cost with snapshots, tiny repo: Edit 9 / 16 ms, Bash 19 / 13 ms (Pre / Post). Turn 1 was spent learning that an untrusted workspace ignores the project's `permissions.allow`; turns 2–3 granted permission per invocation (`--permission-mode acceptEdits`, `--allowedTools 'Bash(rm notes.md data/keep.txt)'`), with no settings changed.
+
+**Found and fixed while building** (all in this session's code)
+- **G1, would have been S0:** keeping only 200 unprotected paths per snapshot row would make the 201st read as absent, so a rollback could delete a user's file as "created by the agent". The full list is kept in a pinned blob (FM-SNAP-11).
+- **G1, would have been S0:** deletes checked links only at planning time; a junction swapped in afterwards with identical bytes behind it would have let a delete reach outside the workspace. Every compare-and-swap now re-checks the path at write time.
+- **G6:** the pre-rollback snapshot read every planned path before the safety check, so a tampered tree's `../x` would have been read from outside the workspace. Unsafe paths are refused before anything is read.
+- The broken-build harness first reported every mutation as surviving (pyproject's `pythonpath = ["."]` imported the real package); a sentinel test now proves the broken copy is what runs.
+- The tampered-`.git` test first attacked nothing (git config reads `;` as a comment); the commands are quoted and the filter was confirmed to run under plain git.
+- Real-run finding: after `rollback --undo` the CLI suggested a command that would fail; fixed with a test.
+
+**Mistakes made and caught**
+- The snapshot, restore and hook-integration tests mostly passed on their first run because I wrote the code before running them. They were then seen to fail against the 53 broken builds, which also exposed four test gaps (fixed).
+- Shell heredocs mangled backslashes twice: once a real NUL byte in `claude_code.py` (caught by a control-character scan before committing), once a half-applied patch to `cli.py`. Later patches that contain backslashes went through the Write tool only.
+
+**Full test suite (AGENTS.md step 8)**, Windows 11, Python 3.12.7, git 2.49.0.windows.1, at `58440ef` (only this handoff follows):
+- `make test` (MSYS2 make: ruff, format, mypy on 80 files, `arch_check` 30 nodes, all pytest tests): **pass, exit 0: 916 passed, 0 failed, 6 skipped**, 108.2 s (pytest's own timing; wall clock not captured). Skips: three symlink cases needing the Windows symlink privilege, three POSIX-only (executable bit, FIFO, unlistable folder). The one warning is the intended `TraceabilityGap` report.
+- `./make.ps1 test`: **915 passed, 1 failed, 6 skipped**, 104.4 s wall: the known, unrelated `test_spike_writes_every_measurement` (WSL's `bash.EXE` under PowerShell, `docs/known-issues.md`), unchanged.
+- Fast lane: 901 passed, 6 skipped, about 41 s.
+- Not run: Linux and macOS (CI when pushed; the POSIX-only attack tests run there), Python 3.11/3.13 locally.
+
+**Needs your decision**
+1. **ADR-0010 (proposed):** budgets (`time_budget_ms` 2000 in a hook, `max_file_mb` 100) and the index choice (AgentVC writes git-format objects itself and keeps its own SQLite stat cache instead of `git add` with a private git index: no process start per snapshot, full control over torn files and unprotected paths). The code uses these defaults until you decide.
+2. **What a rollback target means:** I made every target mean "back to just before it" (`rollback 3:5` undoes step 5 **and later**; `3:t2` turn 2 and later). The alternative, undoing only that step or turn and keeping later ones, is riskier. OK?
+3. **Permission-denied actions** (`docs/known-issues.md`, S3): an action Claude Code itself denied shows as a GAP "may have run unrecorded". Fixing it needs one more real capture of a `PermissionDenied` payload (fixtures only). OK to capture it next session?
+4. Still open: pushing `alpha/session-3` and `alpha/session-4` and the PR plan (this branch is about 25 commits on top of session 3's ~45); the earlier open items (pivot recommendation, PyYAML and Playwright, CI for slow tests).
+
+**Worth knowing**
+- Limits, documented in the design notes and attack reviews: a change by someone else *during* one tool call is attributed to that call (restore still never overwrites anything changed after the agent left it); empty directories, the user's `.git`, nested repositories and LFS content aren't protected yet; the agent isn't told after a rollback (context sync is v0.1 public); on Windows the index can't use ctime.
+- Rollback runs from the CLI while `agentvcd` may be running: both share `.agentvc/snapshot.lock`, so a hook during a rollback records an incomplete snapshot ("store busy") instead of waiting.
+
+**Side effects outside the repository:** 3 short prompts on your Claude account and one more transcript under `~/.claude/projects/` for the throwaway folder. No settings changed (the permission flags were per invocation). The test `agentvcd` was stopped (confirmed gone), the throwaway folder deleted, the temporary `alpha/session-3` worktree removed. The real `~/.agentvc` was never touched. Two older folders from earlier sessions remain in `%TEMP%` (`agentvc-prior-art`, `agentvc-spike-latency`); I left them alone.
+
+**Unrelated issues found:** one, S3: permission-denied actions recorded as possibly-unrecorded gaps (`docs/known-issues.md`; no `gh` here). The PowerShell latency-spike failure is unchanged.
+
+**Next (session 5, Alpha C):** the safety test suite per `docs/agent-prompts.md` (scenario runner, property and model-based tests, differential `diff` vs `git diff --no-index`, crash points and chaos, budgets measured). `eval/broken_builds/` can feed its adversarial runner.
 
 ### 2026-10-22: real Claude Code re-run after the fixes (your request)
 Same set-up as the first U-20 run (throwaway git repo in `%TEMP%`, `--setting-sources project`, hooks from `hooks-config`, temporary `AGENTVC_HOME`), code at `f55a011`, Claude Code 2.1.302, 2 resumed `claude -p` turns. Evidence: `results/spikes/2026-10-22/u20-real-claude-code-rerun/`.

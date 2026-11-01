@@ -9,6 +9,7 @@ text never.
 from __future__ import annotations
 
 import json
+import os
 import re
 from typing import Any
 
@@ -55,6 +56,8 @@ CONTENT_KEYS = frozenset(
         "last_assistant_message",
     }
 )
+# Keys naming the file an edit tool writes (Write, Edit, MultiEdit, NotebookEdit).
+TARGET_KEYS = ("file_path", "notebook_path")
 _ID = re.compile(r"[A-Za-z0-9_.:-]{1,200}")
 MAX_BODY_BYTES = 64 * 1024 * 1024
 MAX_TEXT_CHARS = 4096
@@ -177,6 +180,7 @@ def parse(payload: JSON, *, record_prompts: bool) -> Event | BlindSpot:
         fields["tool_name"] = text(payload["tool_name"], 200)
         fields["tool_use_id"] = payload["tool_use_id"]
         fields["tool_input"] = reduce(payload["tool_input"])
+        fields["targets"] = _targets(payload["tool_input"], payload["cwd"])
     if kind is Kind.TOOL_POST:
         fields.update(_outcome(name, payload))
     if kind is Kind.PROMPT and record_prompts and (prompt := _str(payload, "prompt")):
@@ -194,6 +198,16 @@ def parse(payload: JSON, *, record_prompts: bool) -> Event | BlindSpot:
             calls.append(BatchCall(call["tool_use_id"], text(call["tool_name"], 200)))
         fields["batch"] = tuple(calls)
     return Event(**fields)
+
+
+def _targets(tool_input: dict[str, JSON], cwd: str) -> tuple[str, ...]:
+    """The files an edit tool names (unscrubbed: they locate files, they aren't stored)."""
+    found = []
+    for key in TARGET_KEYS:
+        value = tool_input.get(key)
+        if isinstance(value, str) and value and chr(0) not in value and len(value) <= 4096:
+            found.append(value if os.path.isabs(value) else os.path.join(cwd, value))
+    return tuple(found)
 
 
 def _outcome(name: str, payload: dict[str, JSON]) -> dict[str, str | None]:

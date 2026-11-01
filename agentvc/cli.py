@@ -1,7 +1,7 @@
 """The `agentvc` command line (design note cli.md).
 
-User commands: history, inspect, check. Internal ones, called by the hooks: hook, daemon,
-hooks-config.
+User commands: history, inspect, diff, rollback, undo, redo, repair, check. Internal ones,
+called by the hooks: hook, daemon, hooks-config.
 """
 
 from __future__ import annotations
@@ -21,6 +21,8 @@ from agentvc.debuglog import enabled_from_env
 from agentvc.hook import HookContext, agentvc_home, handle
 from agentvc.io import IO
 from agentvc.ledger import Ledger, LedgerError, Verdict
+from agentvc.restore import Report, RestoreError, Restorer
+from agentvc.snapshot import Snapshotter
 from agentvc.store import Store, find_workspace
 
 
@@ -267,6 +269,11 @@ def cmd_inspect(args: argparse.Namespace, environ: Mapping[str, str]) -> int:
             return 1
         steps = reading.ledger.rows("steps", "where run_id = ?", (run["id"],))
         turns = {t["id"]: t for t in reading.ledger.rows("turns", "where run_id = ?", (run["id"],))}
+        snaps: dict[object, list[dict[str, object]]] = {}
+        for row in reading.ledger.rows("snapshots", "where run_id = ?", (run["id"],)):
+            if row["step_id"] is not None:
+                snaps.setdefault(row["step_id"], []).append(row)
+        rollbacks = reading.ledger.rows("rollbacks", "where run_id = ?", (run["id"],))
         verdict = reading.ledger.verify()
     finally:
         reading.close()
@@ -274,8 +281,27 @@ def cmd_inspect(args: argparse.Namespace, environ: Mapping[str, str]) -> int:
         for s in steps:
             s["flags"] = _flags(s)
             s["input"] = json.loads(str(s["input"])) if s["input"] else None
+            s["snapshots"] = [
+                {
+                    "phase": r["phase"],
+                    "status": r["status"],
+                    "reason": r["reason"],
+                    "tree": r["tree"],
+                    "outside": json.loads(str(r["outside"] or "[]")),
+                    "unprotected_count": r["unprotected_count"],
+                }
+                for r in snaps.get(s["id"], [])
+            ]
         run = {**run, "flags": _flags(run)}
-        data = {"run": run, "steps": steps, "verdict": _verdict_json(verdict)}
+        data = {
+            "run": run,
+            "steps": steps,
+            "rollbacks": [
+                {k: r[k] for k in ("id", "kind", "target", "status", "inverted_by", "flags")}
+                for r in rollbacks
+            ],
+            "verdict": _verdict_json(verdict),
+        }
         print(json.dumps(data, indent=1))
         return 0 if verdict.ok else 1
 
@@ -308,6 +334,8 @@ def cmd_inspect(args: argparse.Namespace, environ: Mapping[str, str]) -> int:
         step_flags = [f for f in _flags(s) if f not in ("pre-late",)]
         if step_flags:
             line += f"  [{', '.join(step_flags)}]"
+        for tag in _snapshot_tags(s, snaps.get(s["id"], [])):
+            line += f"  [{tag}]"
         print(line.rstrip())
     counts = {k: sum(1 for s in steps if s["status"] == k) for k in ("RECORDED", "GAP", "DENIED")}
     print()
@@ -315,8 +343,211 @@ def cmd_inspect(args: argparse.Namespace, environ: Mapping[str, str]) -> int:
         f"Steps: {len(steps)} | recorded {counts['RECORDED']} | gaps {counts['GAP']}"
         f" | denied {counts['DENIED']}"
     )
+    relevant = [s for s in steps if _snapshot_tags(s, []) or _protected(snaps.get(s["id"], []))]
+    if relevant:
+        safe = sum(1 for s in relevant if _protected(snaps.get(s["id"], [])))
+        print(f"Snapshots: {safe} of {len(relevant)} file-changing steps protected")
+    for r in rollbacks:
+        what = f"Rollback {r['id']} ({r['kind']} of {_of(str(r['kind']), str(r['target']))})"
+        if r["status"] == "started":
+            print(f"{what}: INTERRUPTED, run `agentvc repair`")
+        else:
+            undone = f", reversed by rollback {r['inverted_by']}" if r["inverted_by"] else ""
+            print(f"{what}: {r['status']}{undone}")
     print("\n".join(_verdict_lines(verdict)))
     return 0 if verdict.ok else 1
+
+
+# --- snapshots and rollback (design notes cli.md, restore.md) -------------------------------------
+
+FILE_CHANGING = frozenset({"edit", "shell", "mcp", "unknown"})
+RESULT_WORDS = {"could-not": "could not"}
+
+
+def _restorer(reading: _Reading) -> Restorer:
+    assert reading.ledger is not None
+    clock = SystemClock()
+    config = load_config(reading.io, reading.store.config)
+    snapper = Snapshotter(reading.io, clock, reading.workspace, reading.store, config.snapshot)
+    return Restorer(reading.io, clock, reading.ledger, snapper)
+
+
+def _of(kind: str, target: str) -> str:
+    return f"run {target}" if kind == "rollback" and target.isdigit() else target
+
+
+def _report_lines(report: Report, *, recovered: bool = False) -> list[str]:
+    if report.rollback_id is None:
+        lines = [f"Nothing to roll back ({report.kind} of {_of(report.kind, report.target)})"]
+    else:
+        status = report.status + (" (recovered)" if recovered else "")
+        lines = [
+            f"Rollback {report.rollback_id} | {report.kind} of "
+            f"{_of(report.kind, report.target)} | {status}"
+        ]
+    for entry in report.files:
+        word = RESULT_WORDS.get(entry.result, entry.result)
+        line = f"  {word:<10}  {entry.path}"
+        lines.append(line + (f"  {entry.detail}" if entry.detail else ""))
+    counts = report.counts()
+    restored = sum(counts.get(k, 0) for k in ("restored", "partly", "forced"))
+    lines.append(
+        f"Restored {restored} | deleted {counts.get('deleted', 0)} | already "
+        f"{counts.get('already', 0)} | conflicts {counts.get('conflict', 0)} | could not undo "
+        f"{counts.get('could-not', 0)}"
+    )
+    for seq, why in report.uncaptured:
+        lines.append(f"Not undoable: step {seq}, {why}")
+    if report.unprotected:
+        shown = ", ".join(report.unprotected[:5]) + (", ..." if len(report.unprotected) > 5 else "")
+        lines.append(f"Not captured by these snapshots, so not checked: {shown}")
+    if counts.get("conflict"):
+        lines.append(
+            "Conflicts were kept. To overwrite them anyway, use --force "
+            "(the current state is saved first)."
+        )
+    if report.rollback_id is not None and not recovered:
+        lines.append(
+            {
+                "rollback": "To undo this rollback: agentvc rollback --undo",
+                "undo": "To redo: agentvc redo",
+                "redo": "To undo it again: agentvc undo",
+                "rollback-undo": f"To roll it back again: {report.again}",
+            }[report.kind]
+        )
+    return lines
+
+
+def _print_report(report: Report, as_json: bool) -> int:
+    if as_json:
+        print(json.dumps(report.to_json(), indent=1))
+    else:
+        for repaired in report.repaired:
+            print("Finished an interrupted rollback first:")
+            print("\n".join(_report_lines(repaired, recovered=True)))
+        print("\n".join(_report_lines(report)))
+    return 0 if report.status in ("done", "nothing") else 1
+
+
+def _restoring(args: argparse.Namespace, environ: Mapping[str, str], action: str) -> int:
+    reading = _Reading(environ)
+    try:
+        if reading.ledger is None:
+            return _not_recorded(reading, args.json)
+        restorer = _restorer(reading)
+        force = getattr(args, "force", False)
+        try:
+            if action == "rollback" and args.undo:
+                report = restorer.rollback_undo(force=force)
+            elif action == "rollback":
+                if not args.target:
+                    print("agentvc: rollback needs a target (RUN, RUN:STEP, RUN:tTURN) or --undo")
+                    return 2
+                report = restorer.rollback(args.target, force=force)
+            elif action == "undo":
+                report = restorer.undo(force=force)
+            else:
+                report = restorer.redo(force=force)
+        except RestoreError as exc:
+            print(f"agentvc: {exc}")
+            return 1
+    finally:
+        reading.close()
+    return _print_report(report, args.json)
+
+
+def cmd_rollback(args: argparse.Namespace, environ: Mapping[str, str]) -> int:
+    return _restoring(args, environ, "rollback")
+
+
+def cmd_undo(args: argparse.Namespace, environ: Mapping[str, str]) -> int:
+    return _restoring(args, environ, "undo")
+
+
+def cmd_redo(args: argparse.Namespace, environ: Mapping[str, str]) -> int:
+    return _restoring(args, environ, "redo")
+
+
+def cmd_repair(args: argparse.Namespace, environ: Mapping[str, str]) -> int:
+    reading = _Reading(environ)
+    try:
+        if reading.ledger is None:
+            return _not_recorded(reading, args.json)
+        reports = _restorer(reading).repair()
+    finally:
+        reading.close()
+    if args.json:
+        print(json.dumps([r.to_json() for r in reports], indent=1))
+    elif not reports:
+        print("Nothing to repair.")
+    for report in reports if not args.json else []:
+        print("\n".join(_report_lines(report, recovered=True)))
+    return 0 if all(r.status == "done" for r in reports) else 1
+
+
+def cmd_diff(args: argparse.Namespace, environ: Mapping[str, str]) -> int:
+    from agentvc.diff import diff
+
+    reading = _Reading(environ)
+    try:
+        if reading.ledger is None:
+            return _not_recorded(reading, args.json)
+        try:
+            report = diff(_restorer(reading), args.target)
+        except RestoreError as exc:
+            print(f"agentvc: {exc}")
+            return 1
+    finally:
+        reading.close()
+    if args.json:
+        print(json.dumps(report.to_json(), indent=1))
+        return 0
+    if not report.files:
+        print(f"No changes by the agent in {report.target}.")
+    for change in report.files:
+        print(
+            f"{change.change}: {change.path} (step{'s' if len(change.steps) > 1 else ''} "
+            f"{', '.join(map(str, change.steps))})"
+        )
+        sys.stdout.write(change.text)
+    for seq, paths in report.outside:
+        print(f"Changed outside the agent before step {seq}: {', '.join(paths)}")
+    for seq, why in report.uncaptured:
+        print(f"Not captured: step {seq}, {why}")
+    return 0
+
+
+def _snapshot_tags(step: Mapping[str, object], snaps: list[dict[str, object]]) -> list[str]:
+    """What `inspect` says about one step's snapshots (G3: anything not protected)."""
+    relevant = step["category"] in FILE_CHANGING or (
+        step["tool"] is None and step["status"] == "GAP"
+    )
+    if not relevant or step["status"] == "DENIED":
+        return []
+    phases = {str(s["phase"]): s for s in snaps}
+    bad = next((s for s in snaps if s["status"] != "ok"), None)
+    tags = []
+    if not snaps:
+        tags.append("not snapshotted")
+    elif bad is not None:
+        tags.append(f"not snapshotted: {str(bad['reason'] or bad['status'])[:70]}")
+    elif "before" not in phases:
+        tags.append("not snapshotted: no snapshot before it")
+    elif "after" not in phases and step["status"] != "PENDING":
+        tags.append("not snapshotted: no snapshot after it")
+    before = phases.get("before")
+    outside = json.loads(str(before["outside"] or "[]")) if before else []
+    if outside:
+        tags.append(f"outside changes: {len(outside)}")
+    unprotected = sum(int(str(s["unprotected_count"] or 0)) for s in snaps)
+    if unprotected:
+        tags.append(f"{unprotected} path{'s' if unprotected != 1 else ''} not protected")
+    return tags
+
+
+def _protected(snaps: list[dict[str, object]]) -> bool:
+    phases = {s["phase"]: s["status"] for s in snaps}
+    return phases.get("before") == "ok" and phases.get("after") == "ok"
 
 
 def cmd_check(args: argparse.Namespace, environ: Mapping[str, str]) -> int:
@@ -376,6 +607,35 @@ def build_parser() -> argparse.ArgumentParser:
     inspect.add_argument("run", help="run number, or `latest`")
     inspect.add_argument("--json", action="store_true", help="machine-readable output")
     inspect.set_defaults(func=cmd_inspect)
+
+    diff = sub.add_parser("diff", help="what a step, turn or run changed")
+    diff.add_argument("target", help="RUN, RUN:STEP or RUN:tTURN (RUN may be `latest`)")
+    diff.add_argument("--json", action="store_true", help="machine-readable output")
+    diff.set_defaults(func=cmd_diff)
+
+    rollback = sub.add_parser("rollback", help="put files back to before a run, step or turn")
+    rollback.add_argument(
+        "target", nargs="?", help="RUN, RUN:STEP or RUN:tTURN: back to just before it"
+    )
+    rollback.add_argument("--undo", action="store_true", help="reverse the newest rollback")
+    rollback.add_argument(
+        "--force", action="store_true", help="overwrite conflicts too (saved first, undoable)"
+    )
+    rollback.add_argument("--json", action="store_true", help="machine-readable output")
+    rollback.set_defaults(func=cmd_rollback)
+
+    for name, func, text in (
+        ("undo", cmd_undo, "roll back the newest turn that still has changes"),
+        ("redo", cmd_redo, "re-apply the newest undo"),
+    ):
+        command = sub.add_parser(name, help=text)
+        command.add_argument("--force", action="store_true", help="overwrite conflicts too")
+        command.add_argument("--json", action="store_true", help="machine-readable output")
+        command.set_defaults(func=func)
+
+    repair = sub.add_parser("repair", help="finish a rollback that was interrupted")
+    repair.add_argument("--json", action="store_true", help="machine-readable output")
+    repair.set_defaults(func=cmd_repair)
 
     check = sub.add_parser("check", help="prove recording works here, through the real hook path")
     check.add_argument("--json", action="store_true", help="machine-readable output")

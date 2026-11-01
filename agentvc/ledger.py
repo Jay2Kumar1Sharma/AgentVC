@@ -24,15 +24,41 @@ from agentvc import __version__, crash
 from agentvc.clock import Clock
 from agentvc.io import IO, LockTimeout
 
-SCHEMA_VERSION = 1
-# Forward-only migrations: MIGRATIONS[n] turns a version n-1 ledger into version n.
-MIGRATIONS: dict[int, Callable[[sqlite3.Connection], None]] = {}
+SCHEMA_VERSION = 2
 
 BEFORE_COMMIT = crash.declare("ledger.before_commit")
 AFTER_COMMIT = crash.declare("ledger.after_commit")
 MIGRATE_BEFORE_COMMIT = crash.declare("ledger.migrate.before_commit")
 
-TABLES = ("runs", "run_sessions", "turns", "steps")
+TABLES = ("runs", "run_sessions", "turns", "steps", "snapshots", "rollbacks")
+
+# Schema 2 (session 4): snapshots and rollbacks. New tables only, so every existing row still
+# equals the entry that wrote it (design note ledger.md).
+_SCHEMA_V2 = (
+    """CREATE TABLE snapshots (
+    id INTEGER PRIMARY KEY, run_id INTEGER, step_id INTEGER, rollback_id INTEGER,
+    phase TEXT NOT NULL, status TEXT NOT NULL, tree TEXT, scope TEXT,
+    unprotected TEXT NOT NULL DEFAULT '[]', unprotected_count INTEGER NOT NULL DEFAULT 0,
+    unprotected_blob TEXT,
+    outside TEXT NOT NULL DEFAULT '[]', reason TEXT, files INTEGER, bytes INTEGER,
+    duration_ms INTEGER, taken_at TEXT)""",
+    "CREATE INDEX snapshots_step ON snapshots (step_id)",
+    "CREATE INDEX snapshots_run ON snapshots (run_id)",
+    """CREATE TABLE rollbacks (
+    id INTEGER PRIMARY KEY, kind TEXT NOT NULL, target TEXT NOT NULL, run_id INTEGER,
+    inverts INTEGER, inverted_by INTEGER, force INTEGER NOT NULL DEFAULT 0,
+    status TEXT NOT NULL, plan TEXT NOT NULL, result TEXT, started_at TEXT, ended_at TEXT,
+    flags TEXT NOT NULL DEFAULT '[]')""",
+)
+
+
+def _migrate_2(db: sqlite3.Connection) -> None:
+    for statement in _SCHEMA_V2:
+        db.execute(statement)
+
+
+# Forward-only migrations: MIGRATIONS[n] turns a version n-1 ledger into version n.
+MIGRATIONS: dict[int, Callable[[sqlite3.Connection], None]] = {2: _migrate_2}
 _SCHEMA_V1 = """
 CREATE TABLE schema_version (version INTEGER NOT NULL);
 CREATE TABLE migrations (

@@ -1,0 +1,50 @@
+[
+  {
+    "id": "cli-conflicts-hidden",
+    "why": "rollback output leaves out conflicts",
+    "file": "agentvc/cli.py",
+    "find": "    for entry in report.files:",
+    "replace": "    for entry in [e for e in report.files if e.result != \"conflict\"]:",
+    "tests": ["tests/test_cli_rollback.py"]
+  },
+  {
+    "id": "cli-partial-exits-0",
+    "why": "a partial rollback exits 0",
+    "file": "agentvc/cli.py",
+    "find": "    return 0 if report.status in (\"done\", \"nothing\") else 1",
+    "replace": "    return 0",
+    "tests": ["tests/test_cli_rollback.py"]
+  },
+  {
+    "id": "cli-outside-changes-hidden",
+    "why": "diff leaves out changes made outside the agent",
+    "file": "agentvc/cli.py",
+    "find": "    for seq, paths in report.outside:",
+    "replace": "    for seq, paths in []:",
+    "tests": ["tests/test_cli_rollback.py"]
+  },
+  {
+    "id": "cli-interrupted-hidden",
+    "why": "inspect doesn't show an interrupted rollback",
+    "file": "agentvc/cli.py",
+    "find": "        if r[\"status\"] == \"started\":",
+    "replace": "        if False:",
+    "tests": ["tests/test_cli_rollback.py"]
+  },
+  {
+    "id": "cli-snapshot-tags-hidden",
+    "why": "inspect doesn't say which steps weren't protected",
+    "file": "agentvc/cli.py",
+    "find": "        for tag in _snapshot_tags(s, snaps.get(s[\"id\"], [])):",
+    "replace": "        for tag in []:",
+    "tests": ["tests/test_cli_rollback.py", "tests/test_cli.py"]
+  },
+  {
+    "id": "diff-binary-as-text",
+    "why": "binary files printed as text diffs",
+    "file": "agentvc/diff.py",
+    "find": "    if b\"\\0\" in old[:BINARY_PROBE] or b\"\\0\" in new[:BINARY_PROBE]:",
+    "replace": "    if False:",
+    "tests": ["tests/test_cli_rollback.py"]
+  }
+]

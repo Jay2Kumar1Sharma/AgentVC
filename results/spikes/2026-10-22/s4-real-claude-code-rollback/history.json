@@ -1,0 +1,23 @@
+{
+ "workspace": "~\\AppData\\Local\\Temp\\agentvc-s4-real\\ws",
+ "runs": [
+  {
+   "id": 1,
+   "agent": "claude-code",
+   "started_at": "2026-10-22T12:22:56.397224+00:00",
+   "ended_at": "2026-10-22T12:23:38.170039+00:00",
+   "status": "ended",
+   "flags": [],
+   "turns": 3,
+   "steps": 4,
+   "gaps": 1,
+   "denied": 0
+  }
+ ],
+ "verdict": {
+  "status": "ok",
+  "problems": [],
+  "head_seq": 31
+ },
+ "blindspots": 0
+}

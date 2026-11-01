@@ -3,6 +3,7 @@
     "updated": "2026-10-22",
     "version": "0.1.0.dev0",
     "changelog": [
+      "2026-10-22  session 4: snapshotter, objects/, restore shipped; diff and snapindex.db added",
       "2026-10-22  session 3: adapter, recorder, ledger, agentvcd, hook, wiring, self-protection, foundations, check shipped",
       "2026-10-18  first graph from plan diagrams 4.1-4.3; every node planned"
     ]
@@ -121,7 +122,7 @@
       "layer": "engine",
       "path": "agentvc/recorder.py",
       "status": "shipped",
-      "desc": "Turns events into runs, turns and steps. Runs are keyed on (agent, session id) inside one workspace. A Pre without a Post, and a Post without a Pre, become visible GAPs (ADR-0004); PostToolBatch reconciles; denied actions are DENIED steps. Snapshots join in session 4.",
+      "desc": "Turns events into runs, turns and steps. Runs are keyed on (agent, session id) inside one workspace. A Pre without a Post, and a Post without a Pre, become visible GAPs (ADR-0004); PostToolBatch reconciles; denied actions are DENIED steps. A step's snapshot row is written in the same transaction.",
       "adr": [
         "0004"
       ]
@@ -132,12 +133,13 @@
       "sub": "git trees per step",
       "layer": "engine",
       "path": "agentvc/snapshot.py",
-      "status": "planned",
-      "desc": "Snapshots the workspace (or an edit tool's target file) into AgentVC's own object store; anything it can't capture is marked unprotected.",
+      "status": "shipped",
+      "desc": "Before and after snapshots per step: edit tools capture only their targets, shell, MCP and unknown tools the whole workspace. Never follows links; nested repositories, heavy ignored folders, unreadable, oversized and torn files are listed as unprotected. Budgets per ADR-0006/0010; the first snapshot is built in agentvcd's background. Records outside changes between steps.",
       "adr": [
         "0005",
         "0006",
-        "0009"
+        "0009",
+        "0010"
       ]
     },
     {
@@ -156,9 +158,11 @@
       "sub": "per-file compare-and-swap",
       "layer": "engine",
       "path": "agentvc/restore.py",
-      "status": "planned",
-      "desc": "Rolls back only files that still hold exactly what the agent left; everything else is a conflict (G1). Saves the current state first, so a rollback can be undone.",
-      "adr": []
+      "status": "shipped",
+      "desc": "rollback, rollback --undo, undo, redo, repair. Per file, the agent's changes are undone newest first while the file still holds what the agent left; outside changes are never rolled back. Saves the current state first, writes an intent record, compare-and-swap on every write, refuses paths through links; an interrupted rollback is finished by repair.",
+      "adr": [
+        "0005"
+      ]
     },
     {
       "id": "compensator",
@@ -193,11 +197,11 @@
     {
       "id": "ledger",
       "label": "ledger.db",
-      "sub": "runs, turns, steps; hash-chained",
+      "sub": "runs, turns, steps, snapshots; chained",
       "layer": "store",
       "path": "agentvc/ledger.py",
       "status": "shipped",
-      "desc": "SQLite (WAL) ledger: an append-only, hash-chained entries table and materialised runs, turns and steps checked against it. schema_version + migrations tables (ADR-0007). verify() reports tampering, truncation and corruption, never repairs.",
+      "desc": "SQLite (WAL) ledger: an append-only, hash-chained entries table and materialised runs, turns, steps, snapshots and rollbacks checked against it. schema_version + migrations tables (ADR-0007); schema 2 added snapshots and rollbacks. verify() reports tampering, truncation and corruption, never repairs.",
       "adr": [
         "0007"
       ]
@@ -207,11 +211,12 @@
       "label": "objects/",
       "sub": "snapshot trees",
       "layer": "store",
-      "path": null,
-      "status": "planned",
-      "desc": "AgentVC's own git object store; owns every object it references.",
+      "path": "agentvc/objects.py",
+      "status": "shipped",
+      "desc": "AgentVC's own git object store, written by AgentVC as loose objects (readable by any git). No alternates; every snapshot tree pinned by a ref; hashes checked on every read.",
       "adr": [
-        "0005"
+        "0005",
+        "0010"
       ]
     },
     {
@@ -227,11 +232,11 @@
     {
       "id": "cli",
       "label": "CLI",
-      "sub": "history, inspect, check, ...",
+      "sub": "history, inspect, diff, rollback, ...",
       "layer": "interface",
       "path": "agentvc/cli.py",
       "status": "in progress",
-      "desc": "Shipped: history, inspect, check (each with --json), hooks-config. Next: diff, rollback, undo/redo (v0.1); replay, fork (v0.3); review, commit, abort (v0.4).",
+      "desc": "Shipped: history, inspect, diff, rollback (--undo, --force), undo, redo, repair, check (each with --json), hooks-config. Next: status, gc (v0.1); replay, fork (v0.3); review, commit, abort (v0.4).",
       "adr": []
     },
     {
@@ -275,7 +280,7 @@
       "layer": "capture",
       "path": "agentvc/daemon.py",
       "status": "shipped",
-      "desc": "Background process per workspace that receives http hooks. Exclusive bind, a port outside the ephemeral range, token and Host checked. Started and checked once per prompt by the liveness command hook; a dead daemon becomes a daemon-down GAP and a message.",
+      "desc": "Background process per workspace that receives http hooks and keeps the snapshot index warm. Exclusive bind, a port outside the ephemeral range, token and Host checked. Builds the first snapshot in a background thread. Started and checked once per prompt by the liveness command hook, which also reports gaps, missed snapshots and interrupted rollbacks.",
       "adr": [
         "0003",
         "0004"
@@ -288,7 +293,7 @@
       "layer": "capture",
       "path": "agentvc/hook.py",
       "status": "shipped",
-      "desc": "Shared by agentvcd and the per-call command hook. Runs under a 5 s deadline; fails open with a message and a GAP, or blocks PreToolUse in strict mode (ADR-0004).",
+      "desc": "Shared by agentvcd and the per-call command hook. Runs under a 5 s deadline: takes the step's snapshot within its budget, records, replies. Fails open with a message and a GAP, or blocks PreToolUse in strict mode, including when its snapshot failed (ADR-0004).",
       "adr": [
         "0004",
         "0008"
@@ -333,6 +338,28 @@
       "status": "shipped",
       "desc": "Holds the newest entry's hash (and the pending one before each commit) so rewrites, truncation and forged entries are detected (plan §14.1).",
       "adr": []
+    },
+    {
+      "id": "diff",
+      "label": "diff",
+      "sub": "unified diffs per step, turn or run",
+      "layer": "interface",
+      "path": "agentvc/diff.py",
+      "status": "shipped",
+      "desc": "What a step, a turn or a run changed, from its snapshots, as unified diffs; also lists changes made outside the agent and steps that weren't captured.",
+      "adr": []
+    },
+    {
+      "id": "snapindex",
+      "label": "snapindex.db",
+      "sub": "stat cache of the last snapshot",
+      "layer": "store",
+      "path": "agentvc/snapshot.py",
+      "status": "shipped",
+      "desc": "Path to size, times, mode and blob, plus ignore results, so unchanged files aren't read again. A cache: racy entries re-read, never trusted by restore (ADR-0010).",
+      "adr": [
+        "0010"
+      ]
     }
   ],
   "edges": [
@@ -530,6 +557,26 @@
       "from": "health",
       "to": "agentvcd",
       "kind": "calls"
+    },
+    {
+      "from": "snapshotter",
+      "to": "snapindex",
+      "kind": "writes"
+    },
+    {
+      "from": "objects",
+      "to": "diff",
+      "kind": "reads"
+    },
+    {
+      "from": "ledger",
+      "to": "diff",
+      "kind": "reads"
+    },
+    {
+      "from": "diff",
+      "to": "cli",
+      "kind": "serves"
     }
   ],
   "views": {
@@ -557,7 +604,7 @@
       {
         "from": "adapters",
         "to": "snapshotter",
-        "label": "snapshot before (paths or workspace)"
+        "label": "snapshot before (edit targets, or the workspace)"
       },
       {
         "from": "snapshotter",
@@ -567,7 +614,7 @@
       {
         "from": "adapters",
         "to": "ledger",
-        "label": "write pending step"
+        "label": "write pending step + snapshot row (outside changes)"
       },
       {
         "from": "claude_code",

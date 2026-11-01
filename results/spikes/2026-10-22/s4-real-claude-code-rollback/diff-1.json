@@ -1,0 +1,36 @@
+{
+ "target": "1",
+ "files": [
+  {
+   "path": "app.py",
+   "change": "modified",
+   "steps": [
+    3
+   ],
+   "diff": "--- a/app.py\n+++ b/app.py\n@@ -1,2 +1,2 @@\n def main():\n-    print(\"hello\")\n+    print(\"goodbye\")\n"
+  },
+  {
+   "path": "data/keep.txt",
+   "change": "deleted",
+   "steps": [
+    4
+   ],
+   "diff": "--- a/data/keep.txt\n+++ /dev/null\n@@ -1 +0,0 @@\n-precious data\n"
+  },
+  {
+   "path": "notes.md",
+   "change": "deleted",
+   "steps": [
+    4
+   ],
+   "diff": "--- a/notes.md\n+++ /dev/null\n@@ -1,2 +0,0 @@\n-# Notes\n-keep me\n"
+  }
+ ],
+ "outside_changes": [],
+ "uncaptured_steps": [
+  {
+   "step": 2,
+   "why": "no snapshot after it (missing)"
+  }
+ ]
+}

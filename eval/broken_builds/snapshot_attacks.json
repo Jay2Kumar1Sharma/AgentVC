@@ -1,0 +1,32 @@
+[
+  {
+    "id": "snap-torn-unchecked",
+    "why": "a file changing while it's read is saved anyway",
+    "file": "agentvc/snapshot.py",
+    "find": "            if _sig(before) == _sig(after) == _sig(now):",
+    "replace": "            if True:",
+    "tests": [
+      "tests/test_snapshot_attacks.py"
+    ]
+  },
+  {
+    "id": "snap-junction-followed",
+    "why": "junctions entered like folders",
+    "file": "agentvc/snapshot.py",
+    "find": "                        unprotected.append((path + \"/\", \"junction or mount point (not followed)\"))",
+    "replace": "                        pending.append(path)",
+    "tests": [
+      "tests/test_snapshot_attacks.py"
+    ]
+  },
+  {
+    "id": "snap-hash-with-users-git",
+    "why": "content hashed by git inside the user's repository (its filters run)",
+    "file": "agentvc/snapshot.py",
+    "find": "                    sha = self.objects.write_blob_stream(_Reader(handle), before.st_size)",
+    "replace": "                    self.io.run([\"git\", \"-C\", str(self.workspace), \"hash-object\", str(path)], timeout=30); sha = self.objects.write_blob_stream(_Reader(handle), before.st_size)",
+    "tests": [
+      "tests/test_snapshot_attacks.py::test_a_tampered_git_folder_runs_nothing_and_changes_nothing"
+    ]
+  }
+]

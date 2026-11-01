@@ -155,7 +155,7 @@ def test_a_recorder_crash_is_caught_and_becomes_a_gap(
     ctx = context(tmp_path)
     hook.handle(ev(tmp_path, "0003-UserPromptSubmit.json"), ctx)
 
-    def boom(self: Recorder, event: object, *, timeout: float) -> None:
+    def boom(self: Recorder, event: object, *, timeout: float, **kw: object) -> None:
         raise RuntimeError("bug in AgentVC")
 
     monkeypatch.setattr(Recorder, "apply", boom)

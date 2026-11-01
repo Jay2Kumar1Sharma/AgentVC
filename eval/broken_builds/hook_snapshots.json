@@ -1,0 +1,66 @@
+[
+  {
+    "id": "hook-no-before-snapshot",
+    "why": "no snapshot at PreToolUse",
+    "file": "agentvc/hook.py",
+    "find": "    if event.kind not in (Kind.TOOL_PRE, Kind.TOOL_POST) or event.tool_name is None:",
+    "replace": "    if event.kind is not Kind.TOOL_POST or event.tool_name is None:",
+    "tests": ["tests/test_hook_snapshots.py"]
+  },
+  {
+    "id": "hook-edits-snapshot-everything",
+    "why": "edit tools get whole-workspace snapshots (no fast path)",
+    "file": "agentvc/hook.py",
+    "find": "        if category == \"edit\" and event.targets:",
+    "replace": "        if False:",
+    "tests": ["tests/test_hook_snapshots.py"]
+  },
+  {
+    "id": "hook-read-tools-snapshotted",
+    "why": "every tool snapshotted, read-only ones too",
+    "file": "agentvc/hook.py",
+    "find": "    if category != \"edit\" and category not in FULL_SNAPSHOT_CATEGORIES:",
+    "replace": "    if False:",
+    "tests": ["tests/test_hook_snapshots.py"]
+  },
+  {
+    "id": "hook-no-outside-changes",
+    "why": "outside changes between steps not recorded",
+    "file": "agentvc/hook.py",
+    "find": "                values[\"outside\"] = json.dumps(_outside(ctx, tx, outcome.run_id, snap))",
+    "replace": "                pass",
+    "tests": ["tests/test_hook_snapshots.py"]
+  },
+  {
+    "id": "hook-failed-snapshot-silent",
+    "why": "a failed snapshot isn't told to the user",
+    "file": "agentvc/hook.py",
+    "find": "    if message:\n        return HookReply(event.raw_event, system_message=message), outcome.action\n",
+    "replace": "",
+    "tests": ["tests/test_hook_snapshots.py"]
+  },
+  {
+    "id": "hook-strict-ignores-snapshots",
+    "why": "strict mode lets an unprotected action run",
+    "file": "agentvc/hook.py",
+    "find": "    if message and ctx.config.mode == \"strict\" and event.kind is Kind.TOOL_PRE:",
+    "replace": "    if False:",
+    "tests": ["tests/test_hook_snapshots.py"]
+  },
+  {
+    "id": "hook-gap-steps-unsnapshotted",
+    "why": "a Post without its Pre gets no after snapshot",
+    "file": "agentvc/hook.py",
+    "find": "_ATTACH_ACTIONS = frozenset({\"step-opened\", \"step-recorded\", \"gap\"})",
+    "replace": "_ATTACH_ACTIONS = frozenset({\"step-opened\", \"step-recorded\"})",
+    "tests": ["tests/test_hook_snapshots.py"]
+  },
+  {
+    "id": "snap-hook-waits-for-baseline",
+    "why": "a hook waits for the background baseline",
+    "file": "agentvc/snapshot.py",
+    "find": "        if deadline is not None and self.baseline_running():",
+    "replace": "        if False:",
+    "tests": ["tests/test_hook_snapshots.py"]
+  }
+]
