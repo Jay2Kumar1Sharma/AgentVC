@@ -631,7 +631,6 @@ class Restorer:
         for entry in sorted(writes, key=lambda e: -_depth(e.path)):
             if entry.now is DIR and entry.writes:
                 self._remove_empty_tree(entry)
-        self._remove_emptied_parents(entries)
         for entry in sorted(
             (e for e in writes if e.target is not ABSENT and e.writes), key=lambda e: _depth(e.path)
         ):
@@ -716,27 +715,6 @@ class Restorer:
                     f"the folder in the way isn't empty ({_why(exc)})",
                 )
                 return
-
-    def _remove_emptied_parents(self, entries: list[Entry]) -> None:
-        """Folders left empty by deleting files the agent created go too (best effort)."""
-        needed = {
-            "/".join(e.path.split("/")[:i])
-            for e in entries
-            if e.writes and e.target is not ABSENT
-            for i in range(1, _depth(e.path) + 1)
-        }
-        parents = {
-            "/".join(e.path.split("/")[:i])
-            for e in entries
-            if e.result == "deleted"
-            for i in range(1, _depth(e.path) + 1)
-        }
-        for rel in sorted(parents - needed, key=lambda p: -_depth(p)):
-            try:
-                if not self.io.scandir(self.workspace / rel):
-                    self.io.remove_dir(self.workspace / rel)
-            except OSError:
-                pass
 
     def _write(self, op: int, entry: Entry) -> None:
         where = self.workspace / entry.path

@@ -28,7 +28,7 @@ The file ends at the last target reached. So a change made by the user between t
 1. Lock (`.agentvc/snapshot.lock`, shared with the snapshotter, so no snapshot sees a half-written rollback). Finish any interrupted rollback first (step 7). Refuse if the run has a tool call still running, unless `--force`.
 2. **Pre-rollback snapshot** of every path the plan may write, taken before anything is written, pinned, and recorded (`phase = pre-rollback`). A path whose current state can't be saved (unreadable, changing, a directory with content) is never written, even with `--force`.
 3. **Intent record**: a `rollbacks` row with status `started` and the plan (for each path: expected current content, target content). This is the write-ahead log.
-4. For each path: check it is safe (below), then **compare-and-swap**: read the real bytes now; only if they are exactly what the pre-rollback snapshot saved, write the target (temp file in the same folder, `fsync`, `os.replace`) or delete it. Deletions go first (deepest first), so type changes (file ↔ directory) work; folders left empty by a deletion are removed.
+4. For each path: check it is safe (below), then **compare-and-swap**: read the real bytes now; only if they are exactly what the pre-rollback snapshot saved, write the target (temp file in the same folder, `fsync`, `os.replace`) or delete it. Deletions go first (deepest first), so type changes (file ↔ directory) work. A folder is removed only when it is empty and a file must go back where it stands; snapshots don't record folders, so no other folder is removed, even one the agent created (it may have been the user's).
 5. `--force`: conflicts are written too, but only paths whose current state is in the pre-rollback snapshot (so `rollback --undo` restores them).
 6. Mark the row `done` (all written) or `partial`, with a per-file result: `restored`, `deleted`, `already`, `conflict`, `blocked` (stopped at an outside change), `forced`, `could-not` (reason). The CLI prints the counts: restored / already / conflicts / could not undo and why (G3).
 7. **Recovery** (`agentvc repair`; also run first by `rollback`, `undo`, `redo`; reported at the next prompt by the hook): a row still `started` was interrupted. For each planned path: current = target → done; current = expected → do the write now (same compare-and-swap); anything else → conflict. Stray temp files of that rollback are removed. The row ends `done` or `partial`, flagged `recovered`.
@@ -51,7 +51,7 @@ Compare-and-swap per file is plan diagram 4.4. Write-ahead intent records and ro
 ## Limits
 
 - A rollback doesn't tell the agent its files changed (context sync, plan §14.1, comes in v0.1 public). The agent's next step shows the rollback as an outside change.
-- Empty directories aren't restored. On Windows, restoring a symlink needs the symlink privilege; without it the file is `could-not`.
+- Empty directories aren't restored, and empty folders the agent created are left in place (snapshots don't record folders; removing one could remove the user's). On Windows, restoring a symlink needs the symlink privilege; without it the file is `could-not`.
 - The check-then-replace window is a few microseconds; a write landing inside it is overwritten. The pre-rollback snapshot still holds the state it replaced.
 
 ## How it can fail (FMEA rows; existing ones now have tests)

@@ -44,9 +44,11 @@ Reproducible: `python scripts/broken_build.py eval/broken_builds/restore.json ev
 - **Deletes through a junction (S0 risk, G1; fixed before commit).** The first version checked links only before writing. A delete whose bytes matched (an identical file behind a junction) would have deleted outside the workspace. Every compare-and-swap now re-checks the path's parents at the moment of writing.
 - **An equivalent mutant on Windows.** Accepting `..` survived at first because the Windows rule against trailing dots refuses `..` too. Crafted names that only the first rule refuses (an empty part, a backslash) now catch it on every OS.
 
+- **Removing a folder the user had (found on Linux CI).** Rollback removed folders left empty by its deletions; on Linux `undo` removed the user's pre-existing, empty `src/` (the shell's current directory). Windows refuses to remove a folder in use, so it never showed there. Folders are no longer removed except to put a file back in their place (`test_a_folder_that_existed_before_the_agent_is_never_removed`).
+
 ## Limits
 
 - The window between the last check and `os.replace` is microseconds; a write landing inside it is overwritten, but the pre-rollback snapshot still holds it (`rollback --undo`).
 - A change made by someone else *during* a single tool call is attributed to that call (no hook fires in between). Restore still never overwrites anything changed after the agent left it.
-- Empty directories aren't restored. On Windows, restoring a symlink needs the symlink privilege; without it the file is `could-not`.
+- Empty directories aren't restored, and empty folders the agent created are left in place (snapshots don't record folders; removing one could remove the user's). On Windows, restoring a symlink needs the symlink privilege; without it the file is `could-not`.
 - The agent isn't told its files changed after a rollback (context sync, v0.1 public); its next step shows the rollback as an outside change.

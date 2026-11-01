@@ -38,7 +38,7 @@ def test_a_run_is_rolled_back_edits_deletions_and_creations(ws: Path) -> None:
     assert report.status == "done" and report.rollback_id is not None
     assert results(report) == {"a.txt": "restored", "b.txt": "restored", "new/c.txt": "deleted"}
     assert tree(ws) == {"a.txt": b"original a", "b.txt": b"original b", "keep.txt": b"not touched"}
-    assert not (ws / "new").exists()  # the folder it created for c.txt is gone too
+    assert list((ws / "new").iterdir()) == []  # folders are never removed (see below)
     agent.close()
 
 
@@ -261,4 +261,18 @@ def test_an_ignored_env_file_the_agent_deleted_comes_back(ws: Path) -> None:
     report = agent.restorer().rollback(str(agent.run))
     assert results(report) == {".env": "restored"}
     assert (ws / ".env").read_bytes() == b"API_KEY=only-copy-anywhere\n"
+    agent.close()
+
+
+def test_a_folder_that_existed_before_the_agent_is_never_removed(ws: Path) -> None:
+    # Found on Linux CI: `undo` removed the user's (empty) src/ folder, which was also the
+    # shell's current directory. A folder's existence isn't in the snapshots, so rollback
+    # never removes one it can't prove the agent made.
+    (ws / "src").mkdir()
+    (ws / "src" / "inner").mkdir()
+    agent = Agent(ws)
+    agent.write("src/inner/made.txt", b"created by the agent")
+    report = agent.restorer().rollback(str(agent.run))
+    assert results(report) == {"src/inner/made.txt": "deleted"}
+    assert (ws / "src" / "inner").is_dir()
     agent.close()
