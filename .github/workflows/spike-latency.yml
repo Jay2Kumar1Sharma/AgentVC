@@ -32,7 +32,7 @@ jobs:
       - name: Run the spike
         run: python scripts/spikes/hook_latency.py --sizes 1000 10000 100000 --runs 30 --out spike-results
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: hook-latency-${{ matrix.os }}
           path: spike-results/
